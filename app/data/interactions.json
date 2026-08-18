@@ -1,0 +1,1317 @@
+{
+  "_comment": "PidginPharma drug interaction matrix. Curated from DDInter / standard pharmacology references for drugs on the Nigeria Essential Medicines List. severity: low | moderate | high. Loaded into memory by DocReader as an O(1) bidirectional lookup.",
+  "interactions": [
+    {
+      "drug_a": "Chloroquine",
+      "drug_b": "Quinine",
+      "severity": "high",
+      "mechanism": "Additive cardiotoxicity (QT interval prolongation) and increased risk of seizures when chloroquine and quinine are combined.",
+      "source": "DDInter v1.0",
+      "recommendation": "Do not combine. Use a single antimalarial regimen. If both were given, stop one and monitor ECG if available."
+    },
+    {
+      "drug_a": "Chloroquine",
+      "drug_b": "Amodiaquine",
+      "severity": "moderate",
+      "mechanism": "Additive risk of hepatotoxicity and QT prolongation when chloroquine is combined with amodiaquine.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination. Choose one antimalarial agent only."
+    },
+    {
+      "drug_a": "Chloroquine",
+      "drug_b": "Mefloquine",
+      "severity": "high",
+      "mechanism": "Both drugs prolong the QT interval; co-administration increases the risk of serious cardiac arrhythmia and seizures.",
+      "source": "DDInter v1.0",
+      "recommendation": "Contraindicated in combination. Refer to a higher facility."
+    },
+    {
+      "drug_a": "Chloroquine",
+      "drug_b": "Digoxin",
+      "severity": "moderate",
+      "mechanism": "Chloroquine increases digoxin serum concentrations, raising the risk of digoxin toxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for digoxin toxicity (nausea, visual disturbance, slow heart rate). Consider reducing digoxin dose."
+    },
+    {
+      "drug_a": "Chloroquine",
+      "drug_b": "Cimetidine",
+      "severity": "moderate",
+      "mechanism": "Cimetidine inhibits chloroquine metabolism, increasing chloroquine plasma levels and toxicity risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for chloroquine side effects (itching, visual changes). Use an alternative acid suppressant if possible."
+    },
+    {
+      "drug_a": "Chloroquine",
+      "drug_b": "Antacid",
+      "severity": "low",
+      "mechanism": "Antacids containing aluminium or magnesium reduce the absorption of chloroquine.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by at least 2 hours."
+    },
+    {
+      "drug_a": "Chloroquine",
+      "drug_b": "Ampicillin",
+      "severity": "moderate",
+      "mechanism": "Chloroquine reduces the absorption of ampicillin, potentially reducing its efficacy.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by 2 hours or use an alternative antibiotic."
+    },
+    {
+      "drug_a": "Quinine",
+      "drug_b": "Mefloquine",
+      "severity": "high",
+      "mechanism": "Additive QT prolongation and increased risk of convulsions when quinine and mefloquine are combined.",
+      "source": "DDInter v1.0",
+      "recommendation": "Do not combine. Stop mefloquine before starting quinine."
+    },
+    {
+      "drug_a": "Quinine",
+      "drug_b": "Ciprofloxacin",
+      "severity": "moderate",
+      "mechanism": "Additive QT interval prolongation increases the risk of ventricular arrhythmia.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination where possible. Monitor for palpitations or fainting."
+    },
+    {
+      "drug_a": "Quinine",
+      "drug_b": "Digoxin",
+      "severity": "moderate",
+      "mechanism": "Quinine increases digoxin plasma levels, raising the risk of digoxin toxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor digoxin levels and for toxicity signs; reduce digoxin dose if needed."
+    },
+    {
+      "drug_a": "Quinine",
+      "drug_b": "Nifedipine",
+      "severity": "moderate",
+      "mechanism": "Nifedipine increases quinine plasma concentrations, increasing the risk of quinine toxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for quinine toxicity (cinchonism: tinnitus, headache, visual disturbance)."
+    },
+    {
+      "drug_a": "Quinine",
+      "drug_b": "Cimetidine",
+      "severity": "moderate",
+      "mechanism": "Cimetidine reduces quinine clearance, increasing quinine plasma levels.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for quinine toxicity. Consider an alternative acid suppressant."
+    },
+    {
+      "drug_a": "Quinine",
+      "drug_b": "Antacid",
+      "severity": "low",
+      "mechanism": "Antacids delay the absorption of quinine.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by at least 2 hours."
+    },
+    {
+      "drug_a": "Artemether/Lumefantrine",
+      "drug_b": "Ciprofloxacin",
+      "severity": "moderate",
+      "mechanism": "Additive QT interval prolongation increases the risk of cardiac arrhythmia.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination where possible. Monitor for palpitations."
+    },
+    {
+      "drug_a": "Artemether/Lumefantrine",
+      "drug_b": "Metoclopramide",
+      "severity": "moderate",
+      "mechanism": "Both drugs can prolong the QT interval; combined use increases arrhythmia risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use an alternative antiemetic such as an antihistamine where possible."
+    },
+    {
+      "drug_a": "Artemether/Lumefantrine",
+      "drug_b": "Fluconazole",
+      "severity": "moderate",
+      "mechanism": "Fluconazole inhibits CYP3A4, increasing lumefantrine levels and QT prolongation risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for cardiac symptoms. Use with caution."
+    },
+    {
+      "drug_a": "Artemether/Lumefantrine",
+      "drug_b": "Erythromycin",
+      "severity": "moderate",
+      "mechanism": "Erythromycin inhibits CYP3A4 and prolongs QT; lumefantrine levels rise with increased arrhythmia risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination. Choose a non-macrolide antibiotic if possible."
+    },
+    {
+      "drug_a": "Sulfadoxine-Pyrimethamine",
+      "drug_b": "Cotrimoxazole",
+      "severity": "moderate",
+      "mechanism": "Additive antifolate effect increases the risk of severe haematological toxicity (bone marrow suppression) and severe skin reactions.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination. Use an alternative antibiotic."
+    },
+    {
+      "drug_a": "Sulfadoxine-Pyrimethamine",
+      "drug_b": "Warfarin",
+      "severity": "moderate",
+      "mechanism": "Sulfadoxine-pyrimethamine potentiates the anticoagulant effect of warfarin, increasing bleeding risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR closely and adjust warfarin dose."
+    },
+    {
+      "drug_a": "Sulfadoxine-Pyrimethamine",
+      "drug_b": "Phenytoin",
+      "severity": "moderate",
+      "mechanism": "Pyrimethamine can increase phenytoin levels, raising the risk of phenytoin toxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for phenytoin toxicity (nystagmus, ataxia, drowsiness)."
+    },
+    {
+      "drug_a": "Sulfadoxine-Pyrimethamine",
+      "drug_b": "Folic Acid",
+      "severity": "low",
+      "mechanism": "Folic acid supplementation may reduce the efficacy of the antifolate antimalarial.",
+      "source": "DDInter v1.0",
+      "recommendation": "Folic acid may be given for anaemia but monitor treatment response."
+    },
+    {
+      "drug_a": "Metronidazole",
+      "drug_b": "Warfarin",
+      "severity": "high",
+      "mechanism": "Metronidazole inhibits warfarin metabolism, markedly increasing INR and bleeding risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR closely; reduce warfarin dose. Warn the patient about bleeding signs."
+    },
+    {
+      "drug_a": "Metronidazole",
+      "drug_b": "Phenytoin",
+      "severity": "moderate",
+      "mechanism": "Metronidazole increases phenytoin plasma levels, increasing the risk of phenytoin toxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for phenytoin toxicity and reduce dose if needed."
+    },
+    {
+      "drug_a": "Metronidazole",
+      "drug_b": "Carbamazepine",
+      "severity": "moderate",
+      "mechanism": "Metronidazole increases carbamazepine levels, increasing the risk of toxicity (dizziness, drowsiness, unsteadiness).",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for carbamazepine toxicity."
+    },
+    {
+      "drug_a": "Metronidazole",
+      "drug_b": "Isoniazid",
+      "severity": "moderate",
+      "mechanism": "Combined use increases the risk of hepatotoxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor liver function and advise the patient to report jaundice or dark urine."
+    },
+    {
+      "drug_a": "Ciprofloxacin",
+      "drug_b": "Antacid",
+      "severity": "moderate",
+      "mechanism": "Aluminium/magnesium antacids chelate ciprofloxacin, markedly reducing its absorption and efficacy.",
+      "source": "DDInter v1.0",
+      "recommendation": "Give ciprofloxacin at least 2 hours before or 6 hours after antacids."
+    },
+    {
+      "drug_a": "Ciprofloxacin",
+      "drug_b": "Iron",
+      "severity": "moderate",
+      "mechanism": "Iron salts chelate ciprofloxacin, reducing its absorption and efficacy.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by at least 2 hours."
+    },
+    {
+      "drug_a": "Ciprofloxacin",
+      "drug_b": "Zinc",
+      "severity": "moderate",
+      "mechanism": "Zinc reduces the absorption of ciprofloxacin.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by at least 2 hours."
+    },
+    {
+      "drug_a": "Ciprofloxacin",
+      "drug_b": "Warfarin",
+      "severity": "moderate",
+      "mechanism": "Ciprofloxacin potentiates warfarin, increasing INR and bleeding risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR closely during and after the antibiotic course."
+    },
+    {
+      "drug_a": "Doxycycline",
+      "drug_b": "Antacid",
+      "severity": "moderate",
+      "mechanism": "Antacids chelate doxycycline, reducing its absorption and efficacy.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by at least 2 hours."
+    },
+    {
+      "drug_a": "Doxycycline",
+      "drug_b": "Iron",
+      "severity": "moderate",
+      "mechanism": "Iron reduces doxycycline absorption and doxycycline reduces iron absorption.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by at least 2 hours."
+    },
+    {
+      "drug_a": "Doxycycline",
+      "drug_b": "Warfarin",
+      "severity": "moderate",
+      "mechanism": "Doxycycline can enhance the anticoagulant effect of warfarin, increasing bleeding risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR and watch for bleeding signs."
+    },
+    {
+      "drug_a": "Tetracycline",
+      "drug_b": "Antacid",
+      "severity": "moderate",
+      "mechanism": "Antacids chelate tetracycline, reducing absorption and efficacy.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by at least 2 hours."
+    },
+    {
+      "drug_a": "Tetracycline",
+      "drug_b": "Iron",
+      "severity": "moderate",
+      "mechanism": "Iron chelates tetracycline, reducing the absorption of both drugs.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by at least 2 hours."
+    },
+    {
+      "drug_a": "Tetracycline",
+      "drug_b": "Zinc",
+      "severity": "moderate",
+      "mechanism": "Zinc reduces tetracycline absorption.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by at least 2 hours."
+    },
+    {
+      "drug_a": "Erythromycin",
+      "drug_b": "Warfarin",
+      "severity": "moderate",
+      "mechanism": "Erythromycin inhibits warfarin metabolism, increasing INR and bleeding risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR closely."
+    },
+    {
+      "drug_a": "Erythromycin",
+      "drug_b": "Carbamazepine",
+      "severity": "moderate",
+      "mechanism": "Erythromycin inhibits CYP3A4, increasing carbamazepine levels and risk of toxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for carbamazepine toxicity (dizziness, drowsiness, unsteadiness)."
+    },
+    {
+      "drug_a": "Erythromycin",
+      "drug_b": "Digoxin",
+      "severity": "moderate",
+      "mechanism": "Erythromycin increases digoxin absorption and levels, raising toxicity risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for digoxin toxicity."
+    },
+    {
+      "drug_a": "Clarithromycin",
+      "drug_b": "Warfarin",
+      "severity": "moderate",
+      "mechanism": "Clarithromycin inhibits warfarin metabolism, increasing INR and bleeding risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR closely."
+    },
+    {
+      "drug_a": "Clarithromycin",
+      "drug_b": "Carbamazepine",
+      "severity": "moderate",
+      "mechanism": "Clarithromycin increases carbamazepine levels, raising the risk of toxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for carbamazepine toxicity."
+    },
+    {
+      "drug_a": "Azithromycin",
+      "drug_b": "Antacid",
+      "severity": "low",
+      "mechanism": "Antacids reduce the peak concentration of azithromycin.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by at least 1-2 hours."
+    },
+    {
+      "drug_a": "Azithromycin",
+      "drug_b": "Warfarin",
+      "severity": "low",
+      "mechanism": "Possible enhancement of warfarin effect; monitoring advised.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR during concurrent therapy."
+    },
+    {
+      "drug_a": "Cotrimoxazole",
+      "drug_b": "Warfarin",
+      "severity": "moderate",
+      "mechanism": "Cotrimoxazole potentiates warfarin, significantly increasing INR and bleeding risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR closely; consider reducing warfarin dose."
+    },
+    {
+      "drug_a": "Cotrimoxazole",
+      "drug_b": "Phenytoin",
+      "severity": "moderate",
+      "mechanism": "Cotrimoxazole inhibits phenytoin metabolism, increasing phenytoin levels and toxicity risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for phenytoin toxicity."
+    },
+    {
+      "drug_a": "Cotrimoxazole",
+      "drug_b": "Glibenclamide",
+      "severity": "moderate",
+      "mechanism": "Cotrimoxazole can enhance the hypoglycaemic effect of sulfonylureas, causing hypoglycaemia.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor blood glucose; warn the patient about hypoglycaemia symptoms."
+    },
+    {
+      "drug_a": "Cotrimoxazole",
+      "drug_b": "Zidovudine",
+      "severity": "moderate",
+      "mechanism": "Additive haematological toxicity (bone marrow suppression) when combined with zidovudine.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor full blood count."
+    },
+    {
+      "drug_a": "Gentamicin",
+      "drug_b": "Furosemide",
+      "severity": "high",
+      "mechanism": "Additive ototoxicity and nephrotoxicity when aminoglycosides are combined with loop diuretics.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination unless essential. Monitor hearing and renal function."
+    },
+    {
+      "drug_a": "Gentamicin",
+      "drug_b": "Ibuprofen",
+      "severity": "moderate",
+      "mechanism": "NSAIDs increase the nephrotoxicity risk of aminoglycosides.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use paracetamol instead of NSAIDs where possible."
+    },
+    {
+      "drug_a": "Gentamicin",
+      "drug_b": "Diclofenac",
+      "severity": "moderate",
+      "mechanism": "NSAIDs increase the nephrotoxicity risk of aminoglycosides.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid NSAIDs during gentamicin therapy; use paracetamol."
+    },
+    {
+      "drug_a": "Ceftriaxone",
+      "drug_b": "Gentamicin",
+      "severity": "low",
+      "mechanism": "No clinically significant interaction; combination is commonly used. Mild additive renal monitoring advised.",
+      "source": "DDInter v1.0",
+      "recommendation": "No adjustment needed; monitor renal function in the elderly."
+    },
+    {
+      "drug_a": "Chloramphenicol",
+      "drug_b": "Warfarin",
+      "severity": "moderate",
+      "mechanism": "Chloramphenicol inhibits warfarin metabolism, increasing INR and bleeding risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR closely."
+    },
+    {
+      "drug_a": "Chloramphenicol",
+      "drug_b": "Phenytoin",
+      "severity": "moderate",
+      "mechanism": "Chloramphenicol increases phenytoin levels, raising the risk of toxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for phenytoin toxicity."
+    },
+    {
+      "drug_a": "Chloramphenicol",
+      "drug_b": "Glibenclamide",
+      "severity": "moderate",
+      "mechanism": "Chloramphenicol can enhance the hypoglycaemic effect of sulfonylureas.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor blood glucose."
+    },
+    {
+      "drug_a": "Rifampicin",
+      "drug_b": "Warfarin",
+      "severity": "high",
+      "mechanism": "Rifampicin strongly induces warfarin metabolism, markedly reducing the anticoagulant effect and increasing clot risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR and increase warfarin dose as needed; re-check after stopping rifampicin."
+    },
+    {
+      "drug_a": "Rifampicin",
+      "drug_b": "Oral Contraceptive",
+      "severity": "moderate",
+      "mechanism": "Rifampicin induces metabolism of combined oral contraceptives, reducing contraceptive efficacy.",
+      "source": "DDInter v1.0",
+      "recommendation": "Advise an additional contraceptive method during rifampicin therapy."
+    },
+    {
+      "drug_a": "Rifampicin",
+      "drug_b": "Prednisolone",
+      "severity": "moderate",
+      "mechanism": "Rifampicin increases steroid metabolism, reducing prednisolone efficacy.",
+      "source": "DDInter v1.0",
+      "recommendation": "Increase steroid dose if needed and monitor response."
+    },
+    {
+      "drug_a": "Rifampicin",
+      "drug_b": "Glibenclamide",
+      "severity": "moderate",
+      "mechanism": "Rifampicin reduces sulfonylurea levels, reducing hypoglycaemic effect.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor blood glucose; adjust antidiabetic dose."
+    },
+    {
+      "drug_a": "Rifampicin",
+      "drug_b": "Fluconazole",
+      "severity": "moderate",
+      "mechanism": "Rifampicin reduces fluconazole levels, potentially reducing antifungal efficacy.",
+      "source": "DDInter v1.0",
+      "recommendation": "Consider increasing fluconazole dose and monitoring response."
+    },
+    {
+      "drug_a": "Rifampicin",
+      "drug_b": "Nevirapine",
+      "severity": "moderate",
+      "mechanism": "Rifampicin reduces nevirapine levels, risking virological failure.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination if possible; consult the ART clinic."
+    },
+    {
+      "drug_a": "Rifampicin",
+      "drug_b": "Efavirenz",
+      "severity": "moderate",
+      "mechanism": "Rifampicin reduces efavirenz levels; dose adjustment of efavirenz is required.",
+      "source": "DDInter v1.0",
+      "recommendation": "Increase efavirenz dose per national TB/HIV guidelines."
+    },
+    {
+      "drug_a": "Isoniazid",
+      "drug_b": "Phenytoin",
+      "severity": "moderate",
+      "mechanism": "Isoniazid inhibits phenytoin metabolism, increasing phenytoin levels and toxicity risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor phenytoin levels and for toxicity."
+    },
+    {
+      "drug_a": "Isoniazid",
+      "drug_b": "Carbamazepine",
+      "severity": "moderate",
+      "mechanism": "Isoniazid increases carbamazepine levels, raising the risk of toxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for carbamazepine toxicity."
+    },
+    {
+      "drug_a": "Isoniazid",
+      "drug_b": "Paracetamol",
+      "severity": "moderate",
+      "mechanism": "Chronic isoniazid therapy increases the risk of paracetamol-induced hepatotoxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Limit paracetamol use; monitor for liver toxicity signs."
+    },
+    {
+      "drug_a": "Isoniazid",
+      "drug_b": "Antacid",
+      "severity": "low",
+      "mechanism": "Aluminium antacids reduce isoniazid absorption.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by at least 1-2 hours."
+    },
+    {
+      "drug_a": "Isoniazid",
+      "drug_b": "Rifampicin",
+      "severity": "low",
+      "mechanism": "Both are hepatotoxic; combined use (standard TB regimen) requires baseline and monitoring liver function.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor liver function during TB treatment; advise the patient to report jaundice."
+    },
+    {
+      "drug_a": "Aspirin",
+      "drug_b": "Warfarin",
+      "severity": "high",
+      "mechanism": "Additive antiplatelet and anticoagulant effects markedly increase the risk of serious bleeding.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination. Use paracetamol for pain."
+    },
+    {
+      "drug_a": "Aspirin",
+      "drug_b": "Ibuprofen",
+      "severity": "moderate",
+      "mechanism": "Combined use increases gastrointestinal bleeding risk and ibuprofen reduces aspirin's antiplatelet effect.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination; use paracetamol or a single agent."
+    },
+    {
+      "drug_a": "Aspirin",
+      "drug_b": "Diclofenac",
+      "severity": "moderate",
+      "mechanism": "Additive gastrointestinal ulceration and bleeding risk with combined NSAID use.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination of NSAIDs."
+    },
+    {
+      "drug_a": "Aspirin",
+      "drug_b": "Prednisolone",
+      "severity": "moderate",
+      "mechanism": "Corticosteroids increase the gastrointestinal bleeding and ulceration risk of aspirin/NSAIDs.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use with gastroprotection (e.g. omeprazole) or avoid combination."
+    },
+    {
+      "drug_a": "Aspirin",
+      "drug_b": "Glibenclamide",
+      "severity": "moderate",
+      "mechanism": "High-dose aspirin can enhance the hypoglycaemic effect of sulfonylureas.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor blood glucose."
+    },
+    {
+      "drug_a": "Aspirin",
+      "drug_b": "Valproate",
+      "severity": "moderate",
+      "mechanism": "Aspirin displaces valproate from protein binding, increasing free valproate levels and bleeding risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination; monitor for valproate toxicity."
+    },
+    {
+      "drug_a": "Ibuprofen",
+      "drug_b": "Lisinopril",
+      "severity": "moderate",
+      "mechanism": "NSAIDs reduce the antihypertensive effect of ACE inhibitors and increase the risk of renal impairment.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use paracetamol instead; monitor blood pressure and renal function."
+    },
+    {
+      "drug_a": "Ibuprofen",
+      "drug_b": "Enalapril",
+      "severity": "moderate",
+      "mechanism": "NSAIDs reduce the antihypertensive effect of ACE inhibitors and increase nephrotoxicity risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use paracetamol instead; monitor blood pressure."
+    },
+    {
+      "drug_a": "Ibuprofen",
+      "drug_b": "Losartan",
+      "severity": "moderate",
+      "mechanism": "NSAIDs reduce the antihypertensive effect of ARBs and increase the risk of renal impairment.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use paracetamol instead; monitor blood pressure and renal function."
+    },
+    {
+      "drug_a": "Ibuprofen",
+      "drug_b": "Furosemide",
+      "severity": "moderate",
+      "mechanism": "NSAIDs reduce the diuretic and antihypertensive effect of furosemide and increase nephrotoxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use paracetamol; monitor blood pressure, weight and renal function."
+    },
+    {
+      "drug_a": "Ibuprofen",
+      "drug_b": "Hydrochlorothiazide",
+      "severity": "moderate",
+      "mechanism": "NSAIDs reduce the antihypertensive and diuretic effect of thiazides and increase nephrotoxicity risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use paracetamol; monitor blood pressure."
+    },
+    {
+      "drug_a": "Ibuprofen",
+      "drug_b": "Spironolactone",
+      "severity": "moderate",
+      "mechanism": "NSAIDs reduce the diuretic effect of spironolactone and can worsen renal function.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use paracetamol; monitor renal function."
+    },
+    {
+      "drug_a": "Diclofenac",
+      "drug_b": "Lisinopril",
+      "severity": "moderate",
+      "mechanism": "NSAIDs reduce the antihypertensive effect of ACE inhibitors and increase renal impairment risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use paracetamol; monitor blood pressure."
+    },
+    {
+      "drug_a": "Diclofenac",
+      "drug_b": "Warfarin",
+      "severity": "moderate",
+      "mechanism": "NSAIDs increase the bleeding risk of warfarin via platelet inhibition and GI ulceration.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination; use paracetamol."
+    },
+    {
+      "drug_a": "Paracetamol",
+      "drug_b": "Warfarin",
+      "severity": "moderate",
+      "mechanism": "Chronic high-dose paracetamol can potentiate warfarin, increasing INR and bleeding risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Limit paracetamol to short courses; monitor INR."
+    },
+    {
+      "drug_a": "Paracetamol",
+      "drug_b": "Phenytoin",
+      "severity": "moderate",
+      "mechanism": "Chronic phenytoin therapy increases the risk of paracetamol hepatotoxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Limit paracetamol use; monitor for liver toxicity."
+    },
+    {
+      "drug_a": "Paracetamol",
+      "drug_b": "Carbamazepine",
+      "severity": "moderate",
+      "mechanism": "Carbamazepine induces paracetamol metabolism, increasing the risk of hepatotoxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Limit paracetamol use; monitor for liver toxicity."
+    },
+    {
+      "drug_a": "Tramadol",
+      "drug_b": "Amitriptyline",
+      "severity": "high",
+      "mechanism": "Combined use increases the risk of serotonin syndrome and lowers the seizure threshold.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination; consider alternative analgesia."
+    },
+    {
+      "drug_a": "Tramadol",
+      "drug_b": "Carbamazepine",
+      "severity": "moderate",
+      "mechanism": "Carbamazepine reduces tramadol levels and lowers the seizure threshold.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination if possible."
+    },
+    {
+      "drug_a": "Tramadol",
+      "drug_b": "Diazepam",
+      "severity": "low",
+      "mechanism": "Additive central nervous system depression with increased sedation.",
+      "source": "DDInter v1.0",
+      "recommendation": "Warn the patient about drowsiness; avoid driving."
+    },
+    {
+      "drug_a": "Tramadol",
+      "drug_b": "Ondansetron",
+      "severity": "moderate",
+      "mechanism": "Ondansetron may reduce tramadol's analgesic effect and both lower the seizure threshold.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use an alternative antiemetic."
+    },
+    {
+      "drug_a": "Morphine",
+      "drug_b": "Diazepam",
+      "severity": "moderate",
+      "mechanism": "Additive CNS and respiratory depression.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use with extreme caution; monitor breathing and sedation."
+    },
+    {
+      "drug_a": "Morphine",
+      "drug_b": "Amitriptyline",
+      "severity": "moderate",
+      "mechanism": "Increased risk of serotonin syndrome and CNS depression.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use with caution; monitor for agitation, sweating, tremor."
+    },
+    {
+      "drug_a": "Lisinopril",
+      "drug_b": "Spironolactone",
+      "severity": "high",
+      "mechanism": "ACE inhibitors combined with potassium-sparing diuretics can cause life-threatening hyperkalaemia.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination; monitor serum potassium if unavoidable."
+    },
+    {
+      "drug_a": "Lisinopril",
+      "drug_b": "Potassium Supplement",
+      "severity": "high",
+      "mechanism": "ACE inhibitors reduce aldosterone, and added potassium raises the risk of severe hyperkalaemia.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid potassium supplements with ACE inhibitors unless prescribed and monitored."
+    },
+    {
+      "drug_a": "Enalapril",
+      "drug_b": "Spironolactone",
+      "severity": "high",
+      "mechanism": "ACE inhibitors combined with potassium-sparing diuretics can cause life-threatening hyperkalaemia.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination; monitor serum potassium if unavoidable."
+    },
+    {
+      "drug_a": "Amlodipine",
+      "drug_b": "Atenolol",
+      "severity": "moderate",
+      "mechanism": "Additive hypotensive effect; may cause excessive bradycardia in susceptible patients.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor heart rate and blood pressure; adjust doses."
+    },
+    {
+      "drug_a": "Amlodipine",
+      "drug_b": "Propranolol",
+      "severity": "moderate",
+      "mechanism": "Additive hypotensive effect and risk of excessive bradycardia.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor heart rate and blood pressure."
+    },
+    {
+      "drug_a": "Nifedipine",
+      "drug_b": "Atenolol",
+      "severity": "moderate",
+      "mechanism": "Additive hypotensive effect and risk of excessive bradycardia.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor heart rate and blood pressure."
+    },
+    {
+      "drug_a": "Atenolol",
+      "drug_b": "Salbutamol",
+      "severity": "moderate",
+      "mechanism": "Beta-blockers antagonise the bronchodilator effect of salbutamol and may trigger bronchospasm.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid non-selective beta-blockers in asthma; use cardioselective agents with caution."
+    },
+    {
+      "drug_a": "Propranolol",
+      "drug_b": "Salbutamol",
+      "severity": "moderate",
+      "mechanism": "Non-selective beta-blockade antagonises salbutamol and can precipitate bronchospasm.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid propranolol in asthmatic patients."
+    },
+    {
+      "drug_a": "Propranolol",
+      "drug_b": "Insulin",
+      "severity": "moderate",
+      "mechanism": "Beta-blockers mask the adrenergic warning signs of hypoglycaemia (tremor, palpitations), delaying recognition.",
+      "source": "DDInter v1.0",
+      "recommendation": "Warn the diabetic patient that sweating remains a hypoglycaemia sign; monitor glucose."
+    },
+    {
+      "drug_a": "Propranolol",
+      "drug_b": "Glibenclamide",
+      "severity": "moderate",
+      "mechanism": "Beta-blockers mask hypoglycaemia warning signs in sulfonylurea users.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor blood glucose; educate on hypoglycaemia recognition."
+    },
+    {
+      "drug_a": "Digoxin",
+      "drug_b": "Furosemide",
+      "severity": "high",
+      "mechanism": "Loop diuretic-induced hypokalaemia markedly increases digoxin toxicity risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor potassium; replace potassium if low. Watch for nausea, visual disturbance, slow heart rate."
+    },
+    {
+      "drug_a": "Digoxin",
+      "drug_b": "Hydrochlorothiazide",
+      "severity": "moderate",
+      "mechanism": "Thiazide-induced hypokalaemia increases the risk of digoxin toxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor potassium levels."
+    },
+    {
+      "drug_a": "Digoxin",
+      "drug_b": "Spironolactone",
+      "severity": "moderate",
+      "mechanism": "Spironolactone increases digoxin plasma levels, raising toxicity risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor digoxin levels and for toxicity."
+    },
+    {
+      "drug_a": "Digoxin",
+      "drug_b": "Omeprazole",
+      "severity": "low",
+      "mechanism": "Omeprazole may slightly increase digoxin absorption.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor digoxin levels if therapy is prolonged."
+    },
+    {
+      "drug_a": "Digoxin",
+      "drug_b": "Antacid",
+      "severity": "low",
+      "mechanism": "Antacids reduce digoxin absorption.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by at least 2 hours."
+    },
+    {
+      "drug_a": "Digoxin",
+      "drug_b": "Metoclopramide",
+      "severity": "low",
+      "mechanism": "Metoclopramide increases gut motility and can reduce digoxin absorption.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor digoxin effect; adjust dose if needed."
+    },
+    {
+      "drug_a": "Digoxin",
+      "drug_b": "Prednisolone",
+      "severity": "moderate",
+      "mechanism": "Corticosteroid-induced hypokalaemia increases the risk of digoxin toxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor potassium during steroid courses."
+    },
+    {
+      "drug_a": "Warfarin",
+      "drug_b": "Ibuprofen",
+      "severity": "moderate",
+      "mechanism": "NSAIDs increase bleeding risk through platelet inhibition and GI ulceration.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid NSAIDs on warfarin; use paracetamol short-term."
+    },
+    {
+      "drug_a": "Warfarin",
+      "drug_b": "Fluconazole",
+      "severity": "moderate",
+      "mechanism": "Fluconazole inhibits warfarin metabolism, increasing INR and bleeding risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR closely; consider warfarin dose reduction."
+    },
+    {
+      "drug_a": "Warfarin",
+      "drug_b": "Carbamazepine",
+      "severity": "moderate",
+      "mechanism": "Carbamazepine induces warfarin metabolism, reducing anticoagulant effect.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR and adjust warfarin dose."
+    },
+    {
+      "drug_a": "Warfarin",
+      "drug_b": "Phenytoin",
+      "severity": "moderate",
+      "mechanism": "Complex interaction: phenytoin both displaces and induces warfarin metabolism; INR can rise or fall.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR closely when starting or stopping phenytoin."
+    },
+    {
+      "drug_a": "Warfarin",
+      "drug_b": "Phenobarbitone",
+      "severity": "moderate",
+      "mechanism": "Phenobarbitone induces warfarin metabolism, reducing anticoagulant effect.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR and adjust warfarin dose."
+    },
+    {
+      "drug_a": "Warfarin",
+      "drug_b": "Griseofulvin",
+      "severity": "moderate",
+      "mechanism": "Griseofulvin reduces warfarin effect through enzyme induction.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR and adjust warfarin dose."
+    },
+    {
+      "drug_a": "Warfarin",
+      "drug_b": "Miconazole",
+      "severity": "high",
+      "mechanism": "Miconazole (even oral gel) strongly inhibits warfarin metabolism, causing severe bleeding risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination; use an alternative antifungal."
+    },
+    {
+      "drug_a": "Metformin",
+      "drug_b": "Alcohol",
+      "severity": "moderate",
+      "mechanism": "Alcohol increases the risk of lactic acidosis in metformin users, especially on an empty stomach or with liver disease.",
+      "source": "DDInter v1.0",
+      "recommendation": "Advise the patient to avoid or strictly limit alcohol."
+    },
+    {
+      "drug_a": "Metformin",
+      "drug_b": "Cimetidine",
+      "severity": "moderate",
+      "mechanism": "Cimetidine increases metformin plasma levels, raising the risk of lactic acidosis.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor renal function; use an alternative acid suppressant."
+    },
+    {
+      "drug_a": "Metformin",
+      "drug_b": "Furosemide",
+      "severity": "moderate",
+      "mechanism": "Furosemide can increase metformin plasma concentrations and impair renal function, raising lactic acidosis risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor renal function and blood glucose."
+    },
+    {
+      "drug_a": "Glibenclamide",
+      "drug_b": "Fluconazole",
+      "severity": "moderate",
+      "mechanism": "Fluconazole inhibits sulfonylurea metabolism, increasing the risk of hypoglycaemia.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor blood glucose; consider reducing sulfonylurea dose."
+    },
+    {
+      "drug_a": "Glibenclamide",
+      "drug_b": "Prednisolone",
+      "severity": "moderate",
+      "mechanism": "Corticosteroids raise blood glucose, reducing the effect of antidiabetic drugs.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor blood glucose; adjust antidiabetic dose during steroid therapy."
+    },
+    {
+      "drug_a": "Insulin",
+      "drug_b": "Prednisolone",
+      "severity": "moderate",
+      "mechanism": "Corticosteroids raise blood glucose, increasing insulin requirements.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor blood glucose; adjust insulin dose."
+    },
+    {
+      "drug_a": "Prednisolone",
+      "drug_b": "Ibuprofen",
+      "severity": "moderate",
+      "mechanism": "Increased risk of gastrointestinal ulceration and bleeding with combined steroids and NSAIDs.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination; use paracetamol."
+    },
+    {
+      "drug_a": "Dexamethasone",
+      "drug_b": "Aspirin",
+      "severity": "moderate",
+      "mechanism": "Increased GI bleeding risk with combined steroids and NSAIDs.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination; use paracetamol."
+    },
+    {
+      "drug_a": "Dexamethasone",
+      "drug_b": "Rifampicin",
+      "severity": "moderate",
+      "mechanism": "Rifampicin reduces dexamethasone levels and efficacy.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor response; adjust steroid dose."
+    },
+    {
+      "drug_a": "Carbamazepine",
+      "drug_b": "Oral Contraceptive",
+      "severity": "moderate",
+      "mechanism": "Carbamazepine induces contraceptive metabolism, reducing efficacy.",
+      "source": "DDInter v1.0",
+      "recommendation": "Advise an additional contraceptive method."
+    },
+    {
+      "drug_a": "Carbamazepine",
+      "drug_b": "Phenytoin",
+      "severity": "moderate",
+      "mechanism": "Complex enzyme interaction; levels of both drugs can change unpredictably.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for toxicity of both drugs when combined."
+    },
+    {
+      "drug_a": "Carbamazepine",
+      "drug_b": "Valproate",
+      "severity": "moderate",
+      "mechanism": "Valproate inhibits carbamazepine metabolism while carbamazepine induces valproate metabolism; complex interaction.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor drug levels and clinical response."
+    },
+    {
+      "drug_a": "Phenytoin",
+      "drug_b": "Fluconazole",
+      "severity": "moderate",
+      "mechanism": "Fluconazole inhibits phenytoin metabolism, increasing phenytoin levels.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for phenytoin toxicity."
+    },
+    {
+      "drug_a": "Phenytoin",
+      "drug_b": "Folic Acid",
+      "severity": "low",
+      "mechanism": "Folic acid supplementation can lower phenytoin levels, potentially reducing seizure control.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor seizure control when giving folic acid."
+    },
+    {
+      "drug_a": "Phenobarbitone",
+      "drug_b": "Oral Contraceptive",
+      "severity": "moderate",
+      "mechanism": "Phenobarbitone reduces contraceptive efficacy through enzyme induction.",
+      "source": "DDInter v1.0",
+      "recommendation": "Advise an additional contraceptive method."
+    },
+    {
+      "drug_a": "Diazepam",
+      "drug_b": "Alcohol",
+      "severity": "high",
+      "mechanism": "Additive CNS and respiratory depression with alcohol; risk of coma and respiratory arrest.",
+      "source": "DDInter v1.0",
+      "recommendation": "Warn the patient strictly against alcohol while taking diazepam."
+    },
+    {
+      "drug_a": "Diazepam",
+      "drug_b": "Fluconazole",
+      "severity": "moderate",
+      "mechanism": "Fluconazole inhibits diazepam metabolism, increasing sedation.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for excessive sedation."
+    },
+    {
+      "drug_a": "Diazepam",
+      "drug_b": "Cimetidine",
+      "severity": "moderate",
+      "mechanism": "Cimetidine increases diazepam levels, increasing sedation.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use an alternative acid suppressant."
+    },
+    {
+      "drug_a": "Haloperidol",
+      "drug_b": "Metoclopramide",
+      "severity": "moderate",
+      "mechanism": "Additive risk of extrapyramidal side effects (muscle stiffness, tremor, restlessness).",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination; use an alternative antiemetic."
+    },
+    {
+      "drug_a": "Haloperidol",
+      "drug_b": "Tramadol",
+      "severity": "moderate",
+      "mechanism": "Additive risk of seizures and serotonin syndrome.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination where possible."
+    },
+    {
+      "drug_a": "Haloperidol",
+      "drug_b": "Amitriptyline",
+      "severity": "moderate",
+      "mechanism": "Additive anticholinergic effects and QT prolongation risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use with caution; monitor for dry mouth, constipation, arrhythmia."
+    },
+    {
+      "drug_a": "Amitriptyline",
+      "drug_b": "Alcohol",
+      "severity": "moderate",
+      "mechanism": "Additive CNS depression with alcohol.",
+      "source": "DDInter v1.0",
+      "recommendation": "Advise against alcohol while taking amitriptyline."
+    },
+    {
+      "drug_a": "Griseofulvin",
+      "drug_b": "Oral Contraceptive",
+      "severity": "moderate",
+      "mechanism": "Griseofulvin reduces contraceptive efficacy.",
+      "source": "DDInter v1.0",
+      "recommendation": "Advise an additional contraceptive method."
+    },
+    {
+      "drug_a": "Efavirenz",
+      "drug_b": "Warfarin",
+      "severity": "moderate",
+      "mechanism": "Efavirenz can alter warfarin levels; INR monitoring advised.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR closely."
+    },
+    {
+      "drug_a": "Tenofovir",
+      "drug_b": "Ibuprofen",
+      "severity": "moderate",
+      "mechanism": "NSAIDs increase the nephrotoxicity risk of tenofovir.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use paracetamol instead; monitor renal function."
+    },
+    {
+      "drug_a": "Tenofovir",
+      "drug_b": "Diclofenac",
+      "severity": "moderate",
+      "mechanism": "NSAIDs increase the nephrotoxicity risk of tenofovir.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use paracetamol instead; monitor renal function."
+    },
+    {
+      "drug_a": "Ivermectin",
+      "drug_b": "Albendazole",
+      "severity": "low",
+      "mechanism": "No clinically significant interaction; combination is commonly used for mass deworming.",
+      "source": "DDInter v1.0",
+      "recommendation": "No adjustment needed."
+    },
+    {
+      "drug_a": "Albendazole",
+      "drug_b": "Cimetidine",
+      "severity": "low",
+      "mechanism": "Cimetidine increases albendazole plasma levels.",
+      "source": "DDInter v1.0",
+      "recommendation": "No adjustment needed for short courses."
+    },
+    {
+      "drug_a": "Albendazole",
+      "drug_b": "Dexamethasone",
+      "severity": "low",
+      "mechanism": "Dexamethasone increases albendazole levels, which may be used therapeutically in neurocysticercosis.",
+      "source": "DDInter v1.0",
+      "recommendation": "No adjustment needed for routine deworming."
+    },
+    {
+      "drug_a": "Praziquantel",
+      "drug_b": "Cimetidine",
+      "severity": "low",
+      "mechanism": "Cimetidine increases praziquantel plasma levels.",
+      "source": "DDInter v1.0",
+      "recommendation": "No adjustment needed for short courses."
+    },
+    {
+      "drug_a": "Praziquantel",
+      "drug_b": "Dexamethasone",
+      "severity": "low",
+      "mechanism": "Dexamethasone may reduce praziquantel levels.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor treatment response."
+    },
+    {
+      "drug_a": "Zinc",
+      "drug_b": "Iron",
+      "severity": "low",
+      "mechanism": "Zinc and iron compete for absorption when taken together.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by at least 2 hours."
+    },
+    {
+      "drug_a": "Iron",
+      "drug_b": "Antacid",
+      "severity": "low",
+      "mechanism": "Antacids reduce iron absorption.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate doses by at least 2 hours."
+    },
+    {
+      "drug_a": "Iron",
+      "drug_b": "Omeprazole",
+      "severity": "low",
+      "mechanism": "Gastric acid suppression reduces iron absorption.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for anaemia response; consider alternate-day iron."
+    },
+    {
+      "drug_a": "Chlorpheniramine",
+      "drug_b": "Alcohol",
+      "severity": "low",
+      "mechanism": "Additive sedation with alcohol.",
+      "source": "DDInter v1.0",
+      "recommendation": "Warn about drowsiness; avoid alcohol."
+    },
+    {
+      "drug_a": "Cetirizine",
+      "drug_b": "Alcohol",
+      "severity": "low",
+      "mechanism": "Mild additive sedation with alcohol.",
+      "source": "DDInter v1.0",
+      "recommendation": "Warn about drowsiness."
+    },
+    {
+      "drug_a": "Ranitidine",
+      "drug_b": "Warfarin",
+      "severity": "low",
+      "mechanism": "Possible slight increase in INR with ranitidine.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR during concurrent therapy."
+    },
+    {
+      "drug_a": "Amoxicillin",
+      "drug_b": "Methotrexate",
+      "severity": "moderate",
+      "mechanism": "Amoxicillin may reduce renal clearance of methotrexate, increasing methotrexate levels and risk of toxicity.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor for methotrexate toxicity (mouth ulcers, cytopenia) if combined; consider dose adjustment."
+    },
+    {
+      "drug_a": "Amoxicillin",
+      "drug_b": "Warfarin",
+      "severity": "moderate",
+      "mechanism": "Broad-spectrum penicillins can alter gut flora and vitamin K production, potentiating warfarin.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor INR closely when starting or stopping amoxicillin in a patient on warfarin."
+    },
+    {
+      "drug_a": "Amoxicillin",
+      "drug_b": "Allopurinol",
+      "severity": "moderate",
+      "mechanism": "Allopurinol may increase the risk of amoxicillin-induced skin rash.",
+      "source": "DDInter v1.0",
+      "recommendation": "Watch for rash; both drugs are commonly used together with monitoring."
+    },
+    {
+      "drug_a": "Artemether/Lumefantrine",
+      "drug_b": "Halofantrine",
+      "severity": "high",
+      "mechanism": "Both are structurally similar; halofantrine and lumefantrine can prolong the QT interval, increasing risk of serious cardiac arrhythmias.",
+      "source": "WHO Malaria Guidelines / DDInter",
+      "recommendation": "Do NOT combine halofantrine with artemether/lumefantrine or give within 1 month."
+    },
+    {
+      "drug_a": "Artemether/Lumefantrine",
+      "drug_b": "Quinine",
+      "severity": "moderate",
+      "mechanism": "Quinine can prolong QT interval; combined use with lumefantrine adds cardiac risk.",
+      "source": "WHO Malaria Guidelines",
+      "recommendation": "Avoid combination; if quinine needed, monitor ECG and electrolytes."
+    },
+    {
+      "drug_a": "Artemether/Lumefantrine",
+      "drug_b": "Metoclopramide",
+      "severity": "low",
+      "mechanism": "Metoclopramide may increase gastric emptying and absorption of lumefantrine; minor QT additive effect possible.",
+      "source": "DDInter v1.0",
+      "recommendation": "Use with caution; separate administration by 1-2 hours if possible."
+    },
+    {
+      "drug_a": "Artemether/Lumefantrine",
+      "drug_b": "Ketoconazole",
+      "severity": "moderate",
+      "mechanism": "CYP3A4 inhibition by ketoconazole increases lumefantrine levels, raising QT-prolongation risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid co-administration; monitor for arrhythmia if unavoidable."
+    },
+    {
+      "drug_a": "Artemether/Lumefantrine",
+      "drug_b": "Erythromycin",
+      "severity": "moderate",
+      "mechanism": "Erythromycin inhibits CYP3A4 and prolongs QT; additive risk with lumefantrine.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid combination where alternatives exist."
+    },
+    {
+      "drug_a": "Co-trimoxazole",
+      "drug_b": "Warfarin",
+      "severity": "high",
+      "mechanism": "Sulfamethoxazole inhibits warfarin metabolism and displaces it from protein binding, markedly increasing INR and bleeding risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Avoid if possible; if combined, monitor INR closely and reduce warfarin dose."
+    },
+    {
+      "drug_a": "Co-trimoxazole",
+      "drug_b": "Methotrexate",
+      "severity": "high",
+      "mechanism": "Sulfonamides displace methotrexate and reduce its renal excretion, risking severe bone marrow suppression.",
+      "source": "DDInter v1.0",
+      "recommendation": "Contraindicated in most cases; use alternative antibiotic."
+    },
+    {
+      "drug_a": "Co-trimoxazole",
+      "drug_b": "Potassium-sparing diuretics",
+      "severity": "high",
+      "mechanism": "Co-trimoxazole can raise serum potassium; combined with potassium-sparing diuretics (spironolactone, amiloride) risks hyperkalaemia.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor serum potassium; avoid combination in elderly or renal patients."
+    },
+    {
+      "drug_a": "Ciprofloxacin",
+      "drug_b": "Theophylline",
+      "severity": "moderate",
+      "mechanism": "Ciprofloxacin inhibits CYP1A2, raising theophylline levels and seizure risk.",
+      "source": "DDInter v1.0",
+      "recommendation": "Monitor theophylline levels or avoid combination."
+    },
+    {
+      "drug_a": "Ciprofloxacin",
+      "drug_b": "Antacids (magnesium/aluminium)",
+      "severity": "moderate",
+      "mechanism": "Antacids chelate ciprofloxacin, sharply reducing its absorption.",
+      "source": "DDInter v1.0",
+      "recommendation": "Give ciprofloxacin 2 hours before or 6 hours after antacids, iron, or zinc."
+    },
+    {
+      "drug_a": "Ciprofloxacin",
+      "drug_b": "Oral iron",
+      "severity": "moderate",
+      "mechanism": "Iron chelates fluoroquinolones in the gut, reducing ciprofloxacin absorption by up to 50%.",
+      "source": "DDInter v1.0",
+      "recommendation": "Separate by at least 2 hours; better to give iron at bedtime."
+    },
+    {
+      "drug_a": "Rifampicin",
+      "drug_b": "Oral contraceptives",
+      "severity": "moderate",
+      "mechanism": "Rifampicin strongly induces hepatic enzymes, reducing contraceptive effectiveness and risking unplanned pregnancy.",
+      "source": "DDInter v1.0",
+      "recommendation": "Advise alternative contraception (e.g. injectable or barrier methods) during rifampicin therapy."
+    }
+  ]
+}
