@@ -17,6 +17,7 @@ Exit commands: exit, quit, q
 
 import argparse
 import logging
+import random
 import sys
 
 # Windows consoles default to cp1252, which cannot print medical characters
@@ -56,6 +57,15 @@ HELP_TEXT = """Type your question in English or Pidgin, e.g.:
 Commands: help, status, exit
 """
 
+# Calming messages shown while the model processes a query.
+LOADING_MESSAGES = [
+    "Please wait... I dey check the official guidelines for you.",
+    "Hold on small... I dey look through the treatment book.",
+    "Just a moment... I dey search for the right medicine info.",
+    "One second... I dey check the drug interaction table for you.",
+    "Hold on... I dey find di best answer from di Nigeria guidelines.",
+]
+
 
 class Orchestrator:
     def __init__(self, use_model=True, use_docreader=True, use_pinchtab=False, lang="pidgin"):
@@ -72,6 +82,11 @@ class Orchestrator:
         self._llm_ready = None
 
     # ------------------------------------------------------------------
+    @staticmethod
+    def loading_message() -> str:
+        """Return a random calming loading message."""
+        return random.choice(LOADING_MESSAGES)
+
     def status(self) -> str:
         lines = []
         if self.docreader:
@@ -175,6 +190,7 @@ def main(argv=None):
     )
 
     if args.once:
+        print(Orchestrator.loading_message())
         print(orch.answer(args.once))
         return 0
 
@@ -206,6 +222,7 @@ def main(argv=None):
             if len(raw) > 1000:
                 print("Input too long. Keep your question short (under 1000 characters).")
                 continue
+            print("\n" + Orchestrator.loading_message() + "\n")
             print("\n" + orch.answer(raw) + "\n")
         except Exception as exc:
             log.error("error: %s", exc)
