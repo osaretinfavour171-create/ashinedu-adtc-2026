@@ -30,7 +30,7 @@ class TestOrchestrator(unittest.TestCase):
 
     def test_status_runs(self):
         out = self.orch.status()
-        self.assertIn("Language layer", out)
+        self.assertIn("Language", out)
 
     def test_english_mode(self):
         out = self.orch.answer("my pikin get hot body and dey vomit")

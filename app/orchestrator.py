@@ -17,8 +17,11 @@ Exit commands: exit, quit, q
 
 import argparse
 import logging
+import os
 import random
+import subprocess
 import sys
+import time
 
 # Windows consoles default to cp1252, which cannot print medical characters
 # like β (beta) from the guidelines. Force UTF-8 output everywhere.
@@ -37,6 +40,15 @@ from pidgin.reformulator import PidginReformulator
 
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("pidginpharma")
+
+# Paths for auto-restart (relative to app/ directory)
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_PROJECT = os.path.dirname(_HERE)
+_TOOLS = os.path.join(_PROJECT, "tools")
+_DATA = os.path.join(_HERE, "data")
+_DOCREADER_BIN = os.path.join(_TOOLS, "docreader.exe")
+_LLAMA_BIN = os.path.join(_TOOLS, "llamacpp", "llama-server.exe")
+_MODELS_DIR = os.path.join(_PROJECT, "model")
 
 BANNER = r"""
   ____  _ _            _  __  ____  _                          __
@@ -57,7 +69,7 @@ HELP_TEXT = """Type your question in English or Pidgin, e.g.:
 Commands: help, status, exit
 """
 
-# Calming messages shown while the model processes a query.
+# Calming messages shown while the system processes a query.
 LOADING_MESSAGES = [
     "Please wait... I dey check the official guidelines for you.",
     "Hold on small... I dey look through the treatment book.",
@@ -65,6 +77,131 @@ LOADING_MESSAGES = [
     "One second... I dey check the drug interaction table for you.",
     "Hold on... I dey find di best answer from di Nigeria guidelines.",
 ]
+
+# ---- Interactive health tips shown while the model loads ----
+# These keep the user engaged and informed during startup/recovery.
+HEALTH_TIPS = [
+    ("TIP: For malaria, always use ACT (Artemisinin-based Combination Therapy). "
+     "Never use Chloroquine alone — resistance don already."),
+    ("DID YOU KNOW: ORS (Oral Rehydration Salts) fit save pikin wey get diarrhoea. "
+     "Mix am with clean water and give am small small."),
+    ("TIP: Paracetamol dose for pikin na 10-15 mg per kg body weight. "
+     "No give adult dose to pikin!"),
+    ("REMEMBER: Fever + convulsions + difficulty breathing = REFER IMMEDIATELY. "
+     "No try am for clinic."),
+    ("DID YOU KNOW: Metronidazole no dey mix well with alcohol. "
+     "Tell patient to dey avoid alcohol during treatment."),
+    ("TIP: For pregnant women, IPTp-SP (Sulfadoxine-Pyrimethamine) "
+     "dey given from 13 weeks. At least 3 doses."),
+    ("REMEMBER: Antibiotics no dey work for viral infection. "
+     "Don't prescribe am for common cold."),
+    ("DID YOU KNOW: Zinc supplement dey very important for pikin with diarrhoea. "
+     "Give 20mg daily for 10-14 days for pikin wey don reach 6 months."),
+    ("TIP: Before giving any medicine, always ask about allergy. "
+     "Penicillin allergy na very common."),
+    ("REMEMBER: For severe dehydration, IV fluid na the way to go. "
+     "Use Normal Saline or Ringer Lactate."),
+    ("DID YOU KNOW: Artemether-Lumefantrine (AL) dey work best when you take am with food "
+     "or fatty drink. E help am absorb better."),
+    ("TIP: For hypertension, first-line drugs na Amlodipine, Enalapril, or Hydrochlorothiazide. "
+     "Start with low dose."),
+]
+
+# Messages shown during service recovery (while it restarts).
+RECOVERING_TIPS = [
+    "I don notice say one part of me stop work. I dey fix am now...",
+    "Small wahala — I dey restart the brain. Hold on small...",
+    "One service dey sleep. I dey wake am up for you...",
+]
+
+
+def _pick_model() -> str:
+    """Return the best available model filename, or empty string."""
+    primary = os.path.join(_MODELS_DIR, "medgemma-1.5-4b-it-Q8_0.gguf")
+    fallback = os.path.join(_MODELS_DIR, "qwen2.5-1.5b-instruct-q8_0.gguf")
+    if os.path.isfile(primary):
+        return "medgemma-1.5-4b-it-Q8_0.gguf"
+    if os.path.isfile(fallback):
+        return "qwen2.5-1.5b-instruct-q8_0.gguf"
+    return ""
+
+
+def _show_health_tips(duration: int, tips_pool: list = None) -> None:
+    """Show rotating health tips for `duration` seconds.
+    Each tip appears with a short pause, so the user sees the system is alive."""
+    if tips_pool is None:
+        tips_pool = HEALTH_TIPS
+    tips = random.sample(tips_pool, min(len(tips_pool), max(1, duration // 3)))
+    elapsed = 0
+    for tip in tips:
+        if elapsed >= duration:
+            break
+        # Show the tip
+        print(f"  💊 {tip}")
+        # Wait 2-3 seconds between tips (shorter if we're running out of time)
+        wait = min(3, duration - elapsed)
+        time.sleep(wait)
+        elapsed += wait
+
+
+def _try_start_docreader() -> bool:
+    """Attempt to start DocReader in the background. Returns True if started."""
+    if not os.path.isfile(_DOCREADER_BIN):
+        return False
+    try:
+        log_path = os.path.join(_TOOLS, "docreader.log")
+        log_fh = open(log_path, "w")
+        subprocess.Popen(
+            [_DOCREADER_BIN, "-addr", "127.0.0.1:8765", "-data", _DATA],
+            stdout=log_fh,
+            stderr=subprocess.STDOUT,
+            cwd=_PROJECT,
+        )
+        # Wait up to 10s for it to come up
+        for _ in range(10):
+            time.sleep(1)
+            try:
+                import urllib.request
+                urllib.request.urlopen("http://127.0.0.1:8765/health", timeout=2)
+                return True
+            except Exception:
+                continue
+    except Exception as exc:
+        log.warning("Failed to start DocReader: %s", exc)
+    return False
+
+
+def _try_start_llm() -> bool:
+    """Attempt to start the LLM server in the background. Returns True if started."""
+    if not os.path.isfile(_LLAMA_BIN):
+        return False
+    model = _pick_model()
+    if not model:
+        return False
+    model_path = os.path.join(_MODELS_DIR, model)
+    try:
+        log_path = os.path.join(_TOOLS, "llama.log")
+        log_fh = open(log_path, "w")
+        subprocess.Popen(
+            [_LLAMA_BIN, "-m", model_path,
+             "--host", "127.0.0.1", "--port", "8080",
+             "-c", "2048", "--threads", "4", "--no-webui"],
+            stdout=log_fh,
+            stderr=subprocess.STDOUT,
+            cwd=_PROJECT,
+        )
+        # Model loading is slow — wait up to 60s
+        for _ in range(60):
+            time.sleep(1)
+            try:
+                import urllib.request
+                urllib.request.urlopen("http://127.0.0.1:8080/health", timeout=2)
+                return True
+            except Exception:
+                continue
+    except Exception as exc:
+        log.warning("Failed to start LLM server: %s", exc)
+    return False
 
 
 class Orchestrator:
@@ -78,8 +215,6 @@ class Orchestrator:
         self.docreader = DocReaderClient() if use_docreader else None
         self.llm = LLMClient() if use_model else None
         self.pinchtab = PinchTabClient() if use_pinchtab else None
-        self._dr_ready = None
-        self._llm_ready = None
 
     # ------------------------------------------------------------------
     @staticmethod
@@ -91,21 +226,50 @@ class Orchestrator:
         lines = []
         if self.docreader:
             ok = self.docreader.is_ready()
-            self._dr_ready = ok
-            lines.append(f"DocReader (official data server): {'ONLINE' if ok else 'OFFLINE - run start.sh'}")
+            lines.append("Data server:   " + ("READY" if ok else "OFFLINE"))
         if self.llm:
             ok = self.llm.is_ready()
-            self._llm_ready = ok
-            lines.append(f"Local model server (llama.cpp):   {'ONLINE' if ok else 'OFFLINE - run start.sh'}")
+            lines.append("Model server:  " + ("READY" if ok else "OFFLINE"))
         if self.pinchtab:
             ok = self.pinchtab.is_ready()
-            lines.append(f"PinchTab browser layer (optional): {'ONLINE' if ok else 'OFFLINE - pinchtab/Chrome not available'}")
-        lines.append("Language layer (Pidgin<->English): READY")
+            lines.append("Browser layer: " + ("READY" if ok else "OFFLINE"))
+        lines.append("Language: Pidgin (use --lang en for English)")
         return "\n".join(lines)
 
     # ------------------------------------------------------------------
+    def _ensure_services(self) -> None:
+        """Check services and restart any that have crashed, showing health
+        tips while the user waits so they know the system is working."""
+        if self.docreader and not self.docreader.is_ready():
+            print(f"\n  {random.choice(RECOVERING_TIPS)}")
+            log.info("DocReader is down, attempting restart...")
+            # Show tips while DocReader restarts (takes ~2-5s)
+            tips_thread_active = True
+            if _try_start_docreader():
+                log.info("DocReader restarted successfully.")
+                print("  ✅ Data server is back!\n")
+            else:
+                log.warning("DocReader restart failed.")
+                print("  ⚠️  Data server could not restart. Drug lookups may not work.\n")
+
+        if self.llm and not self.llm.is_ready():
+            print(f"\n  {random.choice(RECOVERING_TIPS)}")
+            log.info("Model server is down, attempting restart...")
+            # Show health tips while model loads (takes 30-120s)
+            print("  While I dey load, here are some health tips:\n")
+            _show_health_tips(20)  # Show tips for up to 20s while restarting
+            if _try_start_llm():
+                log.info("Model server restarted successfully.")
+                print("  ✅ Clinical brain is back!\n")
+            else:
+                log.warning("Model server restart failed.")
+                print("  ⚠️  Clinical brain could not restart. Drug interactions still work.\n")
+
     def answer(self, raw: str) -> str:
         """Full pipeline for one user input."""
+        # Ensure services are alive before processing.
+        self._ensure_services()
+
         query = self.normalizer.normalize(raw)
         if not query:
             return "Abeg, tell me wetin dey worry di patient small small."
@@ -130,7 +294,7 @@ class Orchestrator:
             except Exception as exc:
                 log.warning("PinchTab search error: %s", exc)
 
-                # 2. If this is a clear drug-interaction query, answer from local
+        # 2. If this is a clear drug-interaction query, answer from local
         #    data directly (fast + authoritative) and skip the model.
         if interaction_text:
             english = self._compose_drug_answer(interaction_text, query, context)
@@ -139,9 +303,9 @@ class Orchestrator:
                 english = self.llm.ask(query, context)
             except Exception as exc:
                 log.warning("LLM error: %s", exc)
-                english = self._fallback_answer(query, context)
+                english = self._fallback_answer(context)
         else:
-            english = self._fallback_answer(query, context)
+            english = self._fallback_answer(context)
 
         # 3. Reformulate to Pidgin unless the user asked for plain English.
         if self.lang == "en":
@@ -155,19 +319,25 @@ class Orchestrator:
             parts.append(context)
         return "\n\n".join(parts)
 
-    def _fallback_answer(self, query, context) -> str:
-        """No model available: answer from official data alone."""
+    def _fallback_answer(self, context) -> str:
+        """The model is unavailable. If we have guideline context, show it.
+        Otherwise, give a simple Pidgin message — no technical details."""
         if context:
             return (
-                "I no get di model running now, but from di official Nigeria "
-                "guidelines wey I get for dis machine:\n\n"
+                "I no fit use di clinical brain now, but from di official Nigeria "
+                "guidelines wey I get:\n\n"
                 + context
                 + "\n\nIf di patient dey worse, send am go hospital quick quick."
             )
+        # Simple Pidgin message — no ports, no logs, no commands.
         return (
-            "Sorry - di offline model and data server no dey reachable now. "
-            "Run `bash start.sh` make dem start. If e be emergency, send di "
-            "patient go hospital now now."
+            "Sorry - something dey wrong with the system. "
+            "I no fit answer clinical questions now.\n\n"
+            "Please:\n"
+            "  1. Try again in a few minutes\n"
+            "  2. If e no work, restart the computer and try again\n"
+            "  3. If e still no work, ask your supervisor or ICT person for help\n\n"
+            "If this is an emergency, please refer the patient to hospital now."
         )
 
 
@@ -176,7 +346,7 @@ def main(argv=None):
     parser.add_argument("--no-model", action="store_true", help="skip the local LLM")
     parser.add_argument("--no-docreader", action="store_true", help="skip the DocReader")
     parser.add_argument("--pinchtab", action="store_true",
-                        help="enable optional PinchTab browser layer over converted HTML docs (uses ~300-800MB extra RAM)")
+                        help="enable optional PinchTab browser layer (uses ~300-800MB extra RAM)")
     parser.add_argument("--lang", choices=["en", "pidgin"], default="pidgin",
                         help="answer language (default: pidgin)")
     parser.add_argument("--once", metavar="QUERY", help="answer one query and exit")
@@ -226,7 +396,8 @@ def main(argv=None):
             print("\n" + orch.answer(raw) + "\n")
         except Exception as exc:
             log.error("error: %s", exc)
-            print("Something dey wrong - try again small.")
+            # Simple Pidgin error — no tracebacks, no technical details.
+            print("Something dey wrong. Try again small.")
 
 
 if __name__ == "__main__":
