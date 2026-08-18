@@ -1,0 +1,37 @@
+{
+  "team_id": "your-team-id",
+  "domain": "healthcare_medical",
+  "language_scope": ["en", "pcm"],
+  "african_alpha_claim": true,
+  "budget_laptop_claim": true,
+  "submitter": {
+    "name": "your-name",
+    "email": "your-email@domain.com",
+    "github_handle": "your-github"
+  },
+  "cross_disciplinary_pairing": {
+    "discipline": "healthcare_medical",
+    "load_bearing": true,
+    "description": "PidginPharma provides offline clinical decision support for Nigerian community health workers, combining Pidgin English NLP with official drug formulary data and local LLM inference."
+  },
+  "test_prompts": [
+    {
+      "prompt_id": "tp_001",
+      "prompt": "my pikin get hot body and dey vomit"
+    },
+    {
+      "prompt_id": "tp_002",
+      "prompt": "artemether lumefantrine and quinine, e dey safe?"
+    }
+  ],
+  "model": {
+    "name": "MedGemma-1.5-4B-IT-Q8_0",
+    "runtime": "llama.cpp",
+    "quantization": "GGUF Q8_0",
+    "parameters_estimate": "4B",
+    "packaging": "binary_bundle"
+  },
+  "_runtime": {
+    "model_path": "model/medgemma-1.5-4b-it-Q8_0.gguf"
+  }
+}

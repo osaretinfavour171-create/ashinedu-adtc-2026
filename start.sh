@@ -15,7 +15,7 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOOLS="$HERE/tools"
-MODELS="$HERE/models"
+MODELS="$HERE/model"
 DATA="$HERE/app/data"
 LLAMA_BIN="$TOOLS/llamacpp/llama-server.exe"
 DOCREADER_BIN="$TOOLS/docreader.exe"

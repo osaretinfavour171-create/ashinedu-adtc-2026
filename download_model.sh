@@ -10,7 +10,7 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MODELS="$HERE/models"
+MODELS="$HERE/model"
 TOOLS="$HERE/tools"
 mkdir -p "$MODELS" "$TOOLS"
 

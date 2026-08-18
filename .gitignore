@@ -1,5 +1,8 @@
-# Large binaries - download with download_model.sh / build with Go
-models/
+# Model weights - downloaded by download_model.sh, not committed
+model/
+*.gguf
+
+# Large binaries - build with Go
 tools/
 *.exe
 *.dll
