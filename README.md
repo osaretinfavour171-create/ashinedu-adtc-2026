@@ -3,6 +3,13 @@
 **Offline clinical decision support for Nigerian community health workers.**
 Built for the ADTC 2026 Hackathon.
 
+### Team
+
+| Name | GitHub | Role |
+|------|--------|------|
+| Osaretin Favour | [@osaretinfavour171-create](https://github.com/osaretinfavour171-create) | Lead Developer — Pidgin NLP, Orchestrator, LLM Integration |
+| Omotosho Rapheal Omolulu | [@romotosho10](https://github.com/romotosho10) | Co-Developer — DocReader, Security Audit, Testing
+
 PidginPharma helps Community Health Extension Workers (CHEWs) and
 pharmacists at primary healthcare centres across Nigeria answer clinical
 questions — in English, Nigerian Pidgin, or a mix — using **official
@@ -111,7 +118,7 @@ app/
     pidgin_phrases.json    # 475 multi-word phrase mappings
   docreader/               # Go server (interactions + condition index)
   data/                    # EML PDF, STG PDF + 270 conditions, interactions.json
-models/                    # GGUF models (downloaded)
+model/                     # GGUF models (downloaded)
 tools/                     # docreader.exe, llama.cpp, Go
 tests/                     # unit + integration tests
 ```
