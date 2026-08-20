@@ -46,7 +46,7 @@ USER_BEGIN = "<|start_header_id|>user<|end_header_id|>\n\n"
 ASSISTANT_BEGIN = "<|start_header_id|>assistant<|end_header_id|>\n\n"
 
 
-def build_prompt(query: str, context: str = "") -> str:
+def build_prompt(query: str, context: str = "", patient_block: str = "") -> str:
     """Build the full prompt (system + user with context)."""
     ctx_block = ""
     if context:
@@ -126,7 +126,7 @@ class LLMClient:
     # Maximum context length (chars) to avoid overwhelming the local model.
     MAX_CONTEXT_LEN = 6000
 
-    def ask(self, query: str, context: str = "") -> str:
+    def ask(self, query: str, context: str = "", patient_block: str = "") -> str:
         """Full round trip: build prompt, complete, strip tokens."""
         if not self.is_ready():
             raise ConnectionError(
@@ -136,5 +136,5 @@ class LLMClient:
         # Truncate context if too large for the model context window.
         if len(context) > self.MAX_CONTEXT_LEN:
             context = context[:self.MAX_CONTEXT_LEN] + "\n[...truncated...]"
-        prompt = build_prompt(query, context)
+        prompt = build_prompt(query, context, patient_block=patient_block)
         return self.complete(prompt)

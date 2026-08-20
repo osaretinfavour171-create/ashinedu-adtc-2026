@@ -5,7 +5,9 @@ REPL that routes input through the full pipeline:
 
     Pidgin/English input
         -> PidginNormalizer (to clean English query)
-        -> Cache check (instant response for repeated queries)
+        -> SymptomDetector  (is this a symptom or drug question?)
+        -> ClinicalIntake   (if symptom: ask age, weight, symptoms, allergies...)
+        -> Cache check      (instant response for repeated queries)
         -> DocReaderClient  (official local data: conditions + interactions)
         -> LLMClient        (local llama.cpp model, offline)
         -> PidginReformulator (back to Pidgin-flavoured answer)
@@ -13,6 +15,7 @@ REPL that routes input through the full pipeline:
 
 Usage:
     python orchestrator.py [--no-model] [--no-docreader] [--lang en|pidgin]
+                           [--intake] [--no-intake]
 
 Exit commands: exit, quit, q
 """
@@ -38,11 +41,13 @@ if hasattr(sys.stdout, "reconfigure"):
 
 from cache import ResponseCache
 from docreader_client import DocReaderClient
+from intake import PatientContext, quick_intake, run_intake
 from llm import LLMClient
 from metrics import Metrics
 from pinchtab_client import PinchTabClient
 from pidgin.normalizer import PidginNormalizer
 from pidgin.reformulator import PidginReformulator
+from symptom_detector import classify_query
 
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("pidginpharma")
@@ -68,10 +73,11 @@ BANNER = r"""
 """
 
 HELP_TEXT = """Type your question in English or Pidgin, e.g.:
-  "my pikin get hot body and dey vomit"
-  "artemether lumefantrine and quinine - e dey safe?"
-  "treatment for acute diarrhoea"
-  "metronidazole plus warfarin"
+  "my pikin get hot body and dey vomit"     (symptom - will ask follow-up questions)
+  "artemether lumefantrine and quinine"     (drug interaction - direct answer)
+  "treatment for acute diarrhoea"           (general health question)
+  "metronidazole plus warfarin"             (drug question - direct answer)
+
 Commands: help, status, stats, clear-cache, exit
 """
 
@@ -140,7 +146,7 @@ def _show_health_tips(duration: int, tips_pool: list = None) -> None:
     for tip in tips:
         if elapsed >= duration:
             break
-        print(f"  💊 {tip}")
+        print(f"  \U0001f48a {tip}")
         wait = min(3, duration - elapsed)
         time.sleep(wait)
         elapsed += wait
@@ -205,11 +211,13 @@ def _try_start_llm() -> bool:
 
 
 class Orchestrator:
-    def __init__(self, use_model=True, use_docreader=True, use_pinchtab=False, lang="pidgin"):
+    def __init__(self, use_model=True, use_docreader=True, use_pinchtab=False,
+                 lang="pidgin", intake_enabled=True):
         self.lang = lang
         self.use_model = use_model
         self.use_docreader = use_docreader
         self.use_pinchtab = use_pinchtab
+        self.intake_enabled = intake_enabled
         self.normalizer = PidginNormalizer()
         self.reformulator = PidginReformulator()
         self.docreader = DocReaderClient() if use_docreader else None
@@ -254,6 +262,7 @@ class Orchestrator:
             ok = self.pinchtab.is_ready()
             lines.append("Browser layer: " + ("READY" if ok else "OFFLINE"))
         lines.append("Language: Pidgin (use --lang en for English)")
+        lines.append("Intake: " + ("ON" if self.intake_enabled else "OFF"))
         # Cache stats
         cs = self.cache.stats()
         lines.append(f"Cache: {cs['size']}/{cs['max_size']} entries ({cs['hit_rate']} hit rate)")
@@ -267,10 +276,10 @@ class Orchestrator:
             log.info("DocReader is down, attempting restart...")
             if _try_start_docreader():
                 log.info("DocReader restarted successfully.")
-                print("  ✅ Data server is back!\n")
+                print("  \u2705 Data server is back!\n")
             else:
                 log.warning("DocReader restart failed.")
-                print("  ⚠️  Data server could not restart. Drug lookups may not work.\n")
+                print("  \u26a0\ufe0f  Data server could not restart. Drug lookups may not work.\n")
 
         if self.llm and not self.llm.is_ready():
             print(f"\n  {random.choice(RECOVERING_TIPS)}")
@@ -279,13 +288,17 @@ class Orchestrator:
             _show_health_tips(20)
             if _try_start_llm():
                 log.info("Model server restarted successfully.")
-                print("  ✅ Clinical brain is back!\n")
+                print("  \u2705 Clinical brain is back!\n")
             else:
                 log.warning("Model server restart failed.")
-                print("  ⚠️  Clinical brain could not restart. Drug interactions still work.\n")
+                print("  \u26a0\ufe0f  Clinical brain could not restart. Drug interactions still work.\n")
 
-    def answer(self, raw: str) -> tuple[str, str]:
+    def answer(self, raw: str, patient_ctx: PatientContext = None) -> tuple[str, str]:
         """Full pipeline for one user input.
+
+        Args:
+            raw: The raw user input (Pidgin or English).
+            patient_ctx: Optional structured patient info from intake flow.
 
         Returns:
             (answer, source) where source is "cache", "docreader", "llm", or "fallback".
@@ -299,7 +312,11 @@ class Orchestrator:
             return ("Abeg, tell me wetin dey worry di patient small small.", "fallback")
 
         # 0. Check cache first (instant response for repeated queries).
-        cached = self.cache.get(query, self.lang)
+        cache_key = query
+        if patient_ctx and patient_ctx.symptoms:
+            # Include patient context in cache key for personalized answers
+            cache_key = f"{query}|{patient_ctx.age or ''}|{patient_ctx.weight_kg or ''}"
+        cached = self.cache.get(cache_key, self.lang)
         if cached is not None:
             return (cached, "cache")
 
@@ -320,17 +337,22 @@ class Orchestrator:
                 pb = self.pinchtab.search(query)
                 if pb:
                     context = (context + "\n\n" + pb).strip()
-            except Exception as exc:
+            except Exception:
                 log.warning("PinchTab search error: %s", exc)
 
-        # 2. If this is a clear drug-interaction query, answer from local
+        # 2. Build patient context block for the LLM.
+        patient_block = ""
+        if patient_ctx:
+            patient_block = patient_ctx.to_prompt_block()
+
+        # 3. If this is a clear drug-interaction query, answer from local
         #    data directly (fast + authoritative) and skip the model.
         if interaction_text:
             english = self._compose_drug_answer(interaction_text, query, context)
             source = "docreader"
         elif self.llm and self.llm.is_ready():
             try:
-                english = self.llm.ask(query, context)
+                english = self.llm.ask(query, context, patient_block=patient_block)
                 source = "llm"
             except Exception as exc:
                 log.warning("LLM error: %s", exc)
@@ -340,16 +362,16 @@ class Orchestrator:
             english = self._fallback_answer(context)
             source = "fallback"
 
-        # 3. Reformulate to Pidgin unless the user asked for plain English.
+        # 4. Reformulate to Pidgin unless the user asked for plain English.
         if self.lang == "en":
             answer = english
         else:
             answer = self.reformulator.reformulate(english)
 
-        # 4. Store in cache for instant future lookups.
-        self.cache.put(query, self.lang, answer)
+        # 5. Store in cache for instant future lookups.
+        self.cache.put(cache_key, self.lang, answer)
 
-        # 5. Record metrics.
+        # 6. Record metrics.
         elapsed = time.time() - _start
         self.metrics.record_query(raw, elapsed, source)
         return (answer, source)
@@ -383,10 +405,10 @@ class Orchestrator:
 
 # Source labels for the user (in Pidgin)
 SOURCE_LABELS = {
-    "cache": "⚡ (instant — from memory)",
-    "docreader": "📚 (from official guidelines)",
-    "llm": "🧠 (from clinical brain)",
-    "fallback": "⚠️ (basic info)",
+    "cache": "\u26a1 (instant - from memory)",
+    "docreader": "\U0001f4da (from official guidelines)",
+    "llm": "\U0001f9e0 (from clinical brain)",
+    "fallback": "\u26a0\ufe0f (basic info)",
 }
 
 
@@ -399,13 +421,20 @@ def main(argv=None):
     parser.add_argument("--lang", choices=["en", "pidgin"], default="pidgin",
                         help="answer language (default: pidgin)")
     parser.add_argument("--once", metavar="QUERY", help="answer one query and exit")
+    parser.add_argument("--intake", action="store_true", default=True,
+                        help="enable clinical intake flow for symptom queries (default: on)")
+    parser.add_argument("--no-intake", action="store_true",
+                        help="disable clinical intake flow (answer directly)")
     args = parser.parse_args(argv)
+
+    intake_enabled = not args.no_intake
 
     orch = Orchestrator(
         use_model=not args.no_model,
         use_docreader=not args.no_docreader,
         use_pinchtab=args.pinchtab,
         lang=args.lang,
+        intake_enabled=intake_enabled,
     )
 
     if args.once:
@@ -454,16 +483,34 @@ def main(argv=None):
             if len(raw) > 1000:
                 print("Input too long. Keep your question short (under 1000 characters).")
                 continue
-            print("\n" + Orchestrator.loading_message() + "\n")
-            answer, source = orch.answer(raw)
+
+            # Check if this needs the intake flow.
+            query_type = classify_query(orch.normalizer.normalize(raw))
+            patient_ctx = None
+
+            if query_type == "symptom" and orch.intake_enabled:
+                # Symptom query detected - run clinical intake.
+                print("\n  \U0001f3e5 I see say this na patient problem. Make I ask some questions first.\n")
+                patient_ctx = run_intake(lang=orch.lang)
+                # Use the symptoms from intake as the query context
+                if patient_ctx.symptoms:
+                    raw = patient_ctx.symptoms
+                print(Orchestrator.loading_message() + "\n")
+            elif query_type == "symptom" and not orch.intake_enabled:
+                # Intake disabled but symptom detected - try to extract from query
+                patient_ctx = quick_intake(raw)
+                print("\n" + Orchestrator.loading_message() + "\n")
+            else:
+                print("\n" + Orchestrator.loading_message() + "\n")
+
+            answer, source = orch.answer(raw, patient_ctx=patient_ctx)
             print("\n" + answer + "\n")
-            # Show source attribution (so the user knows where the answer came from)
+            # Show source attribution
             src_label = SOURCE_LABELS.get(source, "")
             if src_label:
                 print(f"  {src_label}\n")
         except Exception as exc:
             log.error("error: %s", exc)
-            pass  # metrics recorded inside answer()
             print("Something dey wrong. Try again small.\n")
 
 
