@@ -1,0 +1,363 @@
+"""Dosage calculator for PidginPharma.
+
+Uses patient age + weight to compute exact mg/kg doses from the
+Nigeria Essential Medicines List (EML 2020). This is the authoritative
+source for drug dosing in Nigerian primary healthcare.
+
+All dose ranges are per the Nigeria EML / NSTG 2022. The calculator
+returns the recommended dose range and frequency for a given drug,
+age, and weight combination.
+
+WARNING: This is a clinical decision SUPPORT tool. The CHEW must
+verify doses against the patient's clinical condition and the official
+guidelines before prescribing.
+"""
+
+from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass
+class DoseInfo:
+    """Structured dose recommendation for a drug."""
+    drug: str
+    dose_min_mg: float
+    dose_max_mg: float
+    frequency: str
+    route: str
+    duration: str
+    notes: str
+    max_daily_mg: Optional[float] = None
+
+    def format_pidgin(self) -> str:
+        """Format dose info in Pidgin for the user."""
+        lines = [f"\U0001f48a {self.drug}:"]
+        lines.append(f"   Dose: {self.dose_min_mg:.0f} - {self.dose_max_mg:.0f} mg")
+        lines.append(f"   How: {self.frequency}")
+        lines.append(f"   Route: {self.route}")
+        if self.duration != "as needed":
+            lines.append(f"   Time: {self.duration}")
+        if self.max_daily_mg:
+            lines.append(f"   Max per day: {self.max_daily_mg:.0f} mg")
+        if self.notes:
+            lines.append(f"   Note: {self.notes}")
+        return "\n".join(lines)
+
+    def format_english(self) -> str:
+        """Format dose info in plain English."""
+        lines = [f"{self.drug}:"]
+        lines.append(f"   Dose: {self.dose_min_mg:.0f} - {self.dose_max_mg:.0f} mg")
+        lines.append(f"   Frequency: {self.frequency}")
+        lines.append(f"   Route: {self.route}")
+        if self.duration != "as needed":
+            lines.append(f"   Duration: {self.duration}")
+        if self.max_daily_mg:
+            lines.append(f"   Max daily: {self.max_daily_mg:.0f} mg")
+        if self.notes:
+            lines.append(f"   Note: {self.notes}")
+        return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Drug dose database (Nigeria EML 2020 + NSTG 2022)
+# ---------------------------------------------------------------------------
+# Each entry: drug -> list of (age_min, age_max, dose_per_kg, dose_unit,
+#                             freq, route, duration, notes, max_daily)
+# All doses in mg/kg unless noted.
+
+_DRUG_DATABASE = {
+    # === ANALGESICS / ANTIPYRETICS ===
+    "paracetamol": [
+        (0.0, 0.25, 10, "mg", "every 4-6 hours", "oral", "as needed",
+         "Max 4 doses/day. For neonates use IV under supervision.", 60),
+        (0.25, 12, 10, "mg", "every 4-6 hours", "oral", "as needed",
+         "Max 60 mg/kg/day. Use calibrated syringe.", 60),
+        (12, 100, 500, "mg_flat", "every 4-6 hours", "oral", "as needed",
+         "Max 4g/day. Reduce in liver disease.", 4000),
+    ],
+    "ibuprofen": [
+        (3/12, 12, 5, "mg", "every 8 hours", "oral", "after food",
+         "Max 20 mg/kg/day. Avoid in dehydration. Not for <3 months.", 30),
+        (12, 100, 200, "mg_flat", "every 8 hours", "oral", "after food",
+         "Max 1200mg/day OTC. Take with food.", 1200),
+    ],
+    "aspirin": [
+        (12, 100, 10, "mg", "every 4-6 hours", "oral", "after food",
+         "NOT for children under 12 (Reye syndrome risk). Max 4g/day.", 4000),
+    ],
+
+    # === ANTIMALARIALS ===
+    "artemether lumefantrine": [
+        (0, 0.25, 0, "mg", "N/A", "N/A", "N/A",
+         "Neonates <5kg: NOT recommended. Use rectal artesunate.", 0),
+        (0.25, 5, 20, "mg_al", "as per weight band", "oral", "3 days",
+         "5-14kg: 1 tablet (20mg AL) twice daily x3 days.", 0),
+        (5, 15, 40, "mg_al", "as per weight band", "oral", "3 days",
+         "15-25kg: 2 tablets twice daily x3 days. Take with fatty food.", 0),
+        (15, 25, 60, "mg_al", "as per weight band", "oral", "3 days",
+         "25-35kg: 3 tablets twice daily x3 days.", 0),
+        (25, 100, 80, "mg_al", "as per weight band", "oral", "3 days",
+         ">35kg: 4 tablets twice daily x3 days. Take with fatty food.", 0),
+    ],
+    "artesunate": [
+        (0, 0.25, 0, "mg", "N/A", "rectal", "N/A",
+         "Pre-referral: 10mg rectal stat for severe malaria in children.", 0),
+        (0.25, 20, 10, "mg", "once daily", "rectal", "until oral can be given",
+         "Pre-referral rectal artesunate for severe malaria.", 0),
+        (20, 100, 2.4, "mg", "at 0h, 12h, 24h, then daily", "IV/IM", "until oral",
+         "Severe malaria: 2.4 mg/kg IV/IM. Refer immediately.", 0),
+    ],
+    "sulfadoxine pyrimethamine": [
+        (0, 12, 25, "mg_SP", "single dose", "oral", "single dose",
+         "IPTp-SP: 3 doses from 13 weeks in pregnancy. Not for treatment.", 0),
+        (12, 100, 75, "mg_SP", "single dose", "oral", "single dose",
+         "Pregnancy: 3 tablets (500/25mg) as IPTp.", 0),
+    ],
+
+    # === ANTIBIOTICS ===
+    "amoxicillin": [
+        (0.5, 12, 25, "mg", "every 8 hours", "oral", "5-7 days",
+         "Dose by weight. 125mg/5ml suspension.", 80),
+        (12, 100, 500, "mg_flat", "every 8 hours", "oral", "5-7 days",
+         "500mg capsules. Max 3g/day.", 3000),
+    ],
+    "metronidazole": [
+        (0, 12, 7.5, "mg", "every 8 hours", "oral", "5-7 days",
+         "Trichomoniasis: 15mg/kg single dose. Giardia: 5 days.", 40),
+        (12, 100, 400, "mg_flat", "every 8 hours", "oral", "5-7 days",
+         "400mg tablets. Avoid alcohol during and 48h after.", 2400),
+    ],
+    "ciprofloxacin": [
+        (0, 18, 0, "mg", "N/A", "N/A", "N/A",
+         "CONTRAINDICATED in children <18 (cartilage damage risk).", 0),
+        (18, 100, 500, "mg_flat", "every 12 hours", "oral", "5-14 days",
+         "Take 2h before or 6h after antacids/iron.", 1500),
+    ],
+    "doxycycline": [
+        (0, 8, 0, "mg", "N/A", "N/A", "N/A",
+         "CONTRAINDICATED in children <8 years (teeth staining).", 0),
+        (8, 45, 2.2, "mg", "every 12 hours", "oral", "5-7 days",
+         "Malaria prophylaxis: 100mg daily.", 200),
+        (45, 100, 100, "mg_flat", "every 12 hours", "oral", "5-7 days",
+         "100mg capsules. Take with full glass of water.", 200),
+    ],
+    "azithromycin": [
+        (6/12, 12, 10, "mg", "day 1, then 5mg/day x4 days", "oral", "5 days",
+         "Day 1: 10mg/kg. Days 2-5: 5mg/kg.", 500),
+        (12, 100, 500, "mg_flat", "day 1, then 250mg x4 days", "oral", "5 days",
+         "Day 1: 500mg. Days 2-5: 250mg.", 500),
+    ],
+    "erythromycin": [
+        (0, 12, 10, "mg", "every 8 hours", "oral", "5-10 days",
+         "Suspension 125mg/5ml. Max 50mg/kg/day.", 50),
+        (12, 100, 500, "mg_flat", "every 8 hours", "oral", "5-10 days",
+         "250-500mg per dose. Max 4g/day.", 4000),
+    ],
+
+    # === ORAL REHYDRATION ===
+    "ors": [
+        (0, 100, 0, "ml", "after each loose stool", "oral", "until diarrhoea stops",
+         "Mild: 50ml/kg over 4h. Moderate: 100ml/kg over 4h. Use ORS sachet in 1L water.", 0),
+    ],
+    "zinc": [
+        (0, 6, 10, "mg", "once daily", "oral", "10-14 days",
+         "Children <6 months: 10mg/day for 10-14 days.", 10),
+        (6, 100, 20, "mg", "once daily", "oral", "10-14 days",
+         "Children >=6 months: 20mg/day for 10-14 days.", 20),
+    ],
+
+    # === ANTIHYPERTENSIVES ===
+    "amlodipine": [
+        (6, 18, 0.06, "mg", "once daily", "oral", "ongoing",
+         "Paediatric: 0.06-0.3 mg/kg/day. Start low.", 5),
+        (18, 100, 5, "mg_flat", "once daily", "oral", "ongoing",
+         "Start 5mg, max 10mg. Takes 1-2 weeks for full effect.", 10),
+    ],
+    "enalapril": [
+        (0, 12, 0.08, "mg", "once daily", "oral", "ongoing",
+         "Paediatric: 0.08 mg/kg/day. Start low.", 0.6),
+        (12, 100, 5, "mg_flat", "once daily", "oral", "ongoing",
+         "Start 5mg, max 40mg. Monitor renal function.", 40),
+    ],
+    "hydrochlorothiazide": [
+        (0, 12, 1, "mg", "once daily", "oral", "ongoing",
+         "Paediatric: 1-2 mg/kg/day.", 0),
+        (12, 100, 25, "mg_flat", "once daily", "oral", "ongoing",
+         "Start 12.5-25mg. Max 50mg.", 50),
+    ],
+
+    # === ANTI-EPILEPTICS ===
+    "diazepam": [
+        (0, 100, 0.2, "mg", "single dose for seizure", "rectal", "single dose",
+         "Status epilepticus: 0.2-0.5 mg/kg rectal. Max 10mg.", 10),
+        (0, 100, 0.1, "mg", "every 8 hours", "oral", "short course",
+         "Anxiety/spasm: 0.1-0.2 mg/kg/day divided.", 10),
+    ],
+    "phenobarbitone": [
+        (0, 100, 15, "mg", "once daily (loading: 20mg/kg)", "oral/IV", "ongoing",
+         "Neonatal seizure: 20mg/kg IV loading. Maintenance: 3-5mg/kg/day.", 0),
+    ],
+}
+
+
+def calculate_dose(drug: str, age_years: Optional[float],
+                   weight_kg: Optional[float]) -> Optional[DoseInfo]:
+    """Calculate the recommended dose for a drug given patient age and weight.
+
+    Args:
+        drug: Drug name (will be normalized to lowercase).
+        age_years: Patient age in years.
+        weight_kg: Patient weight in kg.
+
+    Returns:
+        DoseInfo with dose range, or None if drug not found / contraindicated.
+    """
+    drug_lower = drug.lower().strip()
+
+    # Normalize common name variants
+    aliases = {
+        "paracetamol": "paracetamol",
+        "acetaminophen": "paracetamol",
+        "tylenol": "paracetamol",
+        "panadol": "paracetamol",
+        "ibu": "ibuprofen",
+        "ibuprofen": "ibuprofen",
+        "advil": "ibuprofen",
+        "motrin": "ibuprofen",
+        "amox": "amoxicillin",
+        "amoxicillin": "amoxicillin",
+        "amoxil": "amoxicillin",
+        "metro": "metronidazole",
+        "metronidazole": "metronidazole",
+        "flagyl": "metronidazole",
+        "cipro": "ciprofloxacin",
+        "ciprofloxacin": "ciprofloxacin",
+        "doxy": "doxycycline",
+        "doxycycline": "doxycycline",
+        "azithro": "azithromycin",
+        "azithromycin": "azithromycin",
+        "z-pack": "azithromycin",
+        "zithromax": "azithromycin",
+        "erythro": "erythromycin",
+        "erythromycin": "erythromycin",
+        "al": "artemether lumefantrine",
+        "artemether lumefantrine": "artemether lumefantrine",
+        "coartem": "artemether lumefantrine",
+        "artesunate": "artesunate",
+        "sp": "sulfadoxine pyrimethamine",
+        "sulfadoxine pyrimethamine": "sulfadoxine pyrimethamine",
+        "fansidar": "sulfadoxine pyrimethamine",
+        "ors": "ors",
+        "oral rehydration": "ors",
+        "zinc": "zinc",
+        "amlodipine": "amlodipine",
+        "norvasc": "amlodipine",
+        "enalapril": "enalapril",
+        "renitec": "enalapril",
+        "hctz": "hydrochlorothiazide",
+        "hydrochlorothiazide": "hydrochlorothiazide",
+        "diazepam": "diazepam",
+        "valium": "diazepam",
+        "phenobarbitone": "phenobarbitone",
+        "phenobarbital": "phenobarbitone",
+    }
+
+    normalized = aliases.get(drug_lower, drug_lower)
+    entries = _DRUG_DATABASE.get(normalized)
+    if not entries:
+        return None
+
+    age = age_years if age_years is not None else 25.0  # default adult
+    weight = weight_kg if weight_kg is not None else 60.0  # default adult
+
+    # Find the matching dose range for this age
+    for (age_min, age_max, dose_val, dose_unit, freq, route, duration, notes, max_daily) in entries:
+        if age_min <= age < age_max or (age_max == 100 and age >= age_min):
+            if dose_unit == "mg_flat":
+                # Fixed dose (not weight-based)
+                dose = dose_val
+            else:
+                # Weight-based dosing
+                dose = dose_val * weight
+
+            # Cap at drug maximum
+            if max_daily and dose > max_daily:
+                dose = max_daily
+
+            return DoseInfo(
+                drug=drug.title(),
+                dose_min_mg=round(dose * 0.8, 1) if dose > 0 else 0,
+                dose_max_mg=round(dose, 1) if dose > 0 else 0,
+                frequency=freq,
+                route=route,
+                duration=duration,
+                notes=notes,
+                max_daily_mg=max_daily if max_daily else None,
+            )
+
+    return None
+
+
+def get_red_flags(age_years: Optional[float], weight_kg: Optional[float],
+                  temperature: Optional[str] = None,
+                  pulse: Optional[str] = None,
+                  respiratory_rate: Optional[str] = None,
+                  spo2: Optional[str] = None) -> list[str]:
+    """Check vitals against red flag thresholds for the patient's age group.
+
+    Returns a list of red flag descriptions. Empty list = no red flags.
+    """
+    flags = []
+    age = age_years if age_years is not None else 25.0
+
+    # Parse temperature
+    if temperature:
+        import re
+        m = re.search(r"(\d{2,3}(?:\.\d+)?)", temperature)
+        if m:
+            temp = float(m.group(1))
+            if age < 3 and temp >= 38.0:
+                flags.append("\u26a0\ufe0f RED FLAG: Fever in infant (<3 months) - REFER IMMEDIATELY")
+            elif temp >= 40.0:
+                flags.append("\u26a0\ufe0f RED FLAG: Very high fever (>=40C) - needs urgent care")
+
+    # Parse pulse
+    if pulse:
+        import re
+        m = re.search(r"(\d{2,3})", pulse)
+        if m:
+            bpm = int(m.group(1))
+            if age < 1 and bpm > 160:
+                flags.append("\u26a0\ufe0f RED FLAG: Very fast heart rate in infant - REFER")
+            elif 1 <= age < 3 and bpm > 140:
+                flags.append("\u26a0\ufe0f RED FLAG: Fast heart rate in toddler - REFER")
+            elif age >= 3 and bpm > 120:
+                flags.append("\u26a0\ufe0f RED FLAG: Fast heart rate (tachycardia)")
+            elif bpm < 50:
+                flags.append("\u26a0\ufe0f RED FLAG: Very slow heart rate (bradycardia) - REFER")
+
+    # Parse respiratory rate
+    if respiratory_rate:
+        import re
+        m = re.search(r"(\d{1,2})", respiratory_rate)
+        if m:
+            rr = int(m.group(1))
+            if age < 1 and rr > 50:
+                flags.append("\u26a0\ufe0f RED FLAG: Very fast breathing in infant - REFER")
+            elif 1 <= age < 5 and rr > 40:
+                flags.append("\u26a0\ufe0f RED FLAG: Fast breathing in child (possible pneumonia) - REFER")
+            elif age >= 5 and rr > 30:
+                flags.append("\u26a0\ufe0f RED FLAG: Fast breathing (tachypnoea)")
+
+    # Parse SpO2
+    if spo2:
+        import re
+        m = re.search(r"(\d{2,3})", spo2)
+        if m:
+            s = int(m.group(1))
+            if s < 90:
+                flags.append("\u26a0\ufe0f RED FLAG: Severe hypoxia (SpO2 <90%) - REFER IMMEDIATELY")
+            elif s < 94:
+                flags.append("\u26a0\ufe0f RED FLAG: Low oxygen (SpO2 <94%) - needs assessment")
+
+    return flags

@@ -43,7 +43,10 @@ class PatientContext:
     allergies: Optional[str] = None      # "penicillin", "none"
     pregnant: Optional[bool] = None
     current_meds: Optional[str] = None   # "paracetamol, amoxicillin"
-    history: Optional[str] = None        # "asthma, diabetes"
+    history: Optional[str] = None
+    pulse: Optional[str] = None            # "110 bpm", "fast", "normal"
+    respiratory_rate: Optional[str] = None  # "30/min", "fast"
+    spo2: Optional[str] = None             # "95%", "low"         # "asthma, diabetes"
 
     def to_prompt_block(self) -> str:
         """Format as a structured context block for the LLM."""
@@ -68,6 +71,12 @@ class PatientContext:
             lines.append(f"  Current medications: {self.current_meds}")
         if self.history:
             lines.append(f"  Medical history: {self.history}")
+        if self.pulse:
+            lines.append(f"  Pulse: {self.pulse}")
+        if self.respiratory_rate:
+            lines.append(f"  Respiratory rate: {self.respiratory_rate}")
+        if self.spo2:
+            lines.append(f"  SpO2: {self.spo2}")
         return "\n".join(lines)
 
     def is_complete(self) -> bool:
@@ -186,12 +195,74 @@ def _parse_gender(text: str) -> Optional[str]:
     return None
 
 
-def _parse_temperature(text: str) -> Optional[str]:
+def _parse_pulse(text: str) -> Optional[str]:
+    """Parse pulse rate from user input."""
+    text = text.lower().strip()
+    if not text or text in ("skip", "i no know", "no", "idk", "no thermometer"):
+        return None
+    # "110 bpm", "110"
+    m = re.search(r"(\d{2,3})\s*(?:bpm|beats)?", text)
+    if m:
+        val = int(m.group(1))
+        if 30 <= val <= 200:
+            return f"{val} bpm"
+    # Qualitative
+    if any(w in text for w in ("fast", "quick", "racing", "too much")):
+        return "fast (no exact count)"
+    if any(w in text for w in ("slow", "weak")):
+        return "slow (no exact count)"
+    if any(w in text for w in ("normal", "fine", "ok")):
+        return "normal"
+    return None
+
+
+def _parse_respiratory_rate(text: str) -> Optional[str]:
+    """Parse respiratory rate from user input."""
+    text = text.lower().strip()
+    if not text or text in ("skip", "i no know", "no", "idk"):
+        return None
+    # "30 per min", "30/min", "30"
+    m = re.search(r"(\d{1,2})\s*(?:/min|per min|breaths?)?", text)
+    if m:
+        val = int(m.group(1))
+        if 8 <= val <= 60:
+            return f"{val}/min"
+    if any(w in text for w in ("fast", "difficult", "labored")):
+        return "fast/labored"
+    if any(w in text for w in ("normal", "fine")):
+        return "normal"
+    return None
+
+
+def _parse_spo2(text: str) -> Optional[str]:
+    """Parse oxygen saturation from user input."""
+    text = text.lower().strip()
+    if not text or text in ("skip", "i no know", "no", "idk", "no oximeter"):
+        return None
+    m = re.search(r"(\d{2,3})\s*%?", text)
+    if m:
+        val = int(m.group(1))
+        if 50 <= val <= 100:
+            return f"{val}%"
+    if any(w in text for w in ("low", "bad")):
+        return "low (no exact reading)"
+    if any(w in text for w in ("normal", "fine", "ok")):
+        return "normal"
+    return None
+
+
+
     text = text.lower().strip()
     if not text or text in ("skip", "i no know", "no", "idk", "no thermometer"):
         return None
 
-    # "38.5", "38.5°C", "38.5C", "101.3F"
+def _parse_temperature(text: str) -> Optional[str]:
+    """Parse temperature from user input."""
+    text = text.lower().strip()
+    if not text or text in ("skip", "i no know", "no", "idk", "no thermometer"):
+        return None
+
+    # "38.5", "38.5C", "101.3F"
     m = re.search(r"(\d{2,3}(?:\.\d+)?)\s*°?\s*([cf])?", text)
     if m:
         val = float(m.group(1))
@@ -314,6 +385,27 @@ def _get_intake_questions() -> list[IntakeQuestion]:
             parser="text",
             required=False,
         ),
+        IntakeQuestion(
+            key="pulse",
+            prompt_pidgin="You fit feel im pulse? If yes, how e dey? (e.g. fast, normal, 110). If no, say 'skip'.",
+            prompt_english="Can you feel the patient's pulse? How is it? (e.g. fast, normal, 110 bpm). Say 'skip' if unknown.",
+            parser="pulse",
+            required=False,
+        ),
+        IntakeQuestion(
+            key="respiratory_rate",
+            prompt_pidgin="How e dey breathe? (e.g. normal, fast, hard). If no thermometer, say 'skip'.",
+            prompt_english="How is the patient breathing? (e.g. normal, fast, difficult). Say 'skip' if unknown.",
+            parser="respiratory_rate",
+            required=False,
+        ),
+        IntakeQuestion(
+            key="spo2",
+            prompt_pidgin="You get oxygen meter (oximeter)? If yes, wetin e read? If no, say 'skip'.",
+            prompt_english="Do you have a pulse oximeter? If yes, what does it read? Say 'skip' if not available.",
+            parser="spo2",
+            required=False,
+        ),
     ]
 
 
@@ -340,7 +432,7 @@ def run_intake(lang: str = "pidgin", input_fn=None, output_fn=None) -> PatientCo
     ctx = PatientContext()
     questions = _get_intake_questions()
     answered = 0
-    max_questions = 9  # safety limit
+    max_questions = 13  # safety limit
 
     output_fn("")
     if lang == "pidgin":
@@ -465,6 +557,12 @@ def _set_field(ctx: PatientContext, key: str, value):
         ctx.pregnant = value
     elif key == "current_meds":
         ctx.current_meds = value
+    elif key == "pulse":
+        ctx.pulse = value
+    elif key == "respiratory_rate":
+        ctx.respiratory_rate = value
+    elif key == "spo2":
+        ctx.spo2 = value
     elif key == "history":
         ctx.history = value
 

@@ -47,6 +47,8 @@ from metrics import Metrics
 from pinchtab_client import PinchTabClient
 from pidgin.normalizer import PidginNormalizer
 from pidgin.reformulator import PidginReformulator
+from dosage import calculate_dose, get_red_flags
+from followup import FollowUpTracker
 from symptom_detector import classify_query
 
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
@@ -78,7 +80,7 @@ HELP_TEXT = """Type your question in English or Pidgin, e.g.:
   "treatment for acute diarrhoea"           (general health question)
   "metronidazole plus warfarin"             (drug question - direct answer)
 
-Commands: help, status, stats, clear-cache, exit
+Commands: help, status, stats, clear-cache, follow-up, exit
 """
 
 # Calming messages shown while the system processes a query.
@@ -225,6 +227,7 @@ class Orchestrator:
         self.pinchtab = PinchTabClient() if use_pinchtab else None
         self.cache = ResponseCache()
         self.metrics = Metrics()
+        self.followup = FollowUpTracker()
 
         # Register cleanup handlers
         atexit.register(self._cleanup)
@@ -362,19 +365,56 @@ class Orchestrator:
             english = self._fallback_answer(context)
             source = "fallback"
 
-        # 4. Reformulate to Pidgin unless the user asked for plain English.
+        # 4. Add dosage calculations if we have patient context.
+        if patient_ctx and patient_ctx.age_years is not None and patient_ctx.weight_kg:
+            # Check for red flags based on vitals
+            red_flags = get_red_flags(
+                patient_ctx.age_years, patient_ctx.weight_kg,
+                patient_ctx.temperature, patient_ctx.pulse,
+                patient_ctx.respiratory_rate, patient_ctx.spo2,
+            )
+            if red_flags:
+                english = "\n\n".join(red_flags) + "\n\n" + english
+
+            # Try to calculate doses for mentioned drugs
+            dose_info = self._calculate_doses_for_query(query, patient_ctx)
+            if dose_info:
+                english = english + "\n\nRECOMMENDED DOSING (based on patient weight " + str(patient_ctx.weight_kg) + "kg):\n" + "\n".join(dose_info)
+
+        # 5. Reformulate to Pidgin unless the user asked for plain English.
         if self.lang == "en":
             answer = english
         else:
             answer = self.reformulator.reformulate(english)
 
-        # 5. Store in cache for instant future lookups.
+        # 6. Store in cache for instant future lookups.
         self.cache.put(cache_key, self.lang, answer)
 
-        # 6. Record metrics.
+        # 7. Record metrics.
         elapsed = time.time() - _start
         self.metrics.record_query(raw, elapsed, source)
         return (answer, source)
+
+    # ------------------------------------------------------------------
+    def _calculate_doses_for_query(self, query: str, ctx) -> list[str]:
+        """Try to calculate doses for drugs mentioned in the query."""
+        results = []
+        # Common drug names to look for in the query
+        drug_names = [
+            "paracetamol", "ibuprofen", "amoxicillin", "metronidazole",
+            "artemether", "lumefantrine", "coartem", "doxycycline",
+            "azithromycin", "erythromycin", "ciprofloxacin", "zinc",
+            "ors", "oral rehydration", "amlodipine", "enalapril",
+            "diazepam", "phenobarbitone", "aspirin", "sulfadoxine",
+            "pyrimethamine", "artesunate",
+        ]
+        query_lower = query.lower()
+        for drug in drug_names:
+            if drug in query_lower:
+                dose = calculate_dose(drug, ctx.age_years, ctx.weight_kg)
+                if dose:
+                    results.append(dose.format_pidgin())
+        return results
 
     # ------------------------------------------------------------------
     def _compose_drug_answer(self, interaction_text, query, context) -> str:
@@ -477,6 +517,11 @@ def main(argv=None):
         if low == "clear-cache":
             orch.cache.clear()
             print("Cache cleared. All queries will be re-processed.")
+            continue
+        if low in ("follow-up", "followup", "checkup", "check up"):
+            result = orch.followup.run_followup(lang=orch.lang)
+            if result:
+                orch.metrics.record_query("followup", 0, "followup")
             continue
         try:
             # SECURITY: cap input length to prevent abuse.
