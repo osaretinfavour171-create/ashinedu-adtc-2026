@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  docreader:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["./tools/docreader", "-addr", "0.0.0.0:8765", "-data", "./app/data"]
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./app/data:/app/app/data:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8765/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # Optional: LLM server (requires model download first)
+  # Uncomment after running: bash download_model.sh
+  #
+  # llm:
+  #   image: ghcr.io/ggerganov/llama.cpp:server
+  #   command: >
+  #     --model /models/medgemma-1.5-4b-it-Q8_0.gguf
+  #     --host 0.0.0.0
+  #     --port 8080
+  #     -c 2048
+  #     --threads 4
+  #     --no-webui
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./model:/models:ro
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 12
+  #   restart: unless-stopped

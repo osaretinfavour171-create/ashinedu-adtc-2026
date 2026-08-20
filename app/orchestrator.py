@@ -5,9 +5,11 @@ REPL that routes input through the full pipeline:
 
     Pidgin/English input
         -> PidginNormalizer (to clean English query)
+        -> Cache check (instant response for repeated queries)
         -> DocReaderClient  (official local data: conditions + interactions)
         -> LLMClient        (local llama.cpp model, offline)
         -> PidginReformulator (back to Pidgin-flavoured answer)
+        -> ResponseCache store
 
 Usage:
     python orchestrator.py [--no-model] [--no-docreader] [--lang en|pidgin]
@@ -16,9 +18,11 @@ Exit commands: exit, quit, q
 """
 
 import argparse
+import atexit
 import logging
 import os
 import random
+import signal
 import subprocess
 import sys
 import time
@@ -32,8 +36,10 @@ if hasattr(sys.stdout, "reconfigure"):
     except Exception:
         pass
 
+from cache import ResponseCache
 from docreader_client import DocReaderClient
 from llm import LLMClient
+from metrics import Metrics
 from pinchtab_client import PinchTabClient
 from pidgin.normalizer import PidginNormalizer
 from pidgin.reformulator import PidginReformulator
@@ -66,7 +72,7 @@ HELP_TEXT = """Type your question in English or Pidgin, e.g.:
   "artemether lumefantrine and quinine - e dey safe?"
   "treatment for acute diarrhoea"
   "metronidazole plus warfarin"
-Commands: help, status, exit
+Commands: help, status, stats, clear-cache, exit
 """
 
 # Calming messages shown while the system processes a query.
@@ -79,7 +85,6 @@ LOADING_MESSAGES = [
 ]
 
 # ---- Interactive health tips shown while the model loads ----
-# These keep the user engaged and informed during startup/recovery.
 HEALTH_TIPS = [
     ("TIP: For malaria, always use ACT (Artemisinin-based Combination Therapy). "
      "Never use Chloroquine alone — resistance don already."),
@@ -127,8 +132,7 @@ def _pick_model() -> str:
 
 
 def _show_health_tips(duration: int, tips_pool: list = None) -> None:
-    """Show rotating health tips for `duration` seconds.
-    Each tip appears with a short pause, so the user sees the system is alive."""
+    """Show rotating health tips for `duration` seconds."""
     if tips_pool is None:
         tips_pool = HEALTH_TIPS
     tips = random.sample(tips_pool, min(len(tips_pool), max(1, duration // 3)))
@@ -136,9 +140,7 @@ def _show_health_tips(duration: int, tips_pool: list = None) -> None:
     for tip in tips:
         if elapsed >= duration:
             break
-        # Show the tip
         print(f"  💊 {tip}")
-        # Wait 2-3 seconds between tips (shorter if we're running out of time)
         wait = min(3, duration - elapsed)
         time.sleep(wait)
         elapsed += wait
@@ -157,7 +159,6 @@ def _try_start_docreader() -> bool:
             stderr=subprocess.STDOUT,
             cwd=_PROJECT,
         )
-        # Wait up to 10s for it to come up
         for _ in range(10):
             time.sleep(1)
             try:
@@ -190,7 +191,6 @@ def _try_start_llm() -> bool:
             stderr=subprocess.STDOUT,
             cwd=_PROJECT,
         )
-        # Model loading is slow — wait up to 60s
         for _ in range(60):
             time.sleep(1)
             try:
@@ -215,6 +215,26 @@ class Orchestrator:
         self.docreader = DocReaderClient() if use_docreader else None
         self.llm = LLMClient() if use_model else None
         self.pinchtab = PinchTabClient() if use_pinchtab else None
+        self.cache = ResponseCache()
+        self.metrics = Metrics()
+
+        # Register cleanup handlers
+        atexit.register(self._cleanup)
+        signal.signal(signal.SIGINT, self._signal_handler)
+        signal.signal(signal.SIGTERM, self._signal_handler)
+
+    def _signal_handler(self, signum, frame):
+        """Handle shutdown signals gracefully."""
+        print("\n\nSaving session data... Bye bye! Stay safe.")
+        self._cleanup()
+        sys.exit(0)
+
+    def _cleanup(self):
+        """Save metrics on exit."""
+        try:
+            self.metrics.save()
+        except Exception:
+            pass
 
     # ------------------------------------------------------------------
     @staticmethod
@@ -234,17 +254,17 @@ class Orchestrator:
             ok = self.pinchtab.is_ready()
             lines.append("Browser layer: " + ("READY" if ok else "OFFLINE"))
         lines.append("Language: Pidgin (use --lang en for English)")
+        # Cache stats
+        cs = self.cache.stats()
+        lines.append(f"Cache: {cs['size']}/{cs['max_size']} entries ({cs['hit_rate']} hit rate)")
         return "\n".join(lines)
 
     # ------------------------------------------------------------------
     def _ensure_services(self) -> None:
-        """Check services and restart any that have crashed, showing health
-        tips while the user waits so they know the system is working."""
+        """Check services and restart any that have crashed."""
         if self.docreader and not self.docreader.is_ready():
             print(f"\n  {random.choice(RECOVERING_TIPS)}")
             log.info("DocReader is down, attempting restart...")
-            # Show tips while DocReader restarts (takes ~2-5s)
-            tips_thread_active = True
             if _try_start_docreader():
                 log.info("DocReader restarted successfully.")
                 print("  ✅ Data server is back!\n")
@@ -255,9 +275,8 @@ class Orchestrator:
         if self.llm and not self.llm.is_ready():
             print(f"\n  {random.choice(RECOVERING_TIPS)}")
             log.info("Model server is down, attempting restart...")
-            # Show health tips while model loads (takes 30-120s)
             print("  While I dey load, here are some health tips:\n")
-            _show_health_tips(20)  # Show tips for up to 20s while restarting
+            _show_health_tips(20)
             if _try_start_llm():
                 log.info("Model server restarted successfully.")
                 print("  ✅ Clinical brain is back!\n")
@@ -265,14 +284,24 @@ class Orchestrator:
                 log.warning("Model server restart failed.")
                 print("  ⚠️  Clinical brain could not restart. Drug interactions still work.\n")
 
-    def answer(self, raw: str) -> str:
-        """Full pipeline for one user input."""
+    def answer(self, raw: str) -> tuple[str, str]:
+        """Full pipeline for one user input.
+
+        Returns:
+            (answer, source) where source is "cache", "docreader", "llm", or "fallback".
+        """
         # Ensure services are alive before processing.
+        _start = time.time()
         self._ensure_services()
 
         query = self.normalizer.normalize(raw)
         if not query:
-            return "Abeg, tell me wetin dey worry di patient small small."
+            return ("Abeg, tell me wetin dey worry di patient small small.", "fallback")
+
+        # 0. Check cache first (instant response for repeated queries).
+        cached = self.cache.get(query, self.lang)
+        if cached is not None:
+            return (cached, "cache")
 
         # 1. Local official data (conditions + interactions).
         context = ""
@@ -298,19 +327,32 @@ class Orchestrator:
         #    data directly (fast + authoritative) and skip the model.
         if interaction_text:
             english = self._compose_drug_answer(interaction_text, query, context)
+            source = "docreader"
         elif self.llm and self.llm.is_ready():
             try:
                 english = self.llm.ask(query, context)
+                source = "llm"
             except Exception as exc:
                 log.warning("LLM error: %s", exc)
                 english = self._fallback_answer(context)
+                source = "fallback"
         else:
             english = self._fallback_answer(context)
+            source = "fallback"
 
         # 3. Reformulate to Pidgin unless the user asked for plain English.
         if self.lang == "en":
-            return english
-        return self.reformulator.reformulate(english)
+            answer = english
+        else:
+            answer = self.reformulator.reformulate(english)
+
+        # 4. Store in cache for instant future lookups.
+        self.cache.put(query, self.lang, answer)
+
+        # 5. Record metrics.
+        elapsed = time.time() - _start
+        self.metrics.record_query(raw, elapsed, source)
+        return (answer, source)
 
     # ------------------------------------------------------------------
     def _compose_drug_answer(self, interaction_text, query, context) -> str:
@@ -320,8 +362,7 @@ class Orchestrator:
         return "\n\n".join(parts)
 
     def _fallback_answer(self, context) -> str:
-        """The model is unavailable. If we have guideline context, show it.
-        Otherwise, give a simple Pidgin message — no technical details."""
+        """The model is unavailable. If we have guideline context, show it."""
         if context:
             return (
                 "I no fit use di clinical brain now, but from di official Nigeria "
@@ -329,7 +370,6 @@ class Orchestrator:
                 + context
                 + "\n\nIf di patient dey worse, send am go hospital quick quick."
             )
-        # Simple Pidgin message — no ports, no logs, no commands.
         return (
             "Sorry - something dey wrong with the system. "
             "I no fit answer clinical questions now.\n\n"
@@ -339,6 +379,15 @@ class Orchestrator:
             "  3. If e still no work, ask your supervisor or ICT person for help\n\n"
             "If this is an emergency, please refer the patient to hospital now."
         )
+
+
+# Source labels for the user (in Pidgin)
+SOURCE_LABELS = {
+    "cache": "⚡ (instant — from memory)",
+    "docreader": "📚 (from official guidelines)",
+    "llm": "🧠 (from clinical brain)",
+    "fallback": "⚠️ (basic info)",
+}
 
 
 def main(argv=None):
@@ -361,7 +410,9 @@ def main(argv=None):
 
     if args.once:
         print(Orchestrator.loading_message())
-        print(orch.answer(args.once))
+        answer, source = orch.answer(args.once)
+        print(answer)
+        print(f"\n  {SOURCE_LABELS.get(source, '')}")
         return 0
 
     print(BANNER)
@@ -373,13 +424,15 @@ def main(argv=None):
         try:
             raw = input("PidginPharma > ").strip()
         except (EOFError, KeyboardInterrupt):
-            print("\nBye bye! Stay safe.")
+            print("\n\nSaving session data... Bye bye! Stay safe.")
+            orch.metrics.save()
             return 0
         if not raw:
             continue
         low = raw.lower()
         if low in ("exit", "quit", "q"):
-            print("Bye bye! Stay safe.")
+            print("Saving session data... Bye bye! Stay safe.")
+            orch.metrics.save()
             return 0
         if low in ("help", "h", "?"):
             print(HELP_TEXT)
@@ -387,17 +440,31 @@ def main(argv=None):
         if low == "status":
             print(orch.status())
             continue
+        if low == "stats":
+            print(orch.metrics.summary())
+            print()
+            print(orch.cache.stats())
+            continue
+        if low == "clear-cache":
+            orch.cache.clear()
+            print("Cache cleared. All queries will be re-processed.")
+            continue
         try:
             # SECURITY: cap input length to prevent abuse.
             if len(raw) > 1000:
                 print("Input too long. Keep your question short (under 1000 characters).")
                 continue
             print("\n" + Orchestrator.loading_message() + "\n")
-            print("\n" + orch.answer(raw) + "\n")
+            answer, source = orch.answer(raw)
+            print("\n" + answer + "\n")
+            # Show source attribution (so the user knows where the answer came from)
+            src_label = SOURCE_LABELS.get(source, "")
+            if src_label:
+                print(f"  {src_label}\n")
         except Exception as exc:
             log.error("error: %s", exc)
-            # Simple Pidgin error — no tracebacks, no technical details.
-            print("Something dey wrong. Try again small.")
+            pass  # metrics recorded inside answer()
+            print("Something dey wrong. Try again small.\n")
 
 
 if __name__ == "__main__":

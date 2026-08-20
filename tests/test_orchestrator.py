@@ -33,15 +33,29 @@ class TestOrchestrator(unittest.TestCase):
         self.assertIn("Language", out)
 
     def test_english_mode(self):
-        out = self.orch.answer("my pikin get hot body and dey vomit")
-        self.assertIsInstance(out, str)
-        self.assertGreater(len(out), 20)
+        answer, source = self.orch.answer("my pikin get hot body and dey vomit")
+        self.assertIsInstance(answer, str)
+        self.assertGreater(len(answer), 20)
+        self.assertIn(source, ("cache", "docreader", "llm", "fallback"))
 
     @unittest.skipUnless(_dr_available(), "DocReader server not running")
     def test_drug_interaction_answer(self):
-        out = self.orch.answer("metronidazole plus warfarin e dey safe?")
-        self.assertIn("Metronidazole", out)
-        self.assertIn("Warfarin", out)
+        answer, source = self.orch.answer("metronidazole plus warfarin e dey safe?")
+        self.assertIn("Metronidazole", answer)
+        self.assertIn("Warfarin", answer)
+
+    def test_cache_works(self):
+        """Same query twice should hit cache the second time."""
+        q = "what is the treatment for malaria"
+        answer1, source1 = self.orch.answer(q)
+        answer2, source2 = self.orch.answer(q)
+        self.assertEqual(answer1, answer2)
+        self.assertEqual(source2, "cache")
+
+    def test_source_is_valid(self):
+        """Source should always be one of the known values."""
+        _, source = self.orch.answer("diarrhoea treatment")
+        self.assertIn(source, ("cache", "docreader", "llm", "fallback"))
 
 
 if __name__ == "__main__":
