@@ -197,6 +197,38 @@ _DRUG_DATABASE = {
         (0, 100, 15, "mg", "once daily (loading: 20mg/kg)", "oral/IV", "ongoing",
          "Neonatal seizure: 20mg/kg IV loading. Maintenance: 3-5mg/kg/day.", 0),
     ],
+    # === ANTHELMINTICS ===
+    "albendazole": [(1, 2, 200, "mg_flat", "single dose", "oral", "single dose", "1-2y: 200mg. >2y: 400mg.", 400),],
+    "mebendazole": [(2, 100, 500, "mg_flat", "single dose", "oral", "single dose", ">2y: 500mg.", 500),],
+    # === ANTIEMETICS ===
+    "metoclopramide": [(1, 12, 0.1, "mg", "every 8h", "oral", "short", "0.1mg/kg. Max 0.5mg/kg/day.", 0.5),(12, 100, 10, "mg_flat", "every 8h", "oral", "short", "10mg. Max 30mg/day.", 30),],
+    "domperidone": [(0, 12, 0.25, "mg", "every 8h", "oral", "short", "0.25mg/kg.", 1.0),(12, 100, 10, "mg_flat", "every 8h", "oral", "short", "10mg. Max 30mg/day.", 30),],
+    "ondansetron": [(0, 12, 0.15, "mg", "every 8h", "oral", "short", "0.15mg/kg.", 4),(12, 100, 4, "mg_flat", "every 8h", "oral", "short", "4mg. Max 16mg/day.", 16),],
+    # === ANTIHISTAMINES ===
+    "cetirizine": [(6, 100, 10, "mg_flat", "once daily", "oral", "as needed", "10mg once daily.", 10),],
+    "chlorpheniramine": [(0, 12, 0.1, "mg", "every 8h", "oral", "as needed", "0.1mg/kg.", 0.4),(12, 100, 4, "mg_flat", "every 8h", "oral", "as needed", "4mg.", 12),],
+    # === BRONCHODILATORS ===
+    "salbutamol": [(0, 100, 0, "mg", "2-4 puffs every 4-6h", "inhaled", "as needed", "2 puffs via spacer.", 0),],
+    # === CARDIOVASCULAR ===
+    "nifedipine": [(12, 100, 10, "mg_flat", "every 8h", "oral", "ongoing", "10mg TID or ER 30mg daily.", 60),],
+    "methyldopa": [(12, 100, 250, "mg_flat", "every 8h", "oral", "ongoing", "250mg TID. Max 3g/day.", 3000),],
+    # === CORTICOSTEROIDS ===
+    "prednisolone": [(0, 12, 1, "mg", "once daily", "oral", "5-7d", "1-2mg/kg/day.", 0),(12, 100, 20, "mg_flat", "once daily", "oral", "5-7d", "20-40mg/day.", 40),],
+    "dexamethasone": [(0, 100, 0.15, "mg", "every 6h", "oral", "short", "Croup: 0.15mg/kg.", 0),],
+    # === ANTIFUNGALS ===
+    "nystatin": [(0, 100, 100000, "units", "4x daily", "oral", "7-14d", "Oral thrush.", 400000),],
+    # === ANTI-SEIZURE ===
+    "carbamazepine": [(0, 12, 5, "mg", "every 12h", "oral", "ongoing", "5mg/kg/day BID.", 0),(12, 100, 200, "mg_flat", "every 12h", "oral", "ongoing", "200mg BID. Max 1200mg/day.", 1200),],
+    "valproate": [(0, 12, 10, "mg", "every 12h", "oral", "ongoing", "CONTRAINDICATED in pregnancy.", 0),(12, 100, 300, "mg_flat", "every 12h", "oral", "ongoing", "300mg BID. Max 2.4g/day.", 2400),],
+    "midazolam": [(0, 100, 0.2, "mg", "single dose", "buccal/IM", "single", "0.2mg/kg buccal (max 10mg).", 10),],
+    # === DIABETES ===
+    "metformin": [(10, 100, 500, "mg_flat", "twice daily with food", "oral", "ongoing", "500mg BID with meals. Max 2g/day.", 2000),],
+    "insulin": [(0, 100, 0.5, "units", "per kg per day", "SC injection", "ongoing", "MUST refer for initiation.", 0),],
+    # === DERMATOLOGY ===
+    "permethrin": [(0, 100, 0, "mg", "applied to skin", "topical", "single", "5% cream for scabies.", 0),],
+    # === TB ===
+    "ethambutol": [(0, 100, 15, "mg", "once daily", "oral", "2 months", "Refer to DOTS.", 0),],
+    "pyrazinamide": [(0, 100, 25, "mg", "once daily", "oral", "2 months", "Refer to DOTS.", 0),],
 }
 
 
@@ -260,6 +292,34 @@ def calculate_dose(drug: str, age_years: Optional[float],
         "valium": "diazepam",
         "phenobarbitone": "phenobarbitone",
         "phenobarbital": "phenobarbitone",
+        "alben": "albendazole",
+        "vermox": "mebendazole",
+        "ventolin": "salbutamol",
+        "prednisone": "prednisolone",
+        "glucophage": "metformin",
+        "tegretol": "carbamazepine",
+        "epilim": "valproate",
+        "zofran": "ondansetron",
+        "canesten": "clotrimazole",
+        "aldomet": "methyldopa",
+        "adalat": "nifedipine",
+        "domperidone": "domperidone",
+        "motilium": "domperidone",
+        "nystatin": "nystatin",
+        "salbutamol": "salbutamol",
+        "prednisolone": "prednisolone",
+        "dexamethasone": "dexamethasone",
+        "carbamazepine": "carbamazepine",
+        "valproate": "valproate",
+        "metformin": "metformin",
+        "insulin": "insulin",
+        "midazolam": "midazolam",
+        "permethrin": "permethrin",
+        "ondansetron": "ondansetron",
+        "chlorpheniramine": "chlorpheniramine",
+        "cetirizine": "cetirizine",
+        "ORS": "ORS",
+        "oral rehydration": "ORS",
     }
 
     normalized = aliases.get(drug_lower, drug_lower)
@@ -350,14 +410,15 @@ def get_red_flags(age_years: Optional[float], weight_kg: Optional[float],
                 flags.append("\u26a0\ufe0f RED FLAG: Fast breathing (tachypnoea)")
 
     # Parse SpO2
+    # Parse SpO2
     if spo2:
         import re
-        m = re.search(r"(\d{2,3})", spo2)
+        m = re.search(r"(\d{2,3})\s*%?", spo2)
         if m:
             s = int(m.group(1))
             if s < 90:
-                flags.append("\u26a0\ufe0f RED FLAG: Severe hypoxia (SpO2 <90%) - REFER IMMEDIATELY")
+                flags.append("⚠️ RED FLAG: Severe hypoxia (SpO2 <90%) - REFER IMMEDIATELY")
             elif s < 94:
-                flags.append("\u26a0\ufe0f RED FLAG: Low oxygen (SpO2 <94%) - needs assessment")
+                flags.append("⚠️ RED FLAG: Low oxygen (SpO2 <94%) - needs assessment")
 
     return flags

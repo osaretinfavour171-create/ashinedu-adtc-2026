@@ -49,7 +49,7 @@ from pidgin.normalizer import PidginNormalizer
 from pidgin.reformulator import PidginReformulator
 from dosage import calculate_dose, get_red_flags
 from followup import FollowUpTracker
-from symptom_detector import classify_query
+from inference import infer_context, build_patient_context_from_query, get_question_prompt
 
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("pidginpharma")
@@ -450,6 +450,38 @@ SOURCE_LABELS = {
     "llm": "\U0001f9e0 (from clinical brain)",
     "fallback": "\u26a0\ufe0f (basic info)",
 }
+
+
+def _set_ctx_field(ctx, field, value):
+    """Set a field on PatientContext from raw user input."""
+    from intake import _parse_age, _parse_weight, _parse_gender, _parse_temperature
+    if field == "age":
+        display, years = _parse_age(value)
+        if display:
+            ctx.age = display
+            ctx.age_years = years
+    elif field == "weight":
+        kg, _ = _parse_weight(value)
+        if kg:
+            ctx.weight_kg = kg
+    elif field == "gender":
+        g = _parse_gender(value)
+        if g:
+            ctx.gender = g
+    elif field == "symptoms":
+        ctx.symptoms = value
+    elif field == "duration":
+        ctx.duration = value
+    elif field == "temperature":
+        t = _parse_temperature(value)
+        if t:
+            ctx.temperature = t
+    elif field == "allergies":
+        ctx.allergies = value
+    elif field == "current_meds":
+        ctx.current_meds = value
+    elif field == "history":
+        ctx.history = value
 
 
 def main(argv=None):
