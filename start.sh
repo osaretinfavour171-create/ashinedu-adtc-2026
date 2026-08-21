@@ -26,6 +26,22 @@ LLM_PORT=8080
 HTML_PORT=8766
 HTML_DIR="$HERE/app/data/html"
 
+# Convert Git Bash paths to Windows paths for .exe files.
+# Git Bash uses /c/Users/... but .exe files need C:\Users\...
+# The docreader (Go binary compiled on WSL) misinterprets MSYS paths as
+# WSL mount paths (\\mnt\\c\\...) which don't exist on native Windows.
+win_path() {
+    if command -v cygpath > /dev/null 2>&1; then
+        cygpath -w "$1"
+    else
+        echo "$1"
+    fi
+}
+WIN_DATA=$(win_path "$DATA")
+WIN_TOOLS=$(win_path "$TOOLS")
+WIN_MODELS=$(win_path "$MODELS")
+WIN_HTML_DIR=$(win_path "$HTML_DIR")
+
 mkdir -p "$TOOLS" "$MODELS"
 
 # ---------------------------------------------------------------------------
@@ -51,7 +67,7 @@ wait_for_service() {
 if [ -f "$DOCREADER_BIN" ]; then
     if ! curl -sf "http://127.0.0.1:$DR_PORT/health" > /dev/null 2>&1; then
         echo "[start] Starting the data server..."
-        "$DOCREADER_BIN" -addr "127.0.0.1:$DR_PORT" -data "$DATA" \
+        "$DOCREADER_BIN" -addr "127.0.0.1:$DR_PORT" -data "$WIN_DATA" \
             > "$TOOLS/docreader.log" 2>&1 &
         if wait_for_service "http://127.0.0.1:$DR_PORT/health" 15; then
             echo "[start] Data server is ready."
@@ -98,7 +114,7 @@ elif [ -f "$LLAMA_BIN" ]; then
     if [ -n "$MODEL" ]; then
         echo "[start] Loading the clinical brain (this may take a minute)..."
         "$LLAMA_BIN" \
-            -m "$MODELS/$MODEL" \
+            -m "$(win_path "$MODELS/$MODEL")" \
             --host 127.0.0.1 --port "$LLM_PORT" \
             -c 2048 --threads 4 \
             --no-webui \
