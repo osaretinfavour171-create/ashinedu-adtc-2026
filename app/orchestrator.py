@@ -86,7 +86,7 @@ BANNER = (
     "\033[0m"  # Reset
     "\n"
     "\033[1;32m"  # Bold Green
-    r"  ███ PidginPharma ███"
+    r"  ███ Ashinedu ███"
     "\n"
     "\033[0m"  # Reset
     "\n"
