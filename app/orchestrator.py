@@ -47,10 +47,14 @@ from metrics import Metrics
 from pinchtab_client import PinchTabClient
 from pidgin.normalizer import PidginNormalizer
 from pidgin.reformulator import PidginReformulator
-from dosage import calculate_dose, get_red_flags
+from dosage import calculate_dose, get_red_flags, needs_iv_fluids, format_iv_recommendation
 from followup import FollowUpTracker
 from inference import infer_context, build_patient_context_from_query, get_question_prompt
 from symptom_detector import classify_query
+from translations import (
+    get_intake_prompt, get_loading_messages, get_response,
+    get_red_flag, get_iv_guidance, get_summary,
+)
 
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("pidginpharma")
@@ -75,17 +79,18 @@ BANNER = r"""
   Data: Nigeria EML 2020 + NSTG 2022 + local drug-interaction database
 """
 
-HELP_TEXT = """Type your question in English or Pidgin, e.g.:
+HELP_TEXT = """Type your question in English, Pidgin, Hausa, or Yoruba:
   "my pikin get hot body and dey vomit"     (symptom - will ask follow-up questions)
   "artemether lumefantrine and quinine"     (drug interaction - direct answer)
   "treatment for acute diarrhoea"           (general health question)
   "metronidazole plus warfarin"             (drug question - direct answer)
 
-Commands: help, status, stats, clear-cache, follow-up, exit
+Commands: help, status, stats, clear-cache, follow-up, lang <pidgin|en|hausa|yoruba>, exit
 """
 
-# Calming messages shown while the system processes a query.
-LOADING_MESSAGES = [
+# Calming messages are now loaded from translations module based on language.
+# FALLBACK_MESSAGES used if translations module is unavailable.
+FALLBACK_MESSAGES = [
     "Please wait... I dey check the official guidelines for you.",
     "Hold on small... I dey look through the treatment book.",
     "Just a moment... I dey search for the right medicine info.",
@@ -127,6 +132,14 @@ RECOVERING_TIPS = [
     "Small wahala — I dey restart the brain. Hold on small...",
     "One service dey sleep. I dey wake am up for you...",
 ]
+
+# Language display names
+LANG_NAMES = {
+    "pidgin": "Pidgin English",
+    "en": "English",
+    "hausa": "Hausa",
+    "yoruba": "Yoruba",
+}
 
 
 def _pick_model() -> str:
@@ -250,9 +263,13 @@ class Orchestrator:
 
     # ------------------------------------------------------------------
     @staticmethod
-    def loading_message() -> str:
-        """Return a random calming loading message."""
-        return random.choice(LOADING_MESSAGES)
+    def loading_message(lang: str = "pidgin") -> str:
+        """Return a random calming loading message in the selected language."""
+        try:
+            msgs = get_loading_messages(lang)
+        except Exception:
+            msgs = FALLBACK_MESSAGES
+        return random.choice(msgs)
 
     def status(self) -> str:
         lines = []
@@ -265,7 +282,8 @@ class Orchestrator:
         if self.pinchtab:
             ok = self.pinchtab.is_ready()
             lines.append("Browser layer: " + ("READY" if ok else "OFFLINE"))
-        lines.append("Language: Pidgin (use --lang en for English)")
+        lang_name = LANG_NAMES.get(self.lang, self.lang)
+        lines.append(f"Language: {lang_name} (use --lang pidgin|en|hausa|yoruba)")
         lines.append("Intake: " + ("ON" if self.intake_enabled else "OFF"))
         # Cache stats
         cs = self.cache.stats()
@@ -382,11 +400,13 @@ class Orchestrator:
             if dose_info:
                 english = english + "\n\nRECOMMENDED DOSING (based on patient weight " + str(patient_ctx.weight_kg) + "kg):\n" + "\n".join(dose_info)
 
-        # 5. Reformulate to Pidgin unless the user asked for plain English.
-        if self.lang == "en":
-            answer = english
-        else:
+        # 5. Reformulate based on language.
+        #    Pidgin: full reformulation to Pidgin-flavoured text.
+        #    English/Hausa/Yoruba: return English (clinical accuracy).
+        if self.lang == "pidgin":
             answer = self.reformulator.reformulate(english)
+        else:
+            answer = english
 
         # 6. Store in cache for instant future lookups.
         self.cache.put(cache_key, self.lang, answer)
@@ -408,6 +428,9 @@ class Orchestrator:
             "ors", "oral rehydration", "amlodipine", "enalapril",
             "diazepam", "phenobarbitone", "aspirin", "sulfadoxine",
             "pyrimethamine", "artesunate",
+            "normal saline", "ringer lactate", "drip",
+            "iv paracetamol", "iv amoxicillin", "iv metronidazole",
+            "iv artesunate", "iv diazepam",
         ]
         query_lower = query.lower()
         for drug in drug_names:
@@ -491,7 +514,7 @@ def main(argv=None):
     parser.add_argument("--no-docreader", action="store_true", help="skip the DocReader")
     parser.add_argument("--pinchtab", action="store_true",
                         help="enable optional PinchTab browser layer (uses ~300-800MB extra RAM)")
-    parser.add_argument("--lang", choices=["en", "pidgin"], default="pidgin",
+    parser.add_argument("--lang", choices=["en", "pidgin", "hausa", "yoruba"], default="pidgin",
                         help="answer language (default: pidgin)")
     parser.add_argument("--once", metavar="QUERY", help="answer one query and exit")
     parser.add_argument("--intake", action="store_true", default=True,
@@ -551,6 +574,15 @@ def main(argv=None):
             orch.cache.clear()
             print("Cache cleared. All queries will be re-processed.")
             continue
+        if low.startswith("lang ") or low.startswith("language "):
+            new_lang = low.split(None, 1)[-1].strip()
+            if new_lang in ("pidgin", "en", "hausa", "yoruba"):
+                orch.lang = new_lang
+                lang_name = LANG_NAMES.get(new_lang, new_lang)
+                print(f"  Language changed to: {lang_name}")
+            else:
+                print("  Available languages: pidgin, en, hausa, yoruba")
+            continue
         if low in ("follow-up", "followup", "checkup", "check up"):
             result = orch.followup.run_followup(lang=orch.lang)
             if result:
@@ -568,18 +600,18 @@ def main(argv=None):
 
             if query_type == "symptom" and orch.intake_enabled:
                 # Symptom query detected - run clinical intake.
-                print("\n  \U0001f3e5 I see say this na patient problem. Make I ask some questions first.\n")
+                print(f"\n  \U0001f3e5 {get_response('symptom_detected', orch.lang)}\n")
                 patient_ctx = run_intake(lang=orch.lang)
                 # Use the symptoms from intake as the query context
                 if patient_ctx.symptoms:
                     raw = patient_ctx.symptoms
-                print(Orchestrator.loading_message() + "\n")
+                print(Orchestrator.loading_message(lang=orch.lang) + "\n")
             elif query_type == "symptom" and not orch.intake_enabled:
                 # Intake disabled but symptom detected - try to extract from query
                 patient_ctx = quick_intake(raw)
-                print("\n" + Orchestrator.loading_message() + "\n")
+                print("\n" + Orchestrator.loading_message(lang=orch.lang) + "\n")
             else:
-                print("\n" + Orchestrator.loading_message() + "\n")
+                print("\n" + Orchestrator.loading_message(lang=orch.lang) + "\n")
 
             answer, source = orch.answer(raw, patient_ctx=patient_ctx)
             print("\n" + answer + "\n")

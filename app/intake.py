@@ -417,7 +417,7 @@ def run_intake(lang: str = "pidgin", input_fn=None, output_fn=None) -> PatientCo
     """Run the interactive clinical intake flow.
 
     Args:
-        lang: "pidgin" or "en" — controls which prompt language to use.
+        lang: "pidgin", "en", "hausa", or "yoruba" — controls which prompt language to use.
         input_fn: callable that reads a line (defaults to input()).
         output_fn: callable that prints a line (defaults to print()).
 
@@ -429,25 +429,29 @@ def run_intake(lang: str = "pidgin", input_fn=None, output_fn=None) -> PatientCo
     if output_fn is None:
         output_fn = print
 
+    # Import translations for multi-language support
+    from translations import get_intake_prompt, get_response, get_summary
+
     ctx = PatientContext()
     questions = _get_intake_questions()
     answered = 0
     max_questions = 13  # safety limit
 
     output_fn("")
-    if lang == "pidgin":
-        output_fn("  Let me ask you some questions about di patient make I fit help well well.")
-    else:
-        output_fn("  Let me ask some questions about the patient to give you the best advice.")
-    output_fn("  (You fit say 'skip' or 'i no know' for any question wey you no get answer.)")
+    output_fn(get_intake_prompt("intro_pidgin", lang))
+    output_fn(get_intake_prompt("intro_hausa", lang))
     output_fn("")
 
     for q in questions:
         if answered >= max_questions:
             break
 
-        # Show the prompt
-        prompt = q.prompt_pidgin if lang == "pidgin" else q.prompt_english
+        # Skip pregnancy question if gender is already known to be male
+        if q.key == "pregnant" and ctx.gender == "male":
+            continue
+
+        # Show the prompt in the selected language
+        prompt = get_intake_prompt(q.key, lang)
         output_fn(f"  {prompt}")
 
         try:
@@ -487,12 +491,10 @@ def run_intake(lang: str = "pidgin", input_fn=None, output_fn=None) -> PatientCo
                     _set_field(ctx, q.key, parsed3)
                     answered += 1
 
-    # Show summary
+    # Show summary in the selected language
     output_fn("")
-    if lang == "pidgin":
-        output_fn(f"  OK, I don hear. Patient info: {ctx.summary_line()}")
-    else:
-        output_fn(f"  OK, got it. Patient info: {ctx.summary_line()}")
+    summary_template = get_summary(lang)
+    output_fn(summary_template.format(summary=ctx.summary_line()))
     output_fn("")
 
     return ctx

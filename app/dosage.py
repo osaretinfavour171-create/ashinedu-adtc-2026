@@ -229,6 +229,50 @@ _DRUG_DATABASE = {
     # === TB ===
     "ethambutol": [(0, 100, 15, "mg", "once daily", "oral", "2 months", "Refer to DOTS.", 0),],
     "pyrazinamide": [(0, 100, 25, "mg", "once daily", "oral", "2 months", "Refer to DOTS.", 0),],
+    # === IV FLUIDS / INFUSIONS ===
+    "normal saline": [
+        (0, 100, 20, "ml/kg", "over 1-2 hours", "IV infusion", "repeat as needed",
+         "Dehydration: 20-30 ml/kg over 1-2h. Can repeat x2. Monitor urine output.", 0),
+    ],
+    "ringer lactate": [
+        (0, 100, 20, "ml/kg", "over 1-2 hours", "IV infusion", "repeat as needed",
+         "Dehydration: 20-30 ml/kg over 1-2h. Preferred for burns and trauma.", 0),
+    ],
+    "iv paracetamol": [
+        (0, 12, 15, "mg", "every 6 hours", "IV infusion", "as needed",
+         "IV paracetamol: 15mg/kg over 15 min. For patients who cannot take oral.", 60),
+        (12, 100, 1000, "mg_flat", "every 6 hours", "IV infusion", "as needed",
+         "1g over 15 min. Max 4g/day. For severe pain/fever when oral not possible.", 4000),
+    ],
+    "iv amoxicillin": [
+        (0, 12, 25, "mg", "every 8 hours", "IV infusion", "5-7 days",
+         "Severe infection: 25mg/kg IV q8h. For severe pneumonia or sepsis.", 80),
+        (12, 100, 500, "mg_flat", "every 8 hours", "IV infusion", "5-7 days",
+         "500mg IV q8h. Max 3g/day.", 3000),
+    ],
+    "iv metronidazole": [
+        (0, 12, 7.5, "mg", "every 8 hours", "IV infusion", "5-7 days",
+         "Severe infection: 7.5mg/kg IV q8h. For severe abdominal infections.", 40),
+        (12, 100, 500, "mg_flat", "every 8 hours", "IV infusion", "5-7 days",
+         "500mg IV q8h over 1h. Max 3g/day.", 3000),
+    ],
+    "iv artesunate": [
+        (0, 100, 2.4, "mg", "at 0h, 12h, 24h, then daily", "IV/IM", "until oral",
+         "SEVERE MALARIA: 2.4 mg/kg IV/IM. Must refer to hospital.", 0),
+    ],
+    "iv diazepam": [
+        (0, 100, 0.2, "mg", "single dose for seizure", "IV slow push", "single dose",
+         "Status epilepticus: 0.2-0.5 mg/kg IV slow push over 3-5 min. Max 10mg.", 10),
+    ],
+    "iv normal saline maintenance": [
+        (0, 10, 60, "ml/kg", "per day", "IV infusion", "ongoing",
+         "Maintenance: 60 ml/kg/day for first 10kg.", 0),
+        (10, 20, 30, "ml/kg", "per day (above 10kg)", "IV infusion", "ongoing",
+         "Maintenance: +30 ml/kg/day for next 10kg.", 0),
+        (20, 100, 20, "ml/kg", "per day (above 20kg)", "IV infusion", "ongoing",
+         "Maintenance: +20 ml/kg/day for weight above 20kg.", 0),
+    ],
+
 }
 
 
@@ -300,6 +344,17 @@ def calculate_dose(drug: str, age_years: Optional[float],
         "tegretol": "carbamazepine",
         "epilim": "valproate",
         "zofran": "ondansetron",
+        "drip": "normal saline",
+        "ns": "normal saline",
+        "normal saline": "normal saline",
+        "rl": "ringer lactate",
+        "ringer": "ringer lactate",
+        "ringer lactate": "ringer lactate",
+        "iv paracetamol": "iv paracetamol",
+        "iv amoxicillin": "iv amoxicillin",
+        "iv metronidazole": "iv metronidazole",
+        "iv artesunate": "iv artesunate",
+        "iv diazepam": "iv diazepam",
         "canesten": "clotrimazole",
         "aldomet": "methyldopa",
         "adalat": "nifedipine",
@@ -422,3 +477,95 @@ def get_red_flags(age_years: Optional[float], weight_kg: Optional[float],
                 flags.append("⚠️ RED FLAG: Low oxygen (SpO2 <94%) - needs assessment")
 
     return flags
+
+
+
+def needs_iv_fluids(age_years, weight_kg, symptoms=None,
+                     temperature=None, spo2=None,
+                     respiratory_rate=None) -> list[str]:
+    """Determine if the patient needs IV fluids and why.
+
+    Returns a list of reasons why IV fluids are needed.
+    Empty list = no IV fluids needed at this time.
+    """
+    reasons = []
+    age = age_years if age_years is not None else 25.0
+    weight = weight_kg if weight_kg is not None else 60.0
+
+    if symptoms:
+        s = symptoms.lower()
+        # Severe dehydration signs
+        if any(w in s for w in ("dehydration", "dehydrated", "dry mouth", "no urine",
+                                 "sunken eyes", "skin pinch", "not drinking")):
+            reasons.append("Severe dehydration - IV fluids required")
+
+        # Severe vomiting unable to take oral
+        if any(w in s for w in ("vomiting", "vomit")) and any(w in s for w in ("cannot drink", "not drinking", "refusing", "unable")):
+            reasons.append("Unable to take oral fluids - IV/NG tube needed")
+
+        # Severe malaria (needs IV artesunate)
+        if any(w in s for w in ("severe malaria", "cerebral malaria", "black urine", "very high fever")):
+            reasons.append("Suspected severe malaria - IV artesunate required")
+
+        # Sepsis signs
+        if any(w in s for w in ("sepsis", "septic", "very cold", "cold hands", "mottled skin")):
+            reasons.append("Suspected sepsis - IV antibiotics + fluids required")
+
+        # Shock
+        if any(w in s for w in ("shock", "very low blood pressure", "weak pulse", "collapsed")):
+            reasons.append("Suspected shock - aggressive IV fluid resuscitation required")
+
+    # Check SpO2 for severe hypoxia (may need IV medications)
+    if spo2:
+        import re
+        m = re.search(r"(\d{2,3})", spo2)
+        if m:
+            s_val = int(m.group(1))
+            if s_val < 90:
+                reasons.append("Severe hypoxia - may need IV medications")
+
+    # Infant with fever (<3 months) - may need IV antibiotics
+    if age < 0.25:  # <3 months
+        if temperature:
+            import re
+            m = re.search(r"(\d{2,3}(?:\.\d+)?)", temperature)
+            if m:
+                temp = float(m.group(1))
+                if temp >= 38.0:
+                    reasons.append("Fever in neonate (<3 months) - IV antibiotics likely needed")
+
+    return reasons
+
+
+def format_iv_recommendation(reasons, weight_kg=60.0, lang="pidgin"):
+    "Format IV fluid recommendation based on clinical reasons."
+    if not reasons:
+        return ""
+
+    weight = weight_kg if weight_kg else 60.0
+    lines = []
+
+    if lang == "pidgin":
+        lines.append("IV FLUID RECOMMENDATION:")
+        lines.append("  Di patient need drip (IV fluid) for these reasons:")
+    else:
+        lines.append("IV FLUID RECOMMENDATION:")
+        lines.append("  The patient needs IV fluids for these reasons:")
+
+    for i, reason in enumerate(reasons, 1):
+        lines.append("  " + str(i) + ". " + reason)
+
+    # Calculate fluid bolus
+    bolus_ml = round(weight * 20)  # 20 ml/kg initial bolus
+    if lang == "pidgin":
+        lines.append("  Start with: " + str(bolus_ml) + " ml Normal Saline or Ringer Lactate over 1-2 hours.")
+        lines.append("  Can repeat once if no improvement.")
+        lines.append("  Monitor urine output - e must dey come out.")
+        lines.append("  REFER TO HOSPITAL if: no improvement after 2 boluses, or patient dey worse.")
+    else:
+        lines.append("  Start with: " + str(bolus_ml) + " ml Normal Saline or Ringer Lactate over 1-2 hours.")
+        lines.append("  Can repeat once if no improvement.")
+        lines.append("  Monitor urine output - it must be produced.")
+        lines.append("  REFER TO HOSPITAL if: no improvement after 2 boluses, or patient deteriorates.")
+
+    return chr(10).join(lines)
