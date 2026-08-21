@@ -50,6 +50,7 @@ from pidgin.reformulator import PidginReformulator
 from dosage import calculate_dose, get_red_flags
 from followup import FollowUpTracker
 from inference import infer_context, build_patient_context_from_query, get_question_prompt
+from symptom_detector import classify_query
 
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("pidginpharma")
