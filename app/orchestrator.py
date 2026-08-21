@@ -85,7 +85,7 @@ HELP_TEXT = """Type your question in English, Pidgin, Hausa, or Yoruba:
   "treatment for acute diarrhoea"           (general health question)
   "metronidazole plus warfarin"             (drug question - direct answer)
 
-Commands: help, status, stats, clear-cache, follow-up, lang <pidgin|en|hausa|yoruba|igbo|edo>, exit
+Commands: help, status, stats, clear-cache, follow-up, lang, exit
 """
 
 # Calming messages are now loaded from translations module based on language.
@@ -137,10 +137,6 @@ RECOVERING_TIPS = [
 LANG_NAMES = {
     "pidgin": "Pidgin English",
     "en": "English",
-    "hausa": "Hausa",
-    "yoruba": "Yoruba",
-    "igbo": "Igbo",
-    "edo": "Edo (Bini)",
 }
 
 
@@ -285,7 +281,7 @@ class Orchestrator:
             ok = self.pinchtab.is_ready()
             lines.append("Browser layer: " + ("READY" if ok else "OFFLINE"))
         lang_name = LANG_NAMES.get(self.lang, self.lang)
-        lines.append(f"Language: {lang_name} (use --lang pidgin|en|hausa|yoruba|igbo|edo)")
+        lines.append(f"Language: {lang_name} (type 'lang' to switch between Pidgin and English)")
         lines.append("Intake: " + ("ON" if self.intake_enabled else "OFF"))
         # Cache stats
         cs = self.cache.stats()
@@ -516,7 +512,7 @@ def main(argv=None):
     parser.add_argument("--no-docreader", action="store_true", help="skip the DocReader")
     parser.add_argument("--pinchtab", action="store_true",
                         help="enable optional PinchTab browser layer (uses ~300-800MB extra RAM)")
-    parser.add_argument("--lang", choices=["en", "pidgin", "hausa", "yoruba", "igbo", "edo"], default="pidgin",
+    parser.add_argument("--lang", choices=["en", "pidgin"], default="pidgin",
                         help="answer language (default: pidgin)")
     parser.add_argument("--once", metavar="QUERY", help="answer one query and exit")
     parser.add_argument("--intake", action="store_true", default=True,
@@ -578,10 +574,10 @@ def main(argv=None):
             continue
         if low.startswith("lang ") or low.startswith("language "):
             new_lang = low.split(None, 1)[-1].strip()
-            if new_lang in ("pidgin", "en", "hausa", "yoruba", "igbo", "edo"):
+            if new_lang in ("pidgin", "en"):
                 orch.lang = new_lang
                 lang_name = LANG_NAMES.get(new_lang, new_lang)
-                print(f"  Language changed to: {lang_name}")
+                print(f"  Language changed to: {lang_name}. All responses will now use this language.")
             else:
                 print("  Available languages: pidgin, en, hausa, yoruba")
             continue
