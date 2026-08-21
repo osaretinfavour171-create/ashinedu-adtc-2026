@@ -68,17 +68,35 @@ _DOCREADER_BIN = os.path.join(_TOOLS, "docreader.exe")
 _LLAMA_BIN = os.path.join(_TOOLS, "llamacpp", "llama-server.exe")
 _MODELS_DIR = os.path.join(_PROJECT, "model")
 
-BANNER = r"""
-  ____  _ _            _  __  ____  _                          __
- |  _ \(_) |          (_)/ _|/ ___|| |__  _ __ __ _ _ __ _ __ / /
- | |_) | | |  _____   _| |_ \___ \| '_ \| '_ ` _ \ '_ \| '_ \| |
- |  __/| | | |_____| (_|  _| ___) | | | | | | | | | |_) | | | | |
- |_|   |_|_|         (_)_| |____/|_| |_|_| |_| |_| .__/|_| |_| | |
-                                                 |_|
-  Offline clinical decision support for Nigerian community health workers
-  Data: Nigeria EML 2020 + NSTG 2022 + local drug-interaction database
-"""
-
+BANNER = (
+    # ASCII art in raw string (no escape issues)
+    "\033[1;36m"  # Bold Cyan
+    r"  ____  _ _            _  __  ____  _                          __"
+    "\n"
+    r" |  \_ \(\_) |          (_)/ _|/ ___|| |__  _ __ __ _ _ __ _ __ / /"
+    "\n"
+    r" | |_) | | |  _____   _| |_\ \___ \| '_ \| '_ ` _ \_ \_ \| '_ \| |"
+    "\n"
+    r" |  __/| | | |_____| (_|  _| ___) | | | | | | | | | | |_) | | | | |"
+    "\n"
+    r" |_|   |_|_|         (_)_| |____/|_| |_|_| |_| |_| .__/|_| |_| | |"
+    "\n"
+    r"                                                 |_|"
+    "\n"
+    "\033[0m"  # Reset
+    "\n"
+    "\033[1;32m"  # Bold Green
+    r"  ███ PidginPharma ███"
+    "\n"
+    "\033[0m"  # Reset
+    "\n"
+    "\033[1;37m"  # Bold White
+    "  Offline clinical decision support for Nigerian community health workers"
+    "\n"
+    "  Data: Nigeria EML 2020 + NSTG 2022 + local drug-interaction database"
+    "\n"
+    "\033[0m"  # Reset
+)
 HELP_TEXT = """Type your question in English, Pidgin, Hausa, or Yoruba:
   "my pikin get hot body and dey vomit"     (symptom - will ask follow-up questions)
   "artemether lumefantrine and quinine"     (drug interaction - direct answer)
