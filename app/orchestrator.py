@@ -69,17 +69,19 @@ _LLAMA_BIN = os.path.join(_TOOLS, "llamacpp", "llama-server.exe")
 _MODELS_DIR = os.path.join(_PROJECT, "model")
 
 BANNER = (
-    "\033[1;36m"  # Bold Cyan
-    "  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-    "~\033[1;32m\033[1m     ASHINEDU     \033[0m\033[1;36m~\n"
-    "  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-    "\033[0m"  # Reset
+    "\033[1;32m"
+    "     _______________________________________________________________\n"
+    "    |                                                               |\n"
+    "    |                   \033[1;37mA  S  H  I  N  E  D  U\033[0m\033[1;32m                    |\n"
+    "    |                                                               |\n"
+    "    |_______________________________________________________________|\n"
+    "\033[0m"
     "\n"
-    "\033[1;37m"  # Bold White
-    "  Offline Clinical Decision Support for Nigerian Health Workers\n"
-    "  Data: Nigeria EML 2020 + NSTG 2022 + local drug-interaction database\n"
-    "  Type your question in English or Pidgin. Type 'help' for commands.\n"
-    "\033[0m"  # Reset
+    "\033[1;37m"
+    "        Offline Clinical Decision Support for Nigerian Health Workers\n"
+    "        Data: Nigeria EML 2020 + NSTG 2022 + local drug-interaction database\n"
+    "        Type your question in English or Pidgin. Type 'help' for commands.\n"
+    "\033[0m"
 )
 HELP_TEXT = """Type your question in English, Pidgin, Hausa, or Yoruba:
   "my pikin get hot body and dey vomit"     (symptom - will ask follow-up questions)
