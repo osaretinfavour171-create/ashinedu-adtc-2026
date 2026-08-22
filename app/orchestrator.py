@@ -53,6 +53,7 @@ from inference import infer_context, build_patient_context_from_query, get_quest
 from symptom_detector import classify_query
 from clinical_engine import assess_musculoskeletal, is_musculoskeletal_query
 from conservative_care import assess_conservative, is_conservative_condition
+from triage import start_triage, get_triage_summary
 from translations import (
     get_intake_prompt, get_loading_messages, get_response,
     get_red_flag, get_iv_guidance, get_summary,
@@ -571,6 +572,7 @@ SOURCE_LABELS = {
     "docreader": "\U0001f4da (from official guidelines)",
     "clinical_engine": "\U0001f3e5 (clinical reasoning engine)",
     "conservative_care": "\u2764\ufe0f (rest + fluids, no drugs needed)",
+    "triage_refer": "\u26a0\ufe0f (referred to hospital)",
     "llm": "\U0001f9e0 (from clinical brain)",
     "fallback": "\u26a0\ufe0f (basic info)",
 }
@@ -694,20 +696,82 @@ def main(argv=None):
                 print("Input too long. Keep your question short (under 1000 characters).")
                 continue
 
-            # Check if this needs the intake flow.
+            # Check if this needs the intake flow or triage.
             query_type = classify_query(orch.normalizer.normalize(raw))
             patient_ctx = None
 
+            # Try smart triage first (targeted questions, not 13 generic ones)
+            triage_session = None
             if query_type == "symptom" and orch.intake_enabled:
-                # Symptom query detected - run clinical intake.
+                triage_session = start_triage(raw)
+
+            if triage_session:
+                # SMART TRIAGE: ask only the questions that matter
+                if orch.lang == "pidgin":
+                    print(f"\n  \U0001f3e5 I get some follow-up questions to help me understand better.\n")
+                else:
+                    print(f"\n  \U0001f3e5 I have some follow-up questions to understand the situation better.\n")
+
+                # Ask triage questions (max 5 to avoid fatigue)
+                for _ in range(5):
+                    next_q = triage_session.get_next_question()
+                    if next_q is None:
+                        break
+                    try:
+                        answer_text = input(f"  {next_q.prompt_pidgin}\n  > ").strip()
+                    except (EOFError, KeyboardInterrupt):
+                        break
+                    if not answer_text or answer_text.lower() in ("skip", "exit"):
+                        answer_text = "skip"
+                    next_prompt = triage_session.record_answer(answer_text)
+                    if next_prompt is None or triage_session.complete:
+                        break
+                    # Show next question if available
+                    if next_prompt:
+                        continue
+
+                # Route based on triage decision
+                print(f"\n  {Orchestrator.loading_message(lang=orch.lang)}\n")
+                triage_path = triage_session.treatment_path
+                if triage_path == "conservative":
+                    cc = assess_conservative(symptoms=raw, lang=orch.lang)
+                    if cc:
+                        answer = cc.format_pidgin() if orch.lang == "pidgin" else cc.format_english()
+                        source = "conservative_care"
+                    else:
+                        # Fallback: use the orchestrator answer pipeline
+                        answer, source = orch.answer(raw)
+                elif triage_path == "drugs":
+                    # Build a patient context from triage answers for dosing
+                    patient_ctx = quick_intake(raw)
+                    answer, source = orch.answer(raw, patient_ctx=patient_ctx)
+                else:  # refer
+                    if orch.lang == "pidgin":
+                        answer = ("\u26a0\ufe0f REFERRAL NEEDED: Based on your answers, this patient needs to "
+                                  "go to the hospital. This may be more serious than what we can handle here.\n\n"
+                                  "While waiting: Keep the patient comfortable, monitor breathing, "
+                                  "and note any changes to tell the doctor.")
+                    else:
+                        answer = ("\u26a0\ufe0f REFERRAL NEEDED: Based on the answers, this patient needs to "
+                                  "be seen at a hospital. This may require more advanced care.\n\n"
+                                  "While waiting: Keep the patient comfortable, monitor breathing, "
+                                  "and note any changes to report to the doctor.")
+                    source = "triage_refer"
+                # Show triage summary and result
+                print("\n" + answer + "\n")
+                src_label = SOURCE_LABELS.get(source, "")
+                if src_label:
+                    print(f"  {src_label}\n")
+                continue  # Skip to next iteration
+
+            elif query_type == "symptom" and orch.intake_enabled:
+                # No triage match - use full clinical intake for complex cases
                 print(f"\n  \U0001f3e5 {get_response('symptom_detected', orch.lang)}\n")
                 patient_ctx = run_intake(lang=orch.lang)
-                # Use the symptoms from intake as the query context
                 if patient_ctx.symptoms:
                     raw = patient_ctx.symptoms
                 print(Orchestrator.loading_message(lang=orch.lang) + "\n")
             elif query_type == "symptom" and not orch.intake_enabled:
-                # Intake disabled but symptom detected - try to extract from query
                 patient_ctx = quick_intake(raw)
                 print("\n" + Orchestrator.loading_message(lang=orch.lang) + "\n")
             else:
