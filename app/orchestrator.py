@@ -51,6 +51,7 @@ from dosage import calculate_dose, get_red_flags, needs_iv_fluids, format_iv_rec
 from followup import FollowUpTracker
 from inference import infer_context, build_patient_context_from_query, get_question_prompt
 from symptom_detector import classify_query
+from clinical_engine import assess_musculoskeletal, is_musculoskeletal_query
 from translations import (
     get_intake_prompt, get_loading_messages, get_response,
     get_red_flag, get_iv_guidance, get_summary,
@@ -128,6 +129,14 @@ HEALTH_TIPS = [
      "or fatty drink. E help am absorb better."),
     ("TIP: For hypertension, first-line drugs na Amlodipine, Enalapril, or Hydrochlorothiazide. "
      "Start with low dose."),
+    ("DID YOU KNOW: For joint pain in elderly people, try topical diclofenac gel FIRST "
+     "before oral tablets. E dey target di joint directly with less side effects."),
+    ("TIP: Gout dey worse with alcohol (especially beer) and red meat. "
+     "Tell patient to avoid am during attacks and drink plenty water."),
+    ("REMEMBER: Fever + swollen hot joint = possible infection inside di joint. "
+     "REFER TO HOSPITAL IMMEDIATELY. No try am for clinic."),
+    ("TIP: For muscle and joint pain, rest na di first medicine. "
+     "Ice for fresh injury (first 48 hours), warm compress for old stiffness."),
 ]
 
 # Messages shown during service recovery (while it restarts).
@@ -364,6 +373,45 @@ class Orchestrator:
             except Exception:
                 log.warning("PinchTab search error: %s", exc)
 
+        # 1c. Clinical reasoning for musculoskeletal queries.
+        # Use the original (un-normalized) query for MSK detection
+        # because the normalizer can garble words like "knee dey pain".
+        ms_advice = None
+        if is_musculoskeletal_query(raw) or is_musculoskeletal_query(query) or (
+            patient_ctx and patient_ctx.symptoms and
+            is_musculoskeletal_query(patient_ctx.symptoms)
+        ):
+            ms_symptoms = raw  # Use raw query for better symptom matching
+            ms_age = ms_weight = ms_gender = ms_temp = ms_duration = ms_history = None
+            if patient_ctx:
+                ms_symptoms = patient_ctx.symptoms or raw
+                ms_age = patient_ctx.age_years
+                ms_weight = patient_ctx.weight_kg
+                ms_gender = patient_ctx.gender
+                ms_temp = patient_ctx.temperature
+                ms_duration = patient_ctx.duration
+                ms_history = patient_ctx.history
+            else:
+                # Extract age from raw query even without patient_ctx
+                from inference import _extract_existing_info
+                _info = _extract_existing_info(raw.lower())
+                ms_age = _info.get("age_years")
+                ms_gender = _info.get("gender")
+                # Don't use extracted temperature if it looks like an age (e.g. "68C")
+                _temp = _info.get("temperature")
+                if _temp and ms_age and str(int(ms_age)) in _temp:
+                    _temp = None  # Age was misread as temperature
+                ms_temp = _temp
+                ms_symptoms = raw  # Always use full raw query for symptom matching
+            try:
+                ms_advice = assess_musculoskeletal(
+                    symptoms=ms_symptoms, age_years=ms_age, weight_kg=ms_weight,
+                    gender=ms_gender, temperature=ms_temp, duration=ms_duration,
+                    history=ms_history, lang=self.lang,
+                )
+            except Exception as exc:
+                log.warning("Clinical engine error: %s", exc)
+
         # 2. Build patient context block for the LLM.
         patient_block = ""
         if patient_ctx:
@@ -374,6 +422,13 @@ class Orchestrator:
         if interaction_text:
             english = self._compose_drug_answer(interaction_text, query, context)
             source = "docreader"
+        elif ms_advice and ms_advice.condition != "general_health":
+            # Use clinical engine for musculoskeletal queries
+            if self.lang == "pidgin":
+                english = ms_advice.format_pidgin()
+            else:
+                english = ms_advice.format_english()
+            source = "clinical_engine"
         elif self.llm and self.llm.is_ready():
             try:
                 english = self.llm.ask(query, context, patient_block=patient_block)
@@ -433,6 +488,8 @@ class Orchestrator:
             "normal saline", "ringer lactate", "drip",
             "iv paracetamol", "iv amoxicillin", "iv metronidazole",
             "iv artesunate", "iv diazepam",
+            "diclofenac gel", "capsaicin cream", "menthol rub",
+            "colchicine", "allopurinol", "voltaren",
         ]
         query_lower = query.lower()
         for drug in drug_names:
@@ -473,6 +530,7 @@ class Orchestrator:
 SOURCE_LABELS = {
     "cache": "\u26a1 (instant - from memory)",
     "docreader": "\U0001f4da (from official guidelines)",
+    "clinical_engine": "\U0001f3e5 (clinical reasoning engine)",
     "llm": "\U0001f9e0 (from clinical brain)",
     "fallback": "\u26a0\ufe0f (basic info)",
 }

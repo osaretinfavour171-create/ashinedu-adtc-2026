@@ -22,6 +22,10 @@ SYMPTOM_KEYWORDS = {
     "fever", "headache", "vomiting", "vomit", "diarrhoea", "diarrhea",
     "cough", "cold", "rash", "pain", "stomach ache", "stomach pain",
     "chest pain", "back pain", "joint pain", "muscle pain",
+    "knee pain", "hip pain", "shoulder pain", "ankle pain",
+    "neck pain", "elbow pain", "wrist pain",
+    "arthritis", "osteoarthritis", "rheumatoid arthritis", "gout",
+    "stiffness", "crepitus", "swollen joint", "joint swelling",
     "dizziness", "dizzy", "fainting", "weakness", "fatigue",
     "swelling", "bleeding", "bruising", "itching",
     "difficulty breathing", "shortness of breath", "wheezing",
@@ -36,13 +40,19 @@ SYMPTOM_KEYWORDS = {
     # Pidgin
     "hot body", "head dey pain", "dey vomit", "run stomach",
     "dey cough", "dey sneeze", "body dey pain", "belly dey pain",
-    "chest dey pain", "back dey pain", "leg dey pain", "arm dey pain",
+    "chest dey pain", "back dey pain",    "leg dey pain", "arm dey pain",
+    "joint dey pain", "knee dey pain", "hip dey pain",
+    "shoulder dey pain", "ankle dey pain", "neck dey pain",
+    "body dey stiff", "e dey stiff", "e no dey move well",
     "dey feel dizzy", "dey faint", "body dey weak", "no get strength",
     "skin dey itch", "body dey swell", "dey bleed",
     "no fit breathe well", "breathing dey hard",
     "no want chop", "body dey hot",
     "dey shake", "dey confuse", "eye dey pain", "throat dey pain",
     "wound dey pain", "cut dey pain",
+    "bone dey pain", "back dey pain", "neck dey pain",
+    "old woman leg dey pain", "old man leg dey pain",
+    "my mama knee dey pain", "my papa hip dey pain",
 }
 
 # Drug/interaction keywords (direct answer, no intake needed)

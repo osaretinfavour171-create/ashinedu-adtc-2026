@@ -141,6 +141,14 @@ SCENARIOS = {
         can_answer_blind=False,
         min_confidence=0.4,
     ),
+    "musculoskeletal": ClinicalScenario(
+        name="musculoskeletal",
+        required_fields=[],
+        important_fields=["age", "symptoms", "duration"],
+        optional_fields=["temperature", "weight", "gender", "history"],
+        can_answer_blind=True,
+        min_confidence=0.5,
+    ),
     "general_health": ClinicalScenario(
         name="general_health",
         required_fields=[],
@@ -179,6 +187,13 @@ _SCENARIO_PATTERNS = {
     "respiratory": [
         r"\b(?:breath|cough|wheeze|pneumonia|asthma|chest)\b",
         r"\b(?:no fit breathe|breathing hard|short of breath)\b",
+    ],
+    "musculoskeletal": [
+        r"\b(?:joint|arthritis|knee|hip|shoulder|elbow|wrist|ankle)\b",
+        r"\b(?:back pain|neck pain|lumbar|cervical|spine)\b",
+        r"\b(?:muscle|sprain|strain|stiff|crepitus)\b",
+        r"\b(?:gout|rheumatoid|osteoarthritis|frozen shoulder)\b",
+        r"\b(?:rub|massage|compress|cream for pain|body pain|body ache)\b",
     ],
     "pain": [
         r"\b(?:pain|ache|hurt|sore)\b",
@@ -303,9 +318,9 @@ def _extract_existing_info(query: str) -> dict:
 
     # Age detection
     age_patterns = [
-        (r"(\d+)\s*(?:year|yr|y)\b", lambda m: (f"{m.group(1)} years", float(m.group(1)))),
-        (r"(\d+)\s*(?:month|mo)\b", lambda m: (f"{m.group(1)} months", float(m.group(1)) / 12)),
-        (r"(\d+)\s*(?:day|d)\b", lambda m: (f"{m.group(1)} days", float(m.group(1)) / 365)),
+        (r"(\d+)\s*(?:years?|yrs?|y)\b", lambda m: (f"{m.group(1)} years", float(m.group(1)))),
+        (r"(\d+)\s*(?:months?|mos?)\b", lambda m: (f"{m.group(1)} months", float(m.group(1)) / 12)),
+        (r"(\d+)\s*(?:days?|d)\b", lambda m: (f"{m.group(1)} days", float(m.group(1)) / 365)),
         (r"\b(adult|grown|man|woman)\b", lambda m: ("adult", 30.0)),
         (r"\b(baby|babe|newborn|new born)\b", lambda m: ("newborn", 0.0)),
     ]
