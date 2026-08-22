@@ -54,6 +54,11 @@ from symptom_detector import classify_query
 from clinical_engine import assess_musculoskeletal, is_musculoskeletal_query
 from conservative_care import assess_conservative, is_conservative_condition
 from triage import start_triage, get_triage_summary
+from ui import (
+    render_banner, render_help, render_status, render_loading,
+    render_referral, render_triage_question, render_separator,
+    render_answer, C, Icon, Box,
+)
 from translations import (
     get_intake_prompt, get_loading_messages, get_response,
     get_red_flag, get_iv_guidance, get_summary,
@@ -71,29 +76,8 @@ _DOCREADER_BIN = os.path.join(_TOOLS, "docreader.exe")
 _LLAMA_BIN = os.path.join(_TOOLS, "llamacpp", "llama-server.exe")
 _MODELS_DIR = os.path.join(_PROJECT, "model")
 
-BANNER = (
-    "\033[1;32m"
-    "     _______________________________________________________________\n"
-    "    |                                                               |\n"
-    "    |                   \033[1;37mA  S  H  I  N  E  D  U\033[0m\033[1;32m                    |\n"
-    "    |                                                               |\n"
-    "    |_______________________________________________________________|\n"
-    "\033[0m"
-    "\n"
-    "\033[1;37m"
-    "        Offline Clinical Decision Support for Nigerian Health Workers\n"
-    "        Data: Nigeria EML 2020 + NSTG 2022 + local drug-interaction database\n"
-    "        Type your question in English or Pidgin. Type 'help' for commands.\n"
-    "\033[0m"
-)
-HELP_TEXT = """Type your question in English, Pidgin, Hausa, or Yoruba:
-  "my pikin get hot body and dey vomit"     (symptom - will ask follow-up questions)
-  "artemether lumefantrine and quinine"     (drug interaction - direct answer)
-  "treatment for acute diarrhoea"           (general health question)
-  "metronidazole plus warfarin"             (drug question - direct answer)
-
-Commands: help, status, stats, clear-cache, follow-up, lang, exit
-"""
+BANNER = render_banner()
+HELP_TEXT = render_help()
 
 # Calming messages are now loaded from translations module based on language.
 # FALLBACK_MESSAGES used if translations module is unavailable.
@@ -288,26 +272,19 @@ class Orchestrator:
             msgs = get_loading_messages(lang)
         except Exception:
             msgs = FALLBACK_MESSAGES
-        return random.choice(msgs)
+        return render_loading(random.choice(msgs))
 
     def status(self) -> str:
-        lines = []
+        services = {}
         if self.docreader:
-            ok = self.docreader.is_ready()
-            lines.append("Data server:   " + ("READY" if ok else "OFFLINE"))
+            services["Data server"] = self.docreader.is_ready()
         if self.llm:
-            ok = self.llm.is_ready()
-            lines.append("Model server:  " + ("READY" if ok else "OFFLINE"))
+            services["Model server"] = self.llm.is_ready()
         if self.pinchtab:
-            ok = self.pinchtab.is_ready()
-            lines.append("Browser layer: " + ("READY" if ok else "OFFLINE"))
-        lang_name = LANG_NAMES.get(self.lang, self.lang)
-        lines.append(f"Language: {lang_name} (type 'lang' to switch between Pidgin and English)")
-        lines.append("Intake: " + ("ON" if self.intake_enabled else "OFF"))
-        # Cache stats
+            services["Browser layer"] = self.pinchtab.is_ready()
         cs = self.cache.stats()
-        lines.append(f"Cache: {cs['size']}/{cs['max_size']} entries ({cs['hit_rate']} hit rate)")
-        return "\n".join(lines)
+        cache_info = f"{cs['size']}/{cs['max_size']} entries ({cs['hit_rate']})"
+        return render_status(services, self.lang, self.intake_enabled, cache_info)
 
     # ------------------------------------------------------------------
     def _ensure_services(self) -> None:
@@ -568,13 +545,13 @@ class Orchestrator:
 
 # Source labels for the user (in Pidgin)
 SOURCE_LABELS = {
-    "cache": "\u26a1 (instant - from memory)",
-    "docreader": "\U0001f4da (from official guidelines)",
-    "clinical_engine": "\U0001f3e5 (clinical reasoning engine)",
-    "conservative_care": "\u2764\ufe0f (rest + fluids, no drugs needed)",
-    "triage_refer": "\u26a0\ufe0f (referred to hospital)",
-    "llm": "\U0001f9e0 (from clinical brain)",
-    "fallback": "\u26a0\ufe0f (basic info)",
+    "cache": f"{Icon.LIGHTNING} instant - from memory",
+    "docreader": f"{Icon.BOOK} from official guidelines",
+    "clinical_engine": f"{Icon.MEDICAL} clinical reasoning engine",
+    "conservative_care": f"{Icon.HEART} rest + fluids, no drugs needed",
+    "triage_refer": f"{Icon.REFER} referred to hospital",
+    "llm": f"{Icon.BRAIN} from clinical brain",
+    "fallback": f"{Icon.REFER} basic info",
 }
 
 
@@ -707,18 +684,20 @@ def main(argv=None):
 
             if triage_session:
                 # SMART TRIAGE: ask only the questions that matter
+                total_q = len(triage_session.pathway.questions)
                 if orch.lang == "pidgin":
-                    print(f"\n  \U0001f3e5 I get some follow-up questions to help me understand better.\n")
+                    print(f"\n  {Icon.MEDICAL} I get {total_q} quick questions to help me understand better.\n")
                 else:
-                    print(f"\n  \U0001f3e5 I have some follow-up questions to understand the situation better.\n")
+                    print(f"\n  {Icon.MEDICAL} I have {total_q} quick questions to understand the situation better.\n")
 
                 # Ask triage questions (max 5 to avoid fatigue)
-                for _ in range(5):
+                for qi in range(5):
                     next_q = triage_session.get_next_question()
                     if next_q is None:
                         break
                     try:
-                        answer_text = input(f"  {next_q.prompt_pidgin}\n  > ").strip()
+                        prompt = render_triage_question(next_q.prompt_pidgin, qi + 1, total_q)
+                        answer_text = input(prompt).strip()
                     except (EOFError, KeyboardInterrupt):
                         break
                     if not answer_text or answer_text.lower() in ("skip", "exit"):
@@ -726,9 +705,6 @@ def main(argv=None):
                     next_prompt = triage_session.record_answer(answer_text)
                     if next_prompt is None or triage_session.complete:
                         break
-                    # Show next question if available
-                    if next_prompt:
-                        continue
 
                 # Route based on triage decision
                 print(f"\n  {Orchestrator.loading_message(lang=orch.lang)}\n")
@@ -747,15 +723,16 @@ def main(argv=None):
                     answer, source = orch.answer(raw, patient_ctx=patient_ctx)
                 else:  # refer
                     if orch.lang == "pidgin":
-                        answer = ("\u26a0\ufe0f REFERRAL NEEDED: Based on your answers, this patient needs to "
-                                  "go to the hospital. This may be more serious than what we can handle here.\n\n"
+                        reason = ("Based on your answers, this patient needs to go to the hospital. "
+                                  "This may be more serious than what we can handle here.\n"
                                   "While waiting: Keep the patient comfortable, monitor breathing, "
                                   "and note any changes to tell the doctor.")
                     else:
-                        answer = ("\u26a0\ufe0f REFERRAL NEEDED: Based on the answers, this patient needs to "
-                                  "be seen at a hospital. This may require more advanced care.\n\n"
+                        reason = ("Based on the answers, this patient needs to be seen at a hospital. "
+                                  "This may require more advanced care.\n"
                                   "While waiting: Keep the patient comfortable, monitor breathing, "
                                   "and note any changes to report to the doctor.")
+                    answer = render_referral(reason)
                     source = "triage_refer"
                 # Show triage summary and result
                 print("\n" + answer + "\n")
