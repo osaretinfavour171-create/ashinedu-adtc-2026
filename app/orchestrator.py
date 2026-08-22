@@ -52,6 +52,7 @@ from followup import FollowUpTracker
 from inference import infer_context, build_patient_context_from_query, get_question_prompt
 from symptom_detector import classify_query
 from clinical_engine import assess_musculoskeletal, is_musculoskeletal_query
+from conservative_care import assess_conservative, is_conservative_condition
 from translations import (
     get_intake_prompt, get_loading_messages, get_response,
     get_red_flag, get_iv_guidance, get_summary,
@@ -137,6 +138,12 @@ HEALTH_TIPS = [
      "REFER TO HOSPITAL IMMEDIATELY. No try am for clinic."),
     ("TIP: For muscle and joint pain, rest na di first medicine. "
      "Ice for fresh injury (first 48 hours), warm compress for old stiffness."),
+    ("DID YOU KNOW: Most colds and catarrh dey go away in 3-5 days without medicine. "
+     "Rest, warm water, and good sleep na di best treatment."),
+    ("TIP: Not every headache need medicine. "
+     "Drink water, rest in quiet dark room, and e go pass. But if e dey very bad, see doctor."),
+    ("REMEMBER: Dehydration na common cause of tiredness and headache. "
+     "Drink water first before thinking of medicine."),
 ]
 
 # Messages shown during service recovery (while it restarts).
@@ -429,17 +436,49 @@ class Orchestrator:
             else:
                 english = ms_advice.format_english()
             source = "clinical_engine"
-        elif self.llm and self.llm.is_ready():
-            try:
-                english = self.llm.ask(query, context, patient_block=patient_block)
-                source = "llm"
-            except Exception as exc:
-                log.warning("LLM error: %s", exc)
+        else:
+            # Check if this is a simple condition that doesn't need drugs
+            # Use raw query (not normalized) for better pattern matching
+            _cc_age = None
+            _cc_temp = None
+            if patient_ctx:
+                _cc_age = patient_ctx.age_years
+                _cc_temp = patient_ctx.temperature
+            else:
+                from inference import _extract_existing_info as _eei
+                _info = _eei(raw.lower())
+                _cc_age = _info.get("age_years")
+                _cc_temp = _info.get("temperature")
+                if _cc_temp and _cc_age and str(int(_cc_age)) in _cc_temp:
+                    _cc_temp = None
+
+            cc_advice = None
+            if is_conservative_condition(raw):
+                try:
+                    cc_advice = assess_conservative(
+                        symptoms=raw, age_years=_cc_age,
+                        temperature=_cc_temp, lang=self.lang,
+                    )
+                except Exception as exc:
+                    log.warning("Conservative care error: %s", exc)
+
+            if cc_advice:
+                if self.lang == "pidgin":
+                    english = cc_advice.format_pidgin()
+                else:
+                    english = cc_advice.format_english()
+                source = "conservative_care"
+            elif self.llm and self.llm.is_ready():
+                try:
+                    english = self.llm.ask(query, context, patient_block=patient_block)
+                    source = "llm"
+                except Exception as exc:
+                    log.warning("LLM error: %s", exc)
+                    english = self._fallback_answer(context)
+                    source = "fallback"
+            else:
                 english = self._fallback_answer(context)
                 source = "fallback"
-        else:
-            english = self._fallback_answer(context)
-            source = "fallback"
 
         # 4. Add dosage calculations if we have patient context.
         if patient_ctx and patient_ctx.age_years is not None and patient_ctx.weight_kg:
@@ -531,6 +570,7 @@ SOURCE_LABELS = {
     "cache": "\u26a1 (instant - from memory)",
     "docreader": "\U0001f4da (from official guidelines)",
     "clinical_engine": "\U0001f3e5 (clinical reasoning engine)",
+    "conservative_care": "\u2764\ufe0f (rest + fluids, no drugs needed)",
     "llm": "\U0001f9e0 (from clinical brain)",
     "fallback": "\u26a0\ufe0f (basic info)",
 }

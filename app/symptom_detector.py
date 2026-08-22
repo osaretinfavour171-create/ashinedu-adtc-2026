@@ -36,6 +36,10 @@ SYMPTOM_KEYWORDS = {
     "convulsions", "seizure", "confusion",
     "wound", "infection", "abscess", "ulcer",
     "anaemia", "anemia", "jaundice",
+    "tired", "fatigue", "weakness", "exhaustion",
+    "stress", "anxiety", "insomnia",
+    "thirsty", "dehydrated",
+    "dizzy", "faint",
     "swollen", "swelling",
     # Pidgin
     "hot body", "head dey pain", "dey vomit", "run stomach",
@@ -53,6 +57,10 @@ SYMPTOM_KEYWORDS = {
     "bone dey pain", "back dey pain", "neck dey pain",
     "old woman leg dey pain", "old man leg dey pain",
     "my mama knee dey pain", "my papa hip dey pain",
+    "body dey tired", "body dey weak", "dey tire", "no get strength",
+    "dey thirsty", "mouth dey dry", "no drink water",
+    "dey stress", "too much work", "no fit sleep",
+    "body dey hot", "sun dey beat me", "dey dizzy for sun",
 }
 
 # Drug/interaction keywords (direct answer, no intake needed)
