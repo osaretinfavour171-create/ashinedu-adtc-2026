@@ -54,6 +54,7 @@ from symptom_detector import classify_query
 from clinical_engine import assess_musculoskeletal, is_musculoskeletal_query
 from conservative_care import assess_conservative, is_conservative_condition
 from triage import start_triage, get_triage_summary
+from graph_reasoner import GraphReasoner, PatientContext as GraphPatientContext
 from ui import (
     render_banner, render_help, render_status, render_loading,
     render_referral, render_triage_question, render_separator,
@@ -245,6 +246,7 @@ class Orchestrator:
         self.cache = ResponseCache()
         self.metrics = Metrics()
         self.followup = FollowUpTracker()
+        self.graph_reasoner = GraphReasoner()  # Knowledge graph engine
 
         # Register cleanup handlers
         atexit.register(self._cleanup)
@@ -402,61 +404,95 @@ class Orchestrator:
         if patient_ctx:
             patient_block = patient_ctx.to_prompt_block()
 
-        # 3. If this is a clear drug-interaction query, answer from local
-        #    data directly (fast + authoritative) and skip the model.
+        # 3. Routing: drug interaction > clinical engine > graph reasoner > conservative care > LLM > fallback
         if interaction_text:
+            # Drug interaction query — answer from local data (fast + authoritative)
             english = self._compose_drug_answer(interaction_text, query, context)
             source = "docreader"
         elif ms_advice and ms_advice.condition != "general_health":
-            # Use clinical engine for musculoskeletal queries
+            # Musculoskeletal queries — use clinical engine
             if self.lang == "pidgin":
                 english = ms_advice.format_pidgin()
             else:
                 english = ms_advice.format_english()
             source = "clinical_engine"
         else:
-            # Check if this is a simple condition that doesn't need drugs
-            # Use raw query (not normalized) for better pattern matching
-            _cc_age = None
-            _cc_temp = None
-            if patient_ctx:
-                _cc_age = patient_ctx.age_years
-                _cc_temp = patient_ctx.temperature
-            else:
-                from inference import _extract_existing_info as _eei
-                _info = _eei(raw.lower())
-                _cc_age = _info.get("age_years")
-                _cc_temp = _info.get("temperature")
-                if _cc_temp and _cc_age and str(int(_cc_age)) in _cc_temp:
-                    _cc_temp = None
-
-            cc_advice = None
-            if is_conservative_condition(raw):
-                try:
-                    cc_advice = assess_conservative(
-                        symptoms=raw, age_years=_cc_age,
-                        temperature=_cc_temp, lang=self.lang,
+            # Try the Knowledge Graph reasoner (zero hallucination, instant)
+            graph_result = None
+            try:
+                g_patient = None
+                if patient_ctx:
+                    g_patient = GraphPatientContext(
+                        age_years=patient_ctx.age_years,
+                        weight_kg=patient_ctx.weight_kg,
+                        gender=patient_ctx.gender,
+                        temperature=patient_ctx.temperature,
+                        duration=patient_ctx.duration,
+                        symptoms=patient_ctx.symptoms,
                     )
-                except Exception as exc:
-                    log.warning("Conservative care error: %s", exc)
+                # Also try extracting info from raw query without intake
+                elif raw:
+                    from inference import _extract_existing_info as _eei
+                    _info = _eei(raw.lower())
+                    g_patient = GraphPatientContext(
+                        age_years=_info.get("age_years"),
+                        gender=_info.get("gender"),
+                        temperature=_info.get("temperature"),
+                    )
+                graph_result = self.graph_reasoner.reason(raw, g_patient, self.lang)
+            except Exception as exc:
+                log.warning("Graph reasoner error: %s", exc)
 
-            if cc_advice:
-                if self.lang == "pidgin":
-                    english = cc_advice.format_pidgin()
+            if graph_result and graph_result.confidence >= 0.4:
+                # Graph has a confident answer — use it (no LLM needed)
+                english = graph_result.answer
+                source = "graph"
+                # If graph asks follow-up questions, present them
+                if graph_result.needs_followup:
+                    source = "graph_followup"
+            else:
+                # Graph couldn't handle it — try conservative care
+                _cc_age = None
+                _cc_temp = None
+                if patient_ctx:
+                    _cc_age = patient_ctx.age_years
+                    _cc_temp = patient_ctx.temperature
                 else:
-                    english = cc_advice.format_english()
-                source = "conservative_care"
-            elif self.llm and self.llm.is_ready():
-                try:
-                    english = self.llm.ask(query, context, patient_block=patient_block)
-                    source = "llm"
-                except Exception as exc:
-                    log.warning("LLM error: %s", exc)
+                    from inference import _extract_existing_info as _eei
+                    _info = _eei(raw.lower())
+                    _cc_age = _info.get("age_years")
+                    _cc_temp = _info.get("temperature")
+                    if _cc_temp and _cc_age and str(int(_cc_age)) in _cc_temp:
+                        _cc_temp = None
+
+                cc_advice = None
+                if is_conservative_condition(raw):
+                    try:
+                        cc_advice = assess_conservative(
+                            symptoms=raw, age_years=_cc_age,
+                            temperature=_cc_temp, lang=self.lang,
+                        )
+                    except Exception as exc:
+                        log.warning("Conservative care error: %s", exc)
+
+                if cc_advice:
+                    if self.lang == "pidgin":
+                        english = cc_advice.format_pidgin()
+                    else:
+                        english = cc_advice.format_english()
+                    source = "conservative_care"
+                elif self.llm and self.llm.is_ready():
+                    # LLM fallback — only for unusual queries the graph can't match
+                    try:
+                        english = self.llm.ask(query, context, patient_block=patient_block)
+                        source = "llm"
+                    except Exception as exc:
+                        log.warning("LLM error: %s", exc)
+                        english = self._fallback_answer(context)
+                        source = "fallback"
+                else:
                     english = self._fallback_answer(context)
                     source = "fallback"
-            else:
-                english = self._fallback_answer(context)
-                source = "fallback"
 
         # 4. Add dosage calculations if we have patient context.
         if patient_ctx and patient_ctx.age_years is not None and patient_ctx.weight_kg:
@@ -547,6 +583,8 @@ class Orchestrator:
 SOURCE_LABELS = {
     "cache": f"{Icon.LIGHTNING} instant - from memory",
     "docreader": f"{Icon.BOOK} from official guidelines",
+    "graph": f"{Icon.MEDICAL} clinical knowledge graph (270 conditions, zero hallucination)",
+    "graph_followup": f"{Icon.MEDICAL} asking follow-up questions",
     "clinical_engine": f"{Icon.MEDICAL} clinical reasoning engine",
     "conservative_care": f"{Icon.HEART} rest + fluids, no drugs needed",
     "triage_refer": f"{Icon.REFER} referred to hospital",

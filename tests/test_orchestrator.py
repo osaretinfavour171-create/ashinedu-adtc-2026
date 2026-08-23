@@ -36,7 +36,7 @@ class TestOrchestrator(unittest.TestCase):
         answer, source = self.orch.answer("my pikin get hot body and dey vomit")
         self.assertIsInstance(answer, str)
         self.assertGreater(len(answer), 20)
-        self.assertIn(source, ("cache", "docreader", "llm", "fallback"))
+        self.assertIn(source, ("cache", "docreader", "llm", "fallback", "graph", "graph_followup", "conservative_care", "clinical_engine"))
 
     @unittest.skipUnless(_dr_available(), "DocReader server not running")
     def test_drug_interaction_answer(self):
@@ -55,7 +55,7 @@ class TestOrchestrator(unittest.TestCase):
     def test_source_is_valid(self):
         """Source should always be one of the known values."""
         _, source = self.orch.answer("diarrhoea treatment")
-        self.assertIn(source, ("cache", "docreader", "llm", "fallback"))
+        self.assertIn(source, ("cache", "docreader", "llm", "fallback", "graph", "graph_followup", "conservative_care", "clinical_engine"))
 
 
 if __name__ == "__main__":
