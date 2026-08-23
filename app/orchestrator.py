@@ -55,6 +55,7 @@ from clinical_engine import assess_musculoskeletal, is_musculoskeletal_query
 from conservative_care import assess_conservative, is_conservative_condition
 from triage import start_triage, get_triage_summary
 from graph_reasoner import GraphReasoner, PatientContext as GraphPatientContext
+from conversation import ConversationalFlow
 from ui import (
     render_banner, render_help, render_status, render_loading,
     render_referral, render_triage_question, render_separator,
@@ -247,6 +248,8 @@ class Orchestrator:
         self.metrics = Metrics()
         self.followup = FollowUpTracker()
         self.graph_reasoner = GraphReasoner()  # Knowledge graph engine
+        self.conversation_flow = ConversationalFlow()  # Adaptive tone engine
+        self.conversation_flow.start()
 
         # Register cleanup handlers
         atexit.register(self._cleanup)
@@ -510,7 +513,17 @@ class Orchestrator:
             if dose_info:
                 english = english + "\n\nRECOMMENDED DOSING (based on patient weight " + str(patient_ctx.weight_kg) + "kg):\n" + "\n".join(dose_info)
 
-        # 5. Reformulate based on language.
+        # 5. Process conversational flow (adapted from Fish Audio's multi-turn context)
+        #    Detects patient emotion, determines response tone, wraps answer
+        self.conversation_flow.process_patient_input(raw, {
+            "age_years": patient_ctx.age_years if patient_ctx else None,
+            "weight_kg": patient_ctx.weight_kg if patient_ctx else None,
+            "gender": patient_ctx.gender if patient_ctx else None,
+            "source": source,
+        })
+        tone_tags = self.conversation_flow.determine_tone()
+
+        # 6. Reformulate based on language.
         #    Pidgin: full reformulation to Pidgin-flavoured text.
         #    English/Hausa/Yoruba: return English (clinical accuracy).
         if self.lang == "pidgin":
@@ -518,7 +531,11 @@ class Orchestrator:
         else:
             answer = english
 
-        # 6. Store in cache for instant future lookups.
+        # 7. Apply conversational tone (like Fish Audio's [whisper], [excited] tags)
+        #    Wraps the clinical answer with appropriate emotional context
+        answer = self.conversation_flow.format_response(answer, tone_tags)
+
+        # 8. Store in cache for instant future lookups.
         self.cache.put(cache_key, self.lang, answer)
 
         # 7. Record metrics.
