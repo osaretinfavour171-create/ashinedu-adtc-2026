@@ -118,7 +118,6 @@ SYMPTOM_KEYWORDS = {
 # Emergency red flags — if these are present, REFER IMMEDIATELY
 RED_FLAG_SYMPTOMS = {
     "convulsions": "Convulsions/seizures — REFER IMMEDIATELY",
-    "difficulty_breathing": "Difficulty breathing — REFER IMMEDIATELY",
     "unconsciousness": "Patient unconscious — REFER IMMEDIATELY",
     "severe_bleeding": "Severe bleeding — REFER IMMEDIATELY",
     "chest_pain_severe": "Severe chest pain — REFER IMMEDIATELY",

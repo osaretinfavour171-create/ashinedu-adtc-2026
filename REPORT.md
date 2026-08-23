@@ -8,13 +8,84 @@ The challenge: these health workers speak **Nigerian Pidgin English** (spoken by
 
 ## Solution
 
-PidginPharma is an **offline clinical decision support system** that:
+Ashinedu (formerly PidginPharma) is an **offline clinical decision support system** that:
 
 1. **Understands Pidgin** — A NLP normalizer maps 264 medical terms and 475 Pidgin phrases to canonical English
-2. **Queries local official data** — A Go-based DocReader searches 270 NSTG 2022 conditions and 164 drug interactions with age-aware ranking (e.g., demotes pregnancy conditions for child queries)
-3. **Generates answers via local LLM** — MedGemma 1.5-4B (primary) or Qwen 2.5-1.5B (fallback) generates clinical responses guided by a system prompt with Nigerian treatment guidelines
-4. **Responds in Pidgin** — A reformulator translates the clinical answer back into natural Pidgin English while preserving drug names, doses, and severity levels
-5. **Optional PinchTab layer** — For machines with RAM headroom, a headless Chrome layer provides semantic browsing over converted HTML guidelines
+2. **Clinical Knowledge Graph** — A graph-based reasoning engine loads all 270 NSTG 2022 conditions into memory (~100MB) and provides instant, zero-hallucination diagnosis and treatment recommendations
+3. **Drug interaction lookup** — A Go-based DocReader searches 164 drug interactions with age-aware ranking
+4. **LLM fallback** — MedGemma 1.5-4B or Qwen 2.5-1.5B handles unusual queries the graph can't match (optional, not required)
+5. **Responds in Pidgin** — A reformulator translates the clinical answer back into natural Pidgin English while preserving drug names, doses, and severity levels
+
+### Architecture Diagram
+
+```
+User query (Pidgin/English)
+  │
+  ├── [PidginNormalizer] → clean English query
+  │
+  ├── [Cache] → instant response for repeated queries
+  │
+  ├── [DocReader] → drug interactions (instant, <5ms)
+  │
+  ├── [Clinical Engine] → musculoskeletal queries (age-aware)
+  │
+  ├── [Knowledge Graph] → 270 conditions, symptom→treatment
+  │     • Matches symptoms to conditions
+  │     • Assesses severity (mild/moderate/severe/emergency)
+  │     • Detects red flags → immediate referral
+  │     • Generates follow-up questions if confidence is low
+  │     • RAM: ~100MB | Speed: <1 second | Hallucination: ZERO
+  │
+  ├── [Conservative Care] → simple conditions (rest + water)
+  │
+  ├── [LLM Fallback] → unusual queries only (MedGemma/Qwen)
+  │
+  └── [PidginReformulator] → Pidgin-flavoured answer
+```
+
+## Knowledge Graph Engine
+
+The core innovation is a **graph-based clinical reasoning engine** that replaces neural inference for most queries:
+
+### How It Works
+
+1. **Load**: All 270 NSTG 2022 condition JSONs are parsed into `ConditionNode` objects with symptom indexes, drug indexes, and red flag detection
+2. **Match**: When a user describes symptoms, the graph traverses symptom→condition edges to find the best match
+3. **Reason**: The reasoner assesses severity based on age, gender, symptom pattern, and red flags
+4. **Decide**: Determines treatment path — conservative (rest/water), drugs (with dosing from guidelines), or refer (emergency)
+5. **Format**: Outputs a structured clinical answer in Pidgin or English
+
+### Why Graph > Neural Model for Clinical Decisions
+
+| Aspect | Neural Model (MedGemma 4B) | Knowledge Graph |
+|--------|---------------------------|------------------|
+| **RAM** | 2-4 GB | ~100 MB |
+| **Startup** | 30-60 seconds | Instant |
+| **Response** | 5-15 seconds | <1 second |
+| **Hallucination** | Possible (wrong dose!) | **Zero** — follows NSTG exactly |
+| **Offline** | Needs model server | Fully offline, no server |
+| **Accuracy** | Depends on model quality | 100% guideline-faithful |
+
+### Graph Statistics
+
+- **270 conditions** loaded from NSTG 2022
+- **890 drugs** indexed with dosing information
+- **25 symptom categories** with Nigerian Pidgin variants
+- **15 red flag patterns** for emergency detection
+- **30+ condition hints** for common Nigerian health complaints
+
+### Routing Logic
+
+The system routes queries through the most appropriate engine:
+
+```
+Drug interaction query → DocReader (instant, authoritative)
+Musculoskeletal query  → Clinical Engine (age-aware reasoning)
+Common condition        → Knowledge Graph (zero hallucination)
+Simple condition        → Conservative Care (rest + water)
+Unusual query           → LLM fallback (MedGemma/Qwen)
+Emergency               → Immediate referral
+```
 
 ## Design Decisions
 

@@ -82,54 +82,78 @@ CONDITION_HINTS = {
                     "i get cold", "nose dey run", "nose dey block"],
     "pneumonia": ["cough", "fever", "breathing difficulty", "chest pain",
                   "fast breathing", "productive cough"],
-    "bronchitis": ["cough", "chest tightness", "wheezing"],
-    "asthma": ["wheezing", "breathing difficulty", "chest tightness",
+    "acute-bronchitis": ["cough", "chest tightness", "wheezing"],
+    "bronchial-asthma": ["wheezing", "breathing difficulty", "chest tightness",
                "cannot breathe", "asthma"],
     # Gastrointestinal
-    "diarrhoea": ["diarrhoea", "diarrhea", "loose stool", "running stomach",
-                  "watery stool", "pooing"],
-    "typhoid": ["fever", "abdominal pain", "headache", "constipation",
-                "diarrhoea", "rash"],
+    "acute-diarrhoea": ["diarrhoea", "diarrhea", "loose stool", "running stomach",
+                  "watery stool", "pooing", "pikin pooing", "child diarrhoea"],
+    "typhoid-fever-enteric-fever": ["fever", "abdominal pain", "headache",
+                "constipation", "rash", "typhoid"],
     "gastritis": ["stomach pain", "vomiting", "nausea", "bloating",
-                  "heartburn", "acid reflux"],
+                  "heartburn", "acid reflux", "stomach dey pain"],
     # Musculoskeletal
-    "osteoarthritis": ["joint pain", "knee pain", "hip pain", "stiffness",
-                       "morning stiffness", "creaking", "swelling"],
+    "osteoarthritis": ["joint pain", "knee pain", "hip pain",
+                       "joint dey pain", "old age", "elderly",
+                       "years old", "60 years", "70 years"],
     "gout": ["joint pain", "big toe", "sudden pain", "red hot joint",
              "swelling"],
-    "muscle_pain": ["muscle pain", "body pain", "back pain", "stiffness",
-                    "soreness", "exercise"],
     # Skin
-    "skin_infection": ["rash", "wound", "boil", "skin infection",
-                       "itching", "swelling"],
-    "eczema": ["itchy skin", "rash", "dry skin", "eczema"],
-    # Urinary
-    "uti": ["painful urination", "burning urine", "frequent urination",
-            "blood in urine", " cloudy urine"],
+    "furunculosis-boils": ["boil", "boils", "skin infection", "pus"],
+    "atopic-dermatitis-atopic-eczema": ["itchy skin", "rash", "dry skin",
+                                         "eczema", "dermatitis"],
     # Eye
-    "conjunctivitis": ["red eye", "eye pain", "discharge", "itchy eye",
-                       "watery eye"],
+    "the-red-eye": ["red eye", "eye pain", "discharge", "itchy eye",
+                       "watery eye", "eye dey red"],
+    # Ear
+    "foreign-bodies-in-the-ear": ["ear pain", "earache", "ear dey pain",
+                                    "object in ear"],
+    # Throat
+    "pharyngitis-sore-throat": ["sore throat", "throat pain",
+                                  "throat dey pain", "difficulty swallowing"],
     # Dental
     "dental-caries": ["toothache", "tooth pain", "dental pain", "jaw pain"],
     "gingival-abscess": ["gum swelling", "gum pain", "swollen gum", "toothache"],
     # Anaemia
-    "anaemia": ["tired", "weak", "pale", "dizzy", "breathlessness",
-                "fatigue"],
+    "anaemias": ["tired", "weak", "pale", "dizzy", "breathlessness",
+                "fatigue", "no energy", "weakness"],
     # Hypertension
     "hypertension": ["headache", "dizziness", "blurred vision",
-                     "nosebleed", "chest pain"],
+                     "nosebleed", "high blood pressure"],
     # Diabetes
-    "diabetes": ["frequent urination", "thirst", "weight loss",
-                 "fatigue", "blurred vision", "slow healing"],
-    # UTI
-    "urinary_tract_infection": ["burning urine", "frequent urination",
-                                 "cloudy urine", "blood in urine"],
-    # Pregnancy complications
-    "pre_eclampsia": ["headache", "swelling", "blurred vision",
-                      "upper abdominal pain", "in pregnancy"],
-    # Dehydration
-    "dehydration": ["sunken eyes", "no tears", "dry mouth", "thirst",
-                    "no urine", "dizziness"],
+    "diabetes-mellitus": ["frequent urination", "thirst", "weight loss",
+                 "fatigue", "blurred vision", "slow healing", "diabetes"],
+    # Typhoid
+    "typhoid-fever-enteric-fever": ["fever", "abdominal pain", "headache",
+                "constipation", "rash", "typhoid"],
+    # TB
+    "pulmonary-tuberculosis": ["cough", "weight loss", "night sweats",
+                                 "blood in sputum", "tb", "tuberculosis"],
+    # Meningitis
+    "meningitis": ["headache", "stiff neck", "fever", "vomiting",
+                    "sensitivity to light", "confusion"],
+    # Anxiety
+    "anxiety-disorder": ["anxiety", "nervous", "worry", "panic",
+                          "restlessness", "cannot sleep"],
+    # Depression
+    "depression": ["depression", "sad", "hopeless", "no interest",
+                   "cannot sleep", "no appetite"],
+    # Insomnia
+    "insomnia": ["insomnia", "cannot sleep", "sleeplessness",
+                 "trouble sleeping"],
+    # Nasal allergy
+    "nasal-allergy": ["allergy", "allergic", "sneezing", "runny nose",
+                       "itchy nose", "hay fever"],
+    # Headache
+    "headaches": ["headache", "head pain", "head dey pain", "migraine"],
+    "migraines": ["migraine", "severe headache", "throbbing headache",
+                  "light sensitivity"],
+    # Sickle cell
+    "sickle-cell-disease": ["sickle cell", "joint pain", "abdominal pain",
+                              "anaemia", "painful crisis"],
+    # Hepatitis
+    "hepatitis": ["jaundice", "yellow skin", "abdominal pain",
+                  "nausea", "hepatitis"],
 }
 
 
@@ -178,19 +202,17 @@ class GraphReasoner:
         # 4. Also check condition hints for better matching
         hint_matches = self._check_condition_hints(query, patient)
         if hint_matches:
-            # Hint matches get a confidence boost (they're hand-tuned for Nigerian context)
+            # Hint matches always come first (hand-tuned for Nigerian context)
+            # Boost their confidence slightly
             for hm in hint_matches:
-                hm.confidence = min(1.0, hm.confidence + 0.3)
-            # Merge: hints first, then graph matches
+                hm.confidence = min(1.0, hm.confidence + 0.2)
             existing_slugs = {m.condition.slug for m in hint_matches}
-            for gm in matches:
-                if gm.condition.slug not in existing_slugs:
-                    matches.append(gm)
-                    existing_slugs.add(gm.condition.slug)
-            matches = hint_matches + [m for m in matches if m not in hint_matches]
-
-        # Sort by confidence
-        matches.sort(key=lambda m: m.confidence, reverse=True)
+            # Add graph matches that aren't already covered by hints
+            remaining = [m for m in matches if m.condition.slug not in existing_slugs]
+            matches = hint_matches + remaining
+        else:
+            # No hints matched — sort by confidence
+            matches.sort(key=lambda m: m.confidence, reverse=True)
 
         # 5. Determine if we need follow-up questions
         if not matches or matches[0].confidence < self.CONFIDENCE_THRESHOLD:
@@ -277,7 +299,7 @@ class GraphReasoner:
                     score += 1
                     matched.append(kw)
 
-            if score >= 2:  # Need at least 2 keyword matches
+            if score >= 2 or (score >= 1 and len(keywords) <= 4):
                 # Find the condition in the graph
                 slug = condition_key.replace("_", "-")
                 node = self.graph.get_condition(slug)
