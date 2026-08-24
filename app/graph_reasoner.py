@@ -165,7 +165,7 @@ class GraphReasoner:
     """Traverses the Clinical Knowledge Graph for diagnosis and treatment."""
 
     # Minimum confidence threshold to answer without follow-up questions
-    CONFIDENCE_THRESHOLD = 0.4
+    CONFIDENCE_THRESHOLD = 0.3  # Lowered: graph answers are guideline-faithful, even partial matches help
 
     def __init__(self, graph: ClinicalKnowledgeGraph = None):
         self.graph = graph or get_graph()

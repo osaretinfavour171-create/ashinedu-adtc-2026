@@ -341,8 +341,13 @@ class Orchestrator:
             (answer, source) where source is "cache", "docreader", "llm", or "fallback".
         """
         # Ensure services are alive before processing.
+        # Skip health checks if services were confirmed ready recently.
         _start = time.time()
-        self._ensure_services()
+        if not hasattr(self, '_last_health_check'):
+            self._last_health_check = 0
+        if time.time() - self._last_health_check > 30:  # Check every 30s max
+            self._ensure_services()
+            self._last_health_check = time.time()
 
         query = self.normalizer.normalize(raw)
         if not query:
@@ -460,8 +465,10 @@ class Orchestrator:
             except Exception as exc:
                 log.warning("Graph reasoner error: %s", exc)
 
-            if graph_result and graph_result.confidence >= 0.4:
-                # Graph has a confident answer — use it (no LLM needed)
+            if graph_result and graph_result.confidence >= 0.3:
+                # Graph has an answer — use it (no LLM needed)
+                # Threshold 0.3 is enough: graph answers come from official
+                # guidelines, so even partial matches are clinically useful.
                 english = graph_result.answer
                 source = "graph"
                 # If graph asks follow-up questions, present them
