@@ -19,28 +19,46 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOOLS="$HERE/tools"
 MODELS="$HERE/model"
 DATA="$HERE/app/data"
-LLAMA_BIN="$TOOLS/llamacpp/llama-server.exe"
-DOCREADER_BIN="$TOOLS/docreader.exe"
 DR_PORT=8765
 LLM_PORT=8080
 HTML_PORT=8766
 HTML_DIR="$HERE/app/data/html"
 
-# Convert Git Bash paths to Windows paths for .exe files.
-# Git Bash uses /c/Users/... but .exe files need C:\Users\...
-# The docreader (Go binary compiled on WSL) misinterprets MSYS paths as
-# WSL mount paths (\\mnt\\c\\...) which don't exist on native Windows.
-win_path() {
-    if command -v cygpath > /dev/null 2>&1; then
-        cygpath -w "$1"
-    else
-        echo "$1"
-    fi
-}
-WIN_DATA=$(win_path "$DATA")
-WIN_TOOLS=$(win_path "$TOOLS")
-WIN_MODELS=$(win_path "$MODELS")
-WIN_HTML_DIR=$(win_path "$HTML_DIR")
+# --- OS detection: Linux vs Windows (Git Bash) ---
+if [[ "$(uname -s)" == *Linux* ]] || [[ -f /proc/version ]] || [[ -f /etc/os-release ]]; then
+    IS_LINUX=true
+else
+    IS_LINUX=false
+fi
+
+if [ "$IS_LINUX" = true ]; then
+    # Linux (Ubuntu, WSL, etc.) — use ELF binaries
+    LLAMA_BIN="$TOOLS/llama-server"
+    DOCREADER_BIN="$TOOLS/docreader"
+    WIN_DATA="$DATA"
+    WIN_TOOLS="$TOOLS"
+    WIN_MODELS="$MODELS"
+    WIN_HTML_DIR="$HTML_DIR"
+    # Ensure Linux binaries are executable
+    chmod +x "$DOCREADER_BIN" "$LLAMA_BIN" 2>/dev/null || true
+    export LD_LIBRARY_PATH="$TOOLS:${LD_LIBRARY_PATH:-}"
+else
+    # Windows (Git Bash / MSYS) — use .exe binaries
+    LLAMA_BIN="$TOOLS/llamacpp/llama-server.exe"
+    DOCREADER_BIN="$TOOLS/docreader.exe"
+    # Convert Git Bash paths to Windows paths for .exe files
+    win_path() {
+        if command -v cygpath > /dev/null 2>&1; then
+            cygpath -w "$1"
+        else
+            echo "$1"
+        fi
+    }
+    WIN_DATA=$(win_path "$DATA")
+    WIN_TOOLS=$(win_path "$TOOLS")
+    WIN_MODELS=$(win_path "$MODELS")
+    WIN_HTML_DIR=$(win_path "$HTML_DIR")
+fi
 
 mkdir -p "$TOOLS" "$MODELS"
 
@@ -86,7 +104,7 @@ if [ -f "$DOCREADER_BIN" ]; then
     fi
 else
     echo ""
-    echo "  ERROR: The data server program (docreader.exe) is missing."
+    echo "  ERROR: The data server program (docreader) is missing."
     echo ""
     echo "  Please ask your ICT support person to reinstall Ashinedu."
     echo "  If this is an emergency, please refer the patient to hospital."
