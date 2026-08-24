@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Graph-based Clinical Reasoning Engine for Ashinedu.
+"""Graph-based Clinical Reasoning Engine for EARL AI.
 
 Traverses the Clinical Knowledge Graph to:
 1. Match symptoms to conditions (diagnosis)
@@ -29,7 +29,7 @@ from clinical_graph import (
     SYMPTOM_KEYWORDS, RED_FLAG_SYMPTOMS, get_graph,
 )
 
-log = logging.getLogger("ashinedu.reasoner")
+log = logging.getLogger("earlai.reasoner")
 
 
 # ---------------------------------------------------------------------------

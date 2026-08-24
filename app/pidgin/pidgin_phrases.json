@@ -1,5 +1,5 @@
 {
-  "_comment": "Ashinedu phrase map v1.0. Maps multi-word Nigerian Pidgin phrases to standard English clinical phrasing. Used by the input normalizer (longest-match first).",
+  "_comment": "EARL AI phrase map v1.0. Maps multi-word Nigerian Pidgin phrases to standard English clinical phrasing. Used by the input normalizer (longest-match first).",
   "phrase_map": {
     "my pikin get fever": "the child has fever",
     "my pikin get": "the child has",

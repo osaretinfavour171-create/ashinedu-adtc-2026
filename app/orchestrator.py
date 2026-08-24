@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Ashinedu Orchestrator.
+"""EARL AI Orchestrator.
 
 REPL that routes input through the full pipeline:
 
@@ -67,7 +67,7 @@ from translations import (
 )
 
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s: %(message)s")
-log = logging.getLogger("ashinedu")
+log = logging.getLogger("earlai")
 
 # Paths for auto-restart (relative to app/ directory)
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -666,7 +666,7 @@ def _set_ctx_field(ctx, field, value):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Ashinedu orchestrator REPL")
+    parser = argparse.ArgumentParser(description="EARL AI orchestrator REPL")
     parser.add_argument("--no-model", action="store_true", help="skip the local LLM")
     parser.add_argument("--no-docreader", action="store_true", help="skip the DocReader")
     parser.add_argument("--pinchtab", action="store_true",
@@ -704,7 +704,7 @@ def main(argv=None):
 
     while True:
         try:
-            raw = input("Ashinedu > ").strip()
+            raw = input("EARL AI > ").strip()
         except (EOFError, KeyboardInterrupt):
             print("\n\nSaving session data... Bye bye! Stay safe.")
             orch.metrics.save()

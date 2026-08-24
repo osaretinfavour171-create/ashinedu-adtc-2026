@@ -1,4 +1,4 @@
-"""Translations for Ashinedu.
+"""Translations for EARL AI.
 
 Supports 6 languages:
   - pidgin: Nigerian Pidgin English (default)

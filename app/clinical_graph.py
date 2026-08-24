@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Clinical Knowledge Graph engine for Ashinedu.
+"""Clinical Knowledge Graph engine for EARL AI.
 
 Loads all 270+ Nigerian Standard Treatment Guidelines (NSTG 2022) condition
 JSONs into an in-memory graph structure with fast symptom-to-condition indexes.
@@ -23,7 +23,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Optional
 
-log = logging.getLogger("ashinedu.graph")
+log = logging.getLogger("earlai.graph")
 
 # ---------------------------------------------------------------------------
 # Data structures

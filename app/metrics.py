@@ -1,4 +1,4 @@
-"""Query metrics tracker for Ashinedu.
+"""Query metrics tracker for EARL AI.
 
 Tracks response times, query counts, error rates, and popular queries.
 Data is saved to a local JSON file on exit and can be viewed via the
@@ -23,7 +23,7 @@ _METRICS_FILE = os.path.join(_TOOLS_DIR, "metrics.json")
 
 
 class Metrics:
-    """Track query metrics across a Ashinedu session."""
+    """Track query metrics across an EARL AI session."""
 
     def __init__(self, persist_path: str = _METRICS_FILE):
         self._path = persist_path
@@ -105,7 +105,7 @@ class Metrics:
         slowest = max(rt) if rt else 0
 
         lines = [
-            "=== Ashinedu Session Stats ===",
+            "=== EARL AI Session Stats ===",
             f"Total queries:  {total}",
             f"Errors:         {errors}",
             f"Avg response:   {avg_time:.1f}s",

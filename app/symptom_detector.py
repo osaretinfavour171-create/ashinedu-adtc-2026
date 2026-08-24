@@ -1,4 +1,4 @@
-"""Symptom detector for Ashinedu.
+"""Symptom detector for EARL AI.
 
 Determines whether a user's query is:
   1. A SYMPTOM query (needs intake flow for accurate diagnosis)

@@ -12,7 +12,7 @@
   "cross_disciplinary_pairing": {
     "discipline": "healthcare_medical",
     "load_bearing": true,
-    "description": "Ashinedu provides offline clinical decision support for Nigerian community health workers, combining Pidgin English NLP with official drug formulary data and local LLM inference."
+    "description": "EARL AI provides offline clinical decision support for Nigerian community health workers, combining Pidgin English NLP with official drug formulary data and local LLM inference."
   },
   "test_prompts": [
     {

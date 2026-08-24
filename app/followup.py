@@ -1,4 +1,4 @@
-"""Follow-up flow for Ashinedu.
+"""Follow-up flow for EARL AI.
 
 After the initial consultation and treatment, this module tracks whether
 the patient improved. It can be triggered by the CHEW typing "follow up"

@@ -1,4 +1,4 @@
-"""Smart Triage Engine for Ashinedu.
+"""Smart Triage Engine for EARL AI.
 
 Instead of asking 13 generic questions for every complaint, this system:
   1. Detects the condition type from the initial query

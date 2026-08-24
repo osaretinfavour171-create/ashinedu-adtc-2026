@@ -1,4 +1,4 @@
-"""LRU response cache for Ashinedu.
+"""LRU response cache for EARL AI.
 
 Caches normalized query -> answer mappings so repeated queries return
 instantly without hitting the LLM. Key design decisions:

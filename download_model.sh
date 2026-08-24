@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Ashinedu - download models and toolchains (run once, needs internet).
+# EARL AI - download models and toolchains (run once, needs internet).
 #
 # Usage:
 #   bash download_model.sh           # Full install (MedGemma + Qwen, ~5.8 GB)

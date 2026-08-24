@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Conversational flow engine for Ashinedu.
+"""Conversational flow engine for EARL AI.
 
 Adapted from Fish Audio's conversation.py pattern.
 

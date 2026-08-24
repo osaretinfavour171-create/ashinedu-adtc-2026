@@ -1,4 +1,4 @@
-"""Inference engine for Ashinedu.
+"""Inference engine for EARL AI.
 
 Decides WHEN to ask clinical questions and WHEN to answer directly.
 This is the smart layer between the user's query and the intake flow.

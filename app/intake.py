@@ -1,4 +1,4 @@
-"""Clinical intake flow for Ashinedu.
+"""Clinical intake flow for EARL AI.
 
 When a user describes symptoms (rather than asking a direct drug question),
 this module guides them through a structured patient intake to collect:

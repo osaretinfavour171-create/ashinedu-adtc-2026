@@ -1,4 +1,4 @@
-"""Beautiful terminal UI for Ashinedu.
+"""Beautiful terminal UI for EARL AI.
 
 Uses Unicode box-drawing characters, ANSI colors, and visual hierarchy
 to create a professional, aesthetically pleasing terminal experience.
@@ -183,7 +183,7 @@ def _color_box(lines: list[str], color: str, width: int = 60) -> str:
 # ---------------------------------------------------------------------------
 
 def render_banner() -> str:
-    """Render the main Ashinedu banner."""
+    """Render the main EARL AI banner."""
     W = 62  # Box width
 
     lines = []
@@ -195,8 +195,8 @@ def render_banner() -> str:
     lines.append(f"  {C.NG_GREEN}{Box.VH}{C.RESET}{' ' * (W + 2)}{C.NG_GREEN}{Box.VH}{C.RESET}")
 
     # Title line 1
-    title1 = f"{C.BRIGHT_WHITE}{C.BOLD}  A  S  H  I  N  E  D  U  {C.RESET}"
-    vis1 = len("  A  S  H  I  N  E  D  U  ")
+    title1 = f"{C.BRIGHT_WHITE}{C.BOLD}  E  A  R  L     A  I  {C.RESET}"
+    vis1 = len("  E  A  R  L     A  I  ")
     pad1 = max(0, (W + 2 - vis1) // 2)
     pad1r = max(0, W + 2 - vis1 - pad1)
     lines.append(
@@ -305,7 +305,7 @@ def render_help() -> str:
         ("@followup", "Track previous patient"),
         ("@restart", "Restart services"),
         ("@help", "Show this help"),
-        ("@exit", "Quit Ashinedu"),
+        ("@exit", "Quit EARL AI"),
     ]
     for cmd, desc in cmds:
         lines.append(f"  {C.BRIGHT_CYAN}{cmd:>14}{C.RESET}  {C.DIM}{desc}{C.RESET}")
@@ -416,7 +416,7 @@ def render_separator() -> str:
 def render_version() -> str:
     """Render version info."""
     return (
-        f"  {C.DIM}Ashinedu v1.0{C.RESET}\n"
+        f"  {C.DIM}EARL AI v1.0{C.RESET}\n"
         f"  {C.DIM}ADTC 2026 Hackathon Submission{C.RESET}\n"
         f"  {C.DIM}Africa Deep Tech Foundation{C.RESET}"
     )

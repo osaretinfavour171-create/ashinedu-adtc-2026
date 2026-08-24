@@ -1,4 +1,4 @@
-"""Voice support for Ashinedu.
+"""Voice support for EARL AI.
 
 Provides speech-to-text (STT) and text-to-speech (TTS) capabilities
 for community health workers who cannot type.
@@ -30,7 +30,7 @@ except ImportError:
 
 
 class VoiceEngine:
-    """Handles voice input/output for Ashinedu."""
+    """Handles voice input/output for EARL AI."""
 
     def __init__(self):
         self._tts_engine = None

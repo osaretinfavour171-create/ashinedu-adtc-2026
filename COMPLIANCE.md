@@ -4,7 +4,7 @@
 
 | # | Requirement | Status | Evidence |
 |---|---|---|---|
-| 1 | Public GitHub repo | ✅ | `ashinedu-adtc-2026` on GitHub |
+| 1 | Public GitHub repo | ✅ | `earlai-adtc-2026` on GitHub |
 | 2 | metadata.json filled in | ⚠️ **NEEDS YOUR INFO** | Placeholder values remain |
 | 3 | 2 test prompts in metadata | ✅ | `tp_001` (symptom), `tp_002` (drug interaction) |
 | 4 | download_model.sh works | ✅ | Tested, downloads to `model/` |

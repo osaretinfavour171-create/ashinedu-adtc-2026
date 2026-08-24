@@ -1,5 +1,5 @@
 {
-  "_comment": "Ashinedu drug interaction matrix. Curated from DDInter / standard pharmacology references for drugs on the Nigeria Essential Medicines List. severity: low | moderate | high. Loaded into memory by DocReader as an O(1) bidirectional lookup.",
+  "_comment": "EARL AI drug interaction matrix. Curated from DDInter / standard pharmacology references for drugs on the Nigeria Essential Medicines List. severity: low | moderate | high. Loaded into memory by DocReader as an O(1) bidirectional lookup.",
   "interactions": [
     {
       "drug_a": "Chloroquine",

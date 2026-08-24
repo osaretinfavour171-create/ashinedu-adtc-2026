@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Ashinedu - start everything and open the REPL.
+# EARL AI - start everything and open the REPL.
 #
 # This script:
 #   1. Starts DocReader (Go) on 127.0.0.1:8765
 #   2. Starts llama-server with the primary model (MedGemma) on 127.0.0.1:8080;
 #      falls back to Qwen 2.5-1.5B if MedGemma is missing.
 #   3. Waits until ALL services are confirmed ready
-#   4. Opens the Ashinedu REPL
+#   4. Opens the EARL AI REPL
 #
 # Fully offline once download_model.sh has been run.
 #
@@ -116,7 +116,7 @@ else
     echo ""
     echo "  ERROR: The data server program (docreader) is missing."
     echo ""
-    echo "  Please ask your ICT support person to reinstall Ashinedu."
+    echo "  Please ask your ICT support person to reinstall EARL AI."
     echo "  If this is an emergency, please refer the patient to hospital."
     echo ""
     exit 1
@@ -182,7 +182,7 @@ else
     echo "  WARNING: The model program (llama-server) is missing."
     echo "  The system will still work for drug interaction lookups,"
     echo "  but will not be able to answer general clinical questions."
-    echo "  Please ask your ICT support person to reinstall Ashinedu."
+    echo "  Please ask your ICT support person to reinstall EARL AI."
     echo ""
 fi
 

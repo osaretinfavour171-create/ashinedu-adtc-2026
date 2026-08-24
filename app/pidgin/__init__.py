@@ -1,4 +1,4 @@
-"""Ashinedu Pidgin language layer.
+"""EARL AI Pidgin language layer.
 
 normalizer  : Pidgin/English mix -> clean English query
 reformulator: English answer     -> Pidgin-flavoured answer

@@ -1,4 +1,4 @@
-# Ashinedu — Quick Install Guide
+# EARL AI — Quick Install Guide
 
 **Offline Clinical Decision Support for Nigerian Health Workers**
 
@@ -16,8 +16,8 @@
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/osaretinfavour171-create/ashinedu-adtc-2026.git
-cd ashinedu-adtc-2026
+git clone https://github.com/osaretinfavour171-create/earlai-adtc-2026.git
+cd earlai-adtc-2026
 
 # 2. Download models + binaries
 bash download_model.sh           # Full: ~5.8 GB (MedGemma + Qwen)
@@ -36,11 +36,11 @@ bash start.sh --lite       # Lite mode
 ## Try It
 
 ```
-Ashinedu > my pikin get hot body        # Symptom query (Pidgin)
-Ashinedu > @lang en                     # Switch to English
-Ashinedu > treatment for malaria        # General health info
-Ashinedu > metronidazole and warfarin   # Drug interaction check
-Ashinedu > @help                        # Show all commands
+EARL AI > my pikin get hot body        # Symptom query (Pidgin)
+EARL AI > @lang en                     # Switch to English
+EARL AI > treatment for malaria        # General health info
+EARL AI > metronidazole and warfarin   # Drug interaction check
+EARL AI > @help                        # Show all commands
 ```
 
 ## What's Inside
@@ -93,7 +93,7 @@ Response (Pidgin or English)
 
 ## Score Impact
 
-| Metric | Weight | Ashinedu |
+| Metric | Weight | EARL AI |
 |---|---|---|
 | Accuracy (Sacc) | 50% | Graph gives zero-hallucination answers |
 | Speed (Sperf) | 30% | Graph: 1ms/query (way above 15 TPS target) |
