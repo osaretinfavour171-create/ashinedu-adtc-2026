@@ -8,7 +8,7 @@ The challenge: these health workers speak **Nigerian Pidgin English** (spoken by
 
 ## Solution
 
-Ashinedu (formerly Ashinedu) is an **offline clinical decision support system** that:
+Ashinedu (formerly PidginPharma) is an **offline clinical decision support system** that:
 
 1. **Understands Pidgin** — A NLP normalizer maps 264 medical terms and 475 Pidgin phrases to canonical English
 2. **Clinical Knowledge Graph** — A graph-based reasoning engine loads all 270 NSTG 2022 conditions into memory (~100MB) and provides instant, zero-hallucination diagnosis and treatment recommendations

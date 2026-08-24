@@ -53,9 +53,9 @@ class C:
     BG_DARK = "\033[40m"
     BG_BLUE = "\033[44m"
 
-    # Nigerian flag colors
-    NG_GREEN = "\033[38;2;0;128;0m"  # Deep green
-    NG_GREEN_B = "\033[1;38;2;0;150;0m"  # Bright green
+    # Nigerian flag colors (use basic ANSI for PowerShell compatibility)
+    NG_GREEN = "\033[32m"       # Green (PowerShell-safe)
+    NG_GREEN_B = "\033[1;32m"   # Bright green (PowerShell-safe)
 
 
 # ---------------------------------------------------------------------------

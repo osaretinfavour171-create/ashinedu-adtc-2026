@@ -732,10 +732,10 @@ def main(argv=None):
                      "use en", "switch to en", "change to en"):
             new_lang = "en"
             _lang_switched = True
-        elif "pidgin" in low and any(w in low for w in ("switch", "change", "use", "set")):
+        elif "pidgin" in low and any(w in low for w in ("switch", "change", "use", "set", "want", "need", "like")):
             new_lang = "pidgin"
             _lang_switched = True
-        elif "english" in low and any(w in low for w in ("switch", "change", "use", "set")):
+        elif "english" in low and any(w in low for w in ("switch", "change", "use", "set", "want", "need", "like")):
             new_lang = "en"
             _lang_switched = True
         if _lang_switched:
