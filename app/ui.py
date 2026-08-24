@@ -17,6 +17,22 @@ if hasattr(sys.stdout, "reconfigure"):
     except Exception:
         pass
 
+# Enable ANSI colors on Windows PowerShell / legacy console host.
+# Ubuntu and modern Windows Terminal already support ANSI codes natively.
+if sys.platform == "win32":
+    try:
+        import ctypes
+        kernel32 = ctypes.windll.kernel32
+        # STD_OUTPUT_HANDLE = -11
+        handle = kernel32.GetStdHandle(-11)
+        # Get current console mode
+        mode = ctypes.c_ulong()
+        kernel32.GetConsoleMode(handle, ctypes.byref(mode))
+        # ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
+        kernel32.SetConsoleMode(handle, mode.value | 0x0004)
+    except Exception:
+        pass  # silently skip — colors will be plain text, not broken
+
 
 # ---------------------------------------------------------------------------
 # ANSI Color codes
