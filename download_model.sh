@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 # Ashinedu - download models and toolchains (run once, needs internet).
 #
+# Usage:
+#   bash download_model.sh           # Full install (MedGemma + Qwen, ~5.8 GB)
+#   bash download_model.sh --lite    # Lite install (Qwen only, ~2 GB)
+#
 # Downloads:
-#   models/medgemma-1.5-4b-it-Q8_0.gguf        (primary model, ~4.4 GB)
-#   models/qwen2.5-1.5b-instruct-q8_0.gguf      (fallback model, ~1.8 GB)
-#   tools/llamacpp.zip                          (llama.cpp Windows CPU build)
+#   Full:  models/medgemma + models/qwen + tools (~5.8 GB)
+#   Lite:  models/qwen + tools (~2 GB)
 #
 # After this, everything runs fully offline.
 set -euo pipefail
@@ -13,6 +16,14 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MODELS="$HERE/model"
 TOOLS="$HERE/tools"
 mkdir -p "$MODELS" "$TOOLS"
+
+# --- Parse flags ---
+LITE_MODE=false
+for arg in "$@"; do
+    case "$arg" in
+        --lite|-l) LITE_MODE=true ;;
+    esac
+done
 
 MEDGEMMA_URL="https://huggingface.co/unsloth/medgemma-1.5-4b-it-GGUF/resolve/main/medgemma-1.5-4b-it-Q8_0.gguf"
 QWEN_URL="https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q8_0.gguf"
@@ -43,9 +54,23 @@ dl() {
     fi
 }
 
-dl "$MEDGEMMA_URL" "$MODELS/medgemma-1.5-4b-it-Q8_0.gguf" 10c7b9a0d8027c0c151e2050156376f5ed9d4b437494eae81d9cdb81e9b50219
-dl "$QWEN_URL" "$MODELS/qwen2.5-1.5b-instruct-q8_0.gguf" d7efb072e7724d25048a4fda0a3e10b04bdef5d06b1403a1c93bd9f1240a63c8
+# --- Download models ---
+if [ "$LITE_MODE" = true ]; then
+    echo ""
+    echo "  LITE MODE: Downloading Qwen 1.5B only (~2 GB)"
+    echo "  For full mode (MedGemma + Qwen), run: bash download_model.sh"
+    echo ""
+    dl "$QWEN_URL" "$MODELS/qwen2.5-1.5b-instruct-q8_0.gguf" d7efb072e7724d25048a4fda0a3e10b04bdef5d06b1403a1c93bd9f1240a63c8
+else
+    echo ""
+    echo "  FULL MODE: Downloading MedGemma 4B + Qwen 1.5B (~5.8 GB)"
+    echo "  For lite mode (Qwen only), run: bash download_model.sh --lite"
+    echo ""
+    dl "$MEDGEMMA_URL" "$MODELS/medgemma-1.5-4b-it-Q8_0.gguf" 10c7b9a0d8027c0c151e2050156376f5ed9d4b437494eae81d9cdb81e9b50219
+    dl "$QWEN_URL" "$MODELS/qwen2.5-1.5b-instruct-q8_0.gguf" d7efb072e7724d25048a4fda0a3e10b04bdef5d06b1403a1c93bd9f1240a63c8
+fi
 
+# --- Download binaries ---
 if [ "$IS_LINUX" = true ]; then
     # Linux: download llama.cpp and shared libraries
     if [ ! -f "$TOOLS/llama-server" ]; then
@@ -78,5 +103,11 @@ else
     fi
 fi
 
-echo
-echo "All downloads complete. Now run:  bash start.sh"
+echo ""
+if [ "$LITE_MODE" = true ]; then
+    echo "Lite download complete (~2 GB). Now run:  bash start.sh"
+    echo "Note: Lite mode uses Qwen 1.5B only. For better accuracy,"
+    echo "      run full mode: bash download_model.sh"
+else
+    echo "Full download complete (~5.8 GB). Now run:  bash start.sh"
+fi

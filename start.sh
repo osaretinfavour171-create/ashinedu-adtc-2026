@@ -24,6 +24,16 @@ LLM_PORT=8080
 HTML_PORT=8766
 HTML_DIR="$HERE/app/data/html"
 
+# --- Parse flags ---
+LITE_MODE=false
+PASSTHROUGH_ARGS=()
+for arg in "$@"; do
+    case "$arg" in
+        --lite|-l) LITE_MODE=true ;;
+        *) PASSTHROUGH_ARGS+=("$arg") ;;
+    esac
+done
+
 # --- OS detection: Linux vs Windows (Git Bash) ---
 if [[ "$(uname -s)" == *Linux* ]] || [[ -f /proc/version ]] || [[ -f /etc/os-release ]]; then
     IS_LINUX=true
@@ -116,12 +126,22 @@ fi
 # 2. Model server (llama-server)
 # ---------------------------------------------------------------------------
 pick_model() {
-    if [ -f "$MODELS/medgemma-1.5-4b-it-Q8_0.gguf" ]; then
-        echo "medgemma-1.5-4b-it-Q8_0.gguf"
-    elif [ -f "$MODELS/qwen2.5-1.5b-instruct-q8_0.gguf" ]; then
-        echo "qwen2.5-1.5b-instruct-q8_0.gguf"
+    if [ "$LITE_MODE" = true ]; then
+        # Lite mode: Qwen only
+        if [ -f "$MODELS/qwen2.5-1.5b-instruct-q8_0.gguf" ]; then
+            echo "qwen2.5-1.5b-instruct-q8_0.gguf"
+        else
+            echo ""
+        fi
     else
-        echo ""
+        # Full mode: prefer MedGemma, fall back to Qwen
+        if [ -f "$MODELS/medgemma-1.5-4b-it-Q8_0.gguf" ]; then
+            echo "medgemma-1.5-4b-it-Q8_0.gguf"
+        elif [ -f "$MODELS/qwen2.5-1.5b-instruct-q8_0.gguf" ]; then
+            echo "qwen2.5-1.5b-instruct-q8_0.gguf"
+        else
+            echo ""
+        fi
     fi
 }
 
@@ -130,7 +150,11 @@ if curl -sf "http://127.0.0.1:$LLM_PORT/health" > /dev/null 2>&1; then
 elif [ -f "$LLAMA_BIN" ]; then
     MODEL="$(pick_model)"
     if [ -n "$MODEL" ]; then
-        echo "[start] Loading the clinical brain (this may take a minute)..."
+        if [ "$LITE_MODE" = true ]; then
+            echo "[start] Loading Qwen 1.5B (lite mode, fast startup)..."
+        else
+            echo "[start] Loading the clinical brain (this may take a minute)..."
+        fi
         "$LLAMA_BIN" \
             -m "$(win_path "$MODELS/$MODEL")" \
             --host 127.0.0.1 --port "$LLM_PORT" \
@@ -184,4 +208,4 @@ echo "  All systems are ready."
 echo ""
 
 cd "$HERE/app"
-exec python orchestrator.py "$@"
+exec python orchestrator.py "${PASSTHROUGH_ARGS[@]}"
