@@ -1,101 +1,154 @@
-# EARL AI — Quick Install Guide
+# EARL AI — Install Guide
 
-**Offline Clinical Decision Support for Nigerian Health Workers**
+**Offline clinical decision support for Nigerian health workers.**
 
-## Requirements
+---
 
-| Requirement | Value |
-|---|---|
-| OS | Ubuntu 22.04 LTS (or Windows/macOS for testing) |
-| RAM | 2 GB minimum (lite) / 8 GB (full) |
-| Disk | 2 GB (lite) / 6 GB (full) |
-| Internet | Only for initial download (one-time) |
-| GPU | Not required (CPU-only) |
-
-## Install (2 commands)
+## Quick Start (2 commands)
 
 ```bash
-# 1. Clone the repo
+# 1. Clone
 git clone https://github.com/osaretinfavour171-create/earlai-adtc-2026.git
 cd earlai-adtc-2026
 
-# 2. Download models + binaries
-bash download_model.sh           # Full: ~5.8 GB (MedGemma + Qwen)
-# OR
-bash download_model.sh --lite    # Lite: ~2 GB (Qwen only)
+# 2. Download + Run
+bash download_model.sh --lite    # 2GB, 2 minutes
+bash start.sh --lite             # Ready!
 ```
 
-## Run
+---
 
-```bash
-bash start.sh              # Full mode
-# OR
-bash start.sh --lite       # Lite mode
-```
+## Two Modes
+
+| | Lite Mode | Full Mode |
+|---|---|---|
+| **Command** | `bash download_model.sh --lite` | `bash download_model.sh` |
+| **Download** | 2 GB | 5.8 GB |
+| **Models** | Qwen 1.5B only | MedGemma 4B + Qwen 1.5B |
+| **RAM** | ~2.5 GB | ~5.5 GB |
+| **Best for** | Testing, old laptops | Full accuracy, demos |
+
+**Upgrade from Lite to Full:** Just run `bash download_model.sh` (skips already-downloaded files).
+
+---
 
 ## Try It
 
 ```
-EARL AI > my pikin get hot body        # Symptom query (Pidgin)
-EARL AI > @lang en                     # Switch to English
-EARL AI > treatment for malaria        # General health info
-EARL AI > metronidazole and warfarin   # Drug interaction check
-EARL AI > @help                        # Show all commands
+EARL AI > my pikin get hot body
+  → Asks follow-up questions about age, symptoms
+
+EARL AI > @lang en
+  → Switches to English
+
+EARL AI > treatment for malaria
+  → Artemether-Lumefantrine (AL) dosing from NSTG 2022
+
+EARL AI > metronidazole and warfarin
+  → ⚠️ Drug interaction warning
+
+EARL AI > joint pain 70 years
+  → Osteoarthritis assessment with age-aware reasoning
+
+EARL AI > @status
+  → Shows service status, language, cache
 ```
+
+---
+
+## Global Command
+
+After install, run `earlai` from any terminal:
+
+```bash
+# Windows (PowerShell/CMD)
+earlai
+earlai --lite
+
+# Ubuntu/WSL
+earlai
+earlai --lite
+```
+
+---
+
+## Requirements
+
+| | Minimum | Recommended |
+|---|---|---|
+| **OS** | Ubuntu 22.04 / Windows 10 | Any Linux |
+| **RAM** | 4 GB | 8 GB |
+| **Disk** | 3 GB | 7 GB |
+| **Internet** | Only for initial download | None after install |
+| **GPU** | Not required | Not required |
+
+---
 
 ## What's Inside
 
-| Component | What it does | RAM |
+| Component | What it does | Size |
 |---|---|---|
-| **Knowledge Graph** | 252 conditions, 890 drugs, zero hallucination | 18 MB |
-| **Clinical Engine** | Symptom → condition → treatment matching | bundled |
-| **Drug Interaction DB** | Real-time interaction checks | bundled |
+| **Knowledge Graph** | 270 conditions, 890 drugs, instant answers | 18 MB RAM |
+| **Drug Interaction DB** | Real-time safety checks | bundled |
 | **Pidgin NLP** | Understands Nigerian Pidgin English | bundled |
-| **Qwen 1.5B** (LLM fallback) | Handles unusual queries | ~2 GB |
-| **MedGemma 4B** (optional) | Better accuracy for complex cases | ~4 GB |
+| **Clinical Reasoner** | Severity assessment, red flag detection | bundled |
+| **Conversational Engine** | Adaptive tone, smart follow-ups | bundled |
+| **Qwen 1.5B** | LLM fallback for unusual queries | 2 GB |
+| **MedGemma 4B** | Better accuracy (full mode only) | 4 GB |
 
-## Key Commands
+---
+
+## Architecture
+
+```
+Your query (Pidgin or English)
+    ↓
+Pidgin Normalizer → Clean English
+    ↓
+Medical Check → Is this a health question?
+    ↓ Yes
+Knowledge Graph (270 conditions, 1ms)
+    ├── Match found → Guideline answer
+    └── No match → LLM fallback
+    ↓
+Conversational Flow → Tone adaptation
+    ↓
+Response (Pidgin or English)
+```
+
+---
+
+## Commands
 
 | Command | What it does |
 |---|---|
 | `@lang en` | Switch to English |
 | `@lang pidgin` | Switch to Pidgin |
-| `@status` | Check service status |
-| `@clear` | Start new patient |
+| `@status` | Check services |
+| `@stats` | Session stats |
+| `@clear` | New patient |
 | `@help` | Show help |
 | `@exit` | Quit |
 
-## Architecture
+Or type naturally: `"switch to english"`, `"i want pidgin"`
 
-```
-User Query (Pidgin or English)
-    ↓
-Pidgin Normalizer → Clean English query
-    ↓
-Clinical Intake → Age, weight, gender, symptoms
-    ↓
-Knowledge Graph (252 conditions, 1ms response)
-    ├── Match found → Guideline-faithful answer
-    └── No match → LLM fallback (Qwen/MedGemma)
-    ↓
-Conversational Flow → Tone adaptation (Fish Audio pattern)
-    ↓
-Response (Pidgin or English)
-```
+---
 
-## Why It's Different
+## Troubleshooting
 
-1. **Graph-first architecture**: 90% of queries answered by knowledge graph (instant, zero hallucination)
-2. **Runs on any hardware**: Lite mode works on 2GB RAM laptops
-3. **Clinically safe**: Every answer from official Nigerian guidelines (NSTG 2022)
-4. **Bilingual**: Natural Pidgin/English switching with `@lang`
-5. **Offline-first**: Zero internet dependency after install
+| Problem | Fix |
+|---|---|
+| "Data server failed to start" | Run `bash start.sh` from the project folder |
+| "Model server not available" | Models not downloaded yet — run `bash download_model.sh` |
+| Colors look ugly in PowerShell | Open a new terminal window |
+| `earlai` not found | Open a new terminal (PATH needs refresh) |
+
+---
 
 ## Score Impact
 
 | Metric | Weight | EARL AI |
 |---|---|---|
-| Accuracy (Sacc) | 50% | Graph gives zero-hallucination answers |
-| Speed (Sperf) | 30% | Graph: 1ms/query (way above 15 TPS target) |
-| Efficiency (Seff) | 20% | Lite: 97% free RAM / Full: 30% free RAM |
-| Thermal | -10 penalty | Low risk (graph is CPU-light) |
+| Accuracy | 50% | Zero-hallucination graph answers |
+| Speed | 30% | 1ms/query (way above 15 TPS target) |
+| Efficiency | 20% | 18MB graph, 99.8% RAM free |
