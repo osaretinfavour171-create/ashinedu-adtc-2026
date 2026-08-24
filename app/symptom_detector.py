@@ -109,6 +109,54 @@ REFLEX_KEYWORDS = {
 }
 
 
+def is_medical_query(query: str) -> bool:
+    """Check if a query is medically relevant.
+
+    Returns False for nonsense, greetings, or off-topic input.
+    This prevents the system from trying to diagnose "laptop lie lie".
+    """
+    q = query.lower().strip()
+    if not q:
+        return False
+
+    # Too short to be meaningful
+    if len(q) < 3:
+        return False
+
+    # Check for medical keywords (symptoms, drugs, general health)
+    all_medical = SYMPTOM_KEYWORDS | DRUG_KEYWORDS | GENERAL_KEYWORDS
+    for kw in all_medical:
+        if kw in q:
+            return True
+
+    # Common disease/condition names (not in symptom keywords)
+    DISEASE_NAMES = {
+        "malaria", "typhoid", "cholera", "tuberculosis", "tb",
+        "hepatitis", "hiv", "aids", "diabetes", "hypertension",
+        "pneumonia", "meningitis", "epilepsy", "asthma",
+        "sickle cell", "anaemia", "anemia", "goitre",
+        "fibroid", "cancer", "ulcer", "gastritis",
+        "dysentery", "measles", "chickenpox", "polio",
+        "bilharzia", "yellow fever", "lassa fever",
+        "cerebral malaria", "cerebrospinal meningitis",
+    }
+    for disease in DISEASE_NAMES:
+        if disease in q:
+            return True
+
+    # Check for question patterns that might be medical
+    medical_starters = ("what", "how", "why", "when", "can i", "is it",
+                        "wetin", "how I", "how to", "tell me")
+    if any(q.startswith(s) for s in medical_starters):
+        return True
+
+    # Check for age/weight mentions (might be clinical context)
+    if any(w in q for w in ["year", "month", "day", "kg", "gram", "old"]):
+        return True
+
+    return False
+
+
 def classify_query(query: str) -> str:
     """Classify a normalized query into a type.
 

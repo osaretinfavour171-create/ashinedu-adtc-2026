@@ -50,7 +50,7 @@ from pidgin.reformulator import PidginReformulator
 from dosage import calculate_dose, get_red_flags, needs_iv_fluids, format_iv_recommendation
 from followup import FollowUpTracker
 from inference import infer_context, build_patient_context_from_query, get_question_prompt
-from symptom_detector import classify_query
+from symptom_detector import classify_query, is_medical_query
 from clinical_engine import assess_musculoskeletal, is_musculoskeletal_query
 from conservative_care import assess_conservative, is_conservative_condition
 from triage import start_triage, get_triage_summary
@@ -854,6 +854,17 @@ def main(argv=None):
             # SECURITY: cap input length to prevent abuse.
             if len(raw) > 1000:
                 print("Input too long. Keep your question short (under 1000 characters).")
+                continue
+
+            # Reject non-medical input early (saves time, avoids confusion).
+            normalized = orch.normalizer.normalize(raw)
+            if not is_medical_query(normalized) and not is_medical_query(raw):
+                if orch.lang == "pidgin":
+                    print("\n  I be clinical assistant. Ask me about symptoms, drugs, or health matters.")
+                    print("  For example: 'my pikin get hot body' or 'paracetamol and warfarin'\n")
+                else:
+                    print("\n  I'm a clinical assistant. Please ask about symptoms, drugs, or health matters.")
+                    print("  For example: 'my child has fever' or 'paracetamol and warfarin'\n")
                 continue
 
             # Check if this needs the intake flow or triage.
