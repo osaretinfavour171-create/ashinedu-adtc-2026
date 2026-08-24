@@ -123,7 +123,23 @@ def is_medical_query(query: str) -> bool:
     if len(q) < 3:
         return False
 
-    # Check for medical keywords (symptoms, drugs, general health)
+    # --- Explicit rejection: greetings, chat, nonsense ---
+    NON_MEDICAL = {
+        "hello", "hi", "hey", "good morning", "good afternoon",
+        "good evening", "good night", "how are you", "how you dey",
+        "how far", "whats up", "what's up", "wassup", "bado",
+        "freebuff", "freebuff", "chatgpt", "openai", "claude",
+        "help me", "who are you", "what is your name", "what are you",
+        "thank you", "thanks", "ok", "okay", "alright", "bye",
+        "see you", "later", "no problem", "no wahala", "nice",
+        "lol", "haha", "wow", "cool", "great", "awesome",
+    }
+    # Exact match or starts with a non-medical phrase
+    for nm in NON_MEDICAL:
+        if q == nm or q.startswith(nm):
+            return False
+
+    # --- Check for medical keywords (symptoms, drugs, general health) ---
     all_medical = SYMPTOM_KEYWORDS | DRUG_KEYWORDS | GENERAL_KEYWORDS
     for kw in all_medical:
         if kw in q:
@@ -144,14 +160,24 @@ def is_medical_query(query: str) -> bool:
         if disease in q:
             return True
 
-    # Check for question patterns that might be medical
+    # Check for medical question patterns (must contain health context)
     medical_starters = ("what", "how", "why", "when", "can i", "is it",
                         "wetin", "how I", "how to", "tell me")
     if any(q.startswith(s) for s in medical_starters):
-        return True
+        # Only accept if it also contains a health-related word
+        health_context = ("treat", "drug", "medicine", "dose", "dosing",
+                          "diagnos", "condition", "symptom", "pain",
+                          "fever", "infection", "disease", "health",
+                          "clinic", "hospital", "patient", "pregnan",
+                          "child", "baby", "pikin", "adult", "elderly",
+                          "drip", "iv ", "injection", "antibiotic",
+                          "paracetamol", "malaria", "cold", "cough")
+        if any(hw in q for hw in health_context):
+            return True
+        return False
 
-    # Check for age/weight mentions (might be clinical context)
-    if any(w in q for w in ["year", "month", "day", "kg", "gram", "old"]):
+    # Check for age/weight mentions with clinical context
+    if any(w in q for w in ["kg", "gram"]):
         return True
 
     return False
