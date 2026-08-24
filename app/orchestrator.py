@@ -742,7 +742,10 @@ def main(argv=None):
             if new_lang in ("pidgin", "en"):
                 orch.lang = new_lang
                 lang_name = LANG_NAMES.get(new_lang, new_lang)
-                print(f"  Language changed to: {lang_name}. All responses will now use this language.")
+                print(f"\n  Language changed to: {lang_name}")
+                # Show updated status so the language tick box updates
+                print(orch.status())
+                print()
             else:
                 print("  Available languages: pidgin, en")
             continue
@@ -780,7 +783,8 @@ def main(argv=None):
                     if next_q is None:
                         break
                     try:
-                        prompt = render_triage_question(next_q.prompt_pidgin, qi + 1, total_q)
+                        q_text = next_q.prompt_english if orch.lang == "en" else next_q.prompt_pidgin
+                        prompt = render_triage_question(q_text, qi + 1, total_q)
                         answer_text = input(prompt).strip()
                     except (EOFError, KeyboardInterrupt):
                         break
