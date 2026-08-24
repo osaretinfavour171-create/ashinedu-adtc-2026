@@ -249,7 +249,13 @@ class Orchestrator:
         self.followup = FollowUpTracker()
         self.graph_reasoner = GraphReasoner()  # Knowledge graph engine
         self.conversation_flow = ConversationalFlow()  # Adaptive tone engine
-        self.conversation_flow.start()
+        self.conversation_flow.set_language(lang)
+        # Try to restore previous conversation
+        if self.conversation_flow.load():
+            log.info("Restored previous conversation (%d messages)",
+                     len(self.conversation_flow.conversation.messages))
+        else:
+            self.conversation_flow.start()
 
         # Register cleanup handlers
         atexit.register(self._cleanup)
@@ -263,9 +269,13 @@ class Orchestrator:
         sys.exit(0)
 
     def _cleanup(self):
-        """Save metrics on exit."""
+        """Save metrics and conversation on exit."""
         try:
             self.metrics.save()
+        except Exception:
+            pass
+        try:
+            self.conversation_flow.save()
         except Exception:
             pass
 
@@ -537,7 +547,9 @@ class Orchestrator:
 
         # 7. Apply conversational tone (like Fish Audio's [whisper], [excited] tags)
         #    Wraps the clinical answer with appropriate emotional context
-        answer = self.conversation_flow.format_response(answer, tone_tags)
+        answer = self.conversation_flow.format_response(answer, tone_tags, lang=self.lang)
+        # Save conversation for persistence across sessions
+        self.conversation_flow.save()
 
         # 8. Store in cache for instant future lookups.
         self.cache.put(cache_key, self.lang, answer)
@@ -712,6 +724,11 @@ def main(argv=None):
             orch.cache.clear()
             print("Cache cleared. All queries will be re-processed.")
             continue
+        if low in ("clear", "new patient", "new consultation"):
+            orch.conversation_flow.start()
+            orch.conversation_flow.clear_persistence()
+            print("  Conversation cleared. Starting fresh.")
+            continue
         if low in ("restart", "restart services"):
             print("\n  Restarting services...")
             orch._docreader_warned = False
@@ -741,6 +758,7 @@ def main(argv=None):
         if _lang_switched:
             if new_lang in ("pidgin", "en"):
                 orch.lang = new_lang
+                orch.conversation_flow.set_language(new_lang)
                 lang_name = LANG_NAMES.get(new_lang, new_lang)
                 print(f"\n  Language changed to: {lang_name}")
                 # Show updated status so the language tick box updates

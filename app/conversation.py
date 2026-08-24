@@ -1,34 +1,27 @@
 #!/usr/bin/env python3
 """Conversational flow engine for Ashinedu.
 
-Adapted from Fish Audio's conversation.py pattern:
-https://github.com/fishaudio/fish-speech/blob/main/fish_speech/conversation.py
+Adapted from Fish Audio's conversation.py pattern.
 
-Fish Audio uses Message(dataclass) + Conversation(list[Message]) to manage
-multi-turn dialogue context. We adapt this for clinical conversations:
-
-- Message: role (system/patient/healthworker) + content + emotional tags
-- Conversation: maintains full dialogue history, builds clinical context
-- ConversationalFlow: determines tone, pacing, and response style
-
-v2 improvements (Fish Audio pattern upgrade):
-- Active topic tracking: auto-detect symptoms, remember what was discussed
-- Adaptive response length: short for urgent, detailed for calm
+v3 improvements:
+- Language-aware: all opening/closing phrases respect current language
+- Conversation persistence: saves to JSON, restores on restart
+- Active topic tracking + adaptive response length (from v2)
 """
 
-from copy import deepcopy
+import json
+import os
+import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Literal, Optional
-import re
 
 
 # ---------------------------------------------------------------------------
-# Emotional tone tags (adapted from Fish Audio's [whisper], [excited], etc.)
+# Emotional tone tags
 # ---------------------------------------------------------------------------
 
 class ToneTag(Enum):
-    """Response tone tags — adapted from Fish Audio's inline emotion control."""
     CALM = "calm"
     REASSURING = "reassuring"
     URGENT = "urgent"
@@ -41,11 +34,10 @@ class ToneTag(Enum):
 
 
 # ---------------------------------------------------------------------------
-# Patient emotional state detection
+# Patient emotional state
 # ---------------------------------------------------------------------------
 
 class EmotionalState(Enum):
-    """Detected patient emotional state from conversation."""
     ANXIOUS = "anxious"
     CALM = "calm"
     DISTRESSED = "distressed"
@@ -88,6 +80,7 @@ EMOTION_PATTERNS = {
     ],
 }
 
+
 # ---------------------------------------------------------------------------
 # Symptom/topic keywords for active topic tracking
 # ---------------------------------------------------------------------------
@@ -115,7 +108,60 @@ SYMPTOM_KEYWORDS = {
 
 
 # ---------------------------------------------------------------------------
-# Message (adapted from Fish Audio's Message dataclass)
+# Language-aware phrases
+# ---------------------------------------------------------------------------
+
+# All conversational phrases keyed by language
+PHRASES = {
+    "pidgin": {
+        "anxious_open": "No worry, I dey help you. Make we look into this together.\n",
+        "distressed_open": "I understand say you dey suffer. Make I help you with this.\n",
+        "confused_open": "No worry, I go explain am well well for you.\n",
+        "urgent_open": "I hear you. Make we act quick.\n",
+        "skeptical_open": "I understand your concern. Make I explain the evidence.\n",
+        "followup_open": "Okay, I don note wetin you talk before.\n",
+        "followup_topics": "I don note say we talk about {topics} before.\n",
+        "topic_note": "\nNote: {topics} fit dey related.",
+        "reassuring_close": "\nYou go dey alright. Just follow the treatment.",
+        "reassuring_close_elderly": "\nYou go dey alright. Just follow wetin I talk.",
+        "reassuring_close_child": "\nYour pikin go dey alright. Just follow the medicine.",
+        "encouraging_close": "\nIf e no dey better in 2-3 days, come back make we check am again.",
+        "urgent_close": "\nIf e dey worse, go hospital now now. No wait!",
+        "gentle_close": "\nTake your time. If you get any question, ask me.",
+        # Follow-up question suggestions
+        "suggest_cough": "E dey cough?",
+        "suggest_stomach": "Stomach dey run?",
+        "suggest_breathing": "E dey find am hard to breathe?",
+        "suggest_vomit": "E dey vomit too?",
+        "suggest_fever": "E get fever?",
+    },
+    "en": {
+        "anxious_open": "Don't worry, I'm here to help. Let's look into this together.\n",
+        "distressed_open": "I understand you're in pain. Let me help you with this.\n",
+        "confused_open": "Don't worry, I'll explain this clearly for you.\n",
+        "urgent_open": "I hear you. Let's act quickly.\n",
+        "skeptical_open": "I understand your concern. Let me explain the evidence.\n",
+        "followup_open": "Okay, I've noted what you mentioned before.\n",
+        "followup_topics": "I've noted we discussed {topics} before.\n",
+        "topic_note": "\nNote: {topics} may be related.",
+        "reassuring_close": "\nYou'll be alright. Just follow the treatment.",
+        "reassuring_close_elderly": "\nYou'll be alright. Just follow the advice.",
+        "reassuring_close_child": "\nYour child will be alright. Just follow the medicine.",
+        "encouraging_close": "\nIf it doesn't improve in 2-3 days, come back and we'll check again.",
+        "urgent_close": "\nIf it gets worse, go to the hospital immediately. Don't wait!",
+        "gentle_close": "\nTake your time. If you have any questions, ask me.",
+        # Follow-up question suggestions
+        "suggest_cough": "Is there a cough?",
+        "suggest_stomach": "Is there diarrhoea?",
+        "suggest_breathing": "Is there difficulty breathing?",
+        "suggest_vomit": "Is there vomiting too?",
+        "suggest_fever": "Is there a fever?",
+    },
+}
+
+
+# ---------------------------------------------------------------------------
+# Message
 # ---------------------------------------------------------------------------
 
 @dataclass
@@ -136,27 +182,51 @@ class ClinicalMessage:
     def has_tone(self, tag: ToneTag) -> bool:
         return tag in self.tone_tags
 
+    def to_dict(self) -> dict:
+        """Serialize for persistence."""
+        return {
+            "role": self.role,
+            "content": self.content,
+            "emotion": self.emotion.value if self.emotion else None,
+            "tone_tags": [t.value for t in self.tone_tags],
+            "metadata": self.metadata,
+            "timestamp": self.timestamp,
+            "detected_topics": self.detected_topics,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "ClinicalMessage":
+        """Deserialize from persistence."""
+        return cls(
+            role=d["role"],
+            content=d["content"],
+            emotion=EmotionalState(d["emotion"]) if d.get("emotion") else None,
+            tone_tags=[ToneTag(t) for t in d.get("tone_tags", [])],
+            metadata=d.get("metadata", {}),
+            timestamp=d.get("timestamp", 0),
+            detected_topics=d.get("detected_topics", []),
+        )
+
 
 # ---------------------------------------------------------------------------
-# Conversation (adapted from Fish Audio's Conversation class)
+# Conversation with persistence
 # ---------------------------------------------------------------------------
 
 class ClinicalConversation:
-    """Manages multi-turn clinical dialogue history with topic tracking."""
+    """Manages multi-turn clinical dialogue with topic tracking and persistence."""
 
     def __init__(self, messages: list[ClinicalMessage] = None):
         self.messages: list[ClinicalMessage] = messages or []
         self._emotion_history: list[EmotionalState] = []
-        self._topic_stack: list[str] = []  # Active discussion topics
-        self._discussed_topics: set[str] = set()  # All topics ever mentioned
-        self._mentioned_symptoms: set[str] = set()  # Symptoms already covered
+        self._topic_stack: list[str] = []
+        self._discussed_topics: set[str] = set()
+        self._mentioned_symptoms: set[str] = set()
 
     def append(self, message: ClinicalMessage):
         """Add a message and auto-track topics from patient input."""
         self.messages.append(message)
         if message.emotion:
             self._emotion_history.append(message.emotion)
-        # Auto-detect topics from patient messages
         if message.role == "patient":
             topics = self._extract_topics(message.content)
             message.detected_topics = topics
@@ -166,7 +236,6 @@ class ClinicalConversation:
                 self._mentioned_symptoms.add(t)
 
     def _extract_topics(self, text: str) -> list[str]:
-        """Extract symptom topics from text."""
         text_lower = text.lower()
         found = []
         for topic, keywords in SYMPTOM_KEYWORDS.items():
@@ -175,14 +244,8 @@ class ClinicalConversation:
         return found
 
     def _push_topic(self, topic: str):
-        """Push topic to stack if not already active."""
         if topic not in self._topic_stack:
             self._topic_stack.append(topic)
-
-    def pop_topic(self):
-        """Pop the most recent topic."""
-        if self._topic_stack:
-            self._topic_stack.pop()
 
     def get_last_n(self, n: int = 5) -> list[ClinicalMessage]:
         return self.messages[-n:]
@@ -191,15 +254,9 @@ class ClinicalConversation:
         return [m for m in self.messages if m.role == "patient"]
 
     def get_discussed_topics(self) -> list[str]:
-        """Get all topics that have been discussed."""
         return list(self._discussed_topics)
 
     def get_unmentioned_symptoms(self, query_symptoms: list[str]) -> list[str]:
-        """For a given set of query symptoms, return ones NOT yet discussed.
-        
-        This enables smart follow-ups: if the patient mentioned fever and
-        we know malaria often comes with headache, we can ask about headache.
-        """
         return [s for s in query_symptoms if s not in self._mentioned_symptoms]
 
     # ------------------------------------------------------------------
@@ -236,11 +293,9 @@ class ClinicalConversation:
     # ------------------------------------------------------------------
 
     def build_clinical_context(self) -> dict:
-        """Build rich clinical context from conversation history."""
         emotion = self.get_emotional_arc()
         turn_count = len(self.messages)
         patient_msgs = self.get_patient_messages()
-
         is_followup = turn_count > 2
         is_repeated = self._is_repeated_concern()
 
@@ -283,7 +338,32 @@ class ClinicalConversation:
         return False
 
     # ------------------------------------------------------------------
-    # Conversation state
+    # Persistence
+    # ------------------------------------------------------------------
+
+    def to_dict(self) -> dict:
+        """Serialize entire conversation for JSON persistence."""
+        return {
+            "messages": [m.to_dict() for m in self.messages],
+            "emotion_history": [e.value for e in self._emotion_history],
+            "topic_stack": self._topic_stack,
+            "discussed_topics": list(self._discussed_topics),
+            "mentioned_symptoms": list(self._mentioned_symptoms),
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "ClinicalConversation":
+        """Restore conversation from JSON."""
+        conv = cls()
+        conv.messages = [ClinicalMessage.from_dict(m) for m in d.get("messages", [])]
+        conv._emotion_history = [EmotionalState(e) for e in d.get("emotion_history", [])]
+        conv._topic_stack = d.get("topic_stack", [])
+        conv._discussed_topics = set(d.get("discussed_topics", []))
+        conv._mentioned_symptoms = set(d.get("mentioned_symptoms", []))
+        return conv
+
+    # ------------------------------------------------------------------
+    # State
     # ------------------------------------------------------------------
 
     @property
@@ -309,21 +389,42 @@ class ClinicalConversation:
 
 
 # ---------------------------------------------------------------------------
-# Conversational Flow Engine (the main adapter)
+# Conversational Flow Engine
 # ---------------------------------------------------------------------------
 
 class ConversationalFlow:
-    """Adapts Fish Audio's conversational patterns for clinical dialogue.
+    """Language-aware conversational flow with persistence.
 
-    v2 improvements:
-    - Active topic tracking: auto-detect and remember symptoms
-    - Adaptive response length: short for urgent, detailed for calm
+    All phrases adapt to the current language setting.
+    Conversation history is saved to disk and restored on restart.
     """
 
-    def __init__(self):
+    def __init__(self, persistence_path: str = None):
         self.conversation = ClinicalConversation()
+        self._lang = "pidgin"
+        self._persistence_path = persistence_path or os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "data", "conversation_history.json"
+        )
+
+    def set_language(self, lang: str):
+        """Update the language for all future phrases."""
+        self._lang = lang if lang in PHRASES else "pidgin"
+
+    def _phrase(self, key: str) -> str:
+        """Get a phrase in the current language."""
+        return PHRASES.get(self._lang, PHRASES["pidgin"]).get(key, "")
+
+    def _phrase_format(self, key: str, **kwargs) -> str:
+        """Get a formatted phrase in the current language."""
+        template = self._phrase(key)
+        try:
+            return template.format(**kwargs)
+        except (KeyError, IndexError):
+            return template
 
     def start(self):
+        """Start a new conversation (clears previous)."""
         self.conversation.clear()
         self.conversation.append(ClinicalMessage(
             role="system",
@@ -364,10 +465,8 @@ class ConversationalFlow:
             tags.append(ToneTag.GENTLE)
             if ToneTag.SIMPLE not in tags:
                 tags.append(ToneTag.SIMPLE)
-
         if context["is_child"]:
             tags.append(ToneTag.GENTLE)
-
         if context["is_followup"] and context["is_repeated"]:
             tags.append(ToneTag.REASSURING)
             tags.append(ToneTag.ENCOURAGING)
@@ -375,39 +474,26 @@ class ConversationalFlow:
         return list(dict.fromkeys(tags))
 
     # ------------------------------------------------------------------
-    # Adaptive response length (Fish Audio pattern)
+    # Adaptive response length
     # ------------------------------------------------------------------
 
     def _determine_response_length(self, tone_tags: list[ToneTag]) -> str:
-        """Determine how detailed the response should be.
-
-        Fish Audio adapts response pacing based on context:
-        - Urgent: short, punchy, action-oriented
-        - Calm/educational: longer, explanatory
-        - Confused: medium, with examples
-        """
         if ToneTag.URGENT in tone_tags:
-            return "short"      # 1-2 sentences max
+            return "short"
         if ToneTag.DIRECT in tone_tags:
-            return "medium"     # 2-3 sentences
+            return "medium"
         if ToneTag.SIMPLE in tone_tags:
-            return "medium"     # Simple but complete
+            return "medium"
         if ToneTag.GENTLE in tone_tags:
-            return "detailed"   # Thorough, patient
+            return "detailed"
         if ToneTag.PROFESSIONAL in tone_tags:
-            return "detailed"   # Full clinical detail
+            return "detailed"
         return "medium"
 
     def _trim_response(self, text: str, max_length: str) -> str:
-        """Trim a response to match the target length.
-
-        If the answer is too long for an urgent situation,
-        extract only the most critical lines.
-        """
         lines = [l.strip() for l in text.split("\n") if l.strip()]
 
         if max_length == "short":
-            # Keep only lines with action words (give, take, refer, go)
             action_lines = []
             for line in lines:
                 lower = line.lower()
@@ -417,17 +503,29 @@ class ConversationalFlow:
                     action_lines.append(line)
             if action_lines:
                 return "\n".join(action_lines[:3])
-            # Fallback: just the first 2 lines
             return "\n".join(lines[:2])
 
         if max_length == "medium":
             return "\n".join(lines[:6])
 
-        # detailed — return everything
         return text
 
-    def format_response(self, clinical_answer: str, tone_tags: list[ToneTag] = None) -> str:
-        """Format a clinical answer with adaptive tone and length."""
+    # ------------------------------------------------------------------
+    # Format response (language-aware)
+    # ------------------------------------------------------------------
+
+    def format_response(self, clinical_answer: str, tone_tags: list[ToneTag] = None,
+                        lang: str = None) -> str:
+        """Format clinical answer with language-appropriate conversational tone.
+
+        Args:
+            clinical_answer: The clinical content.
+            tone_tags: Override tone tags (auto-detected if None).
+            lang: Override language (uses stored language if None).
+        """
+        if lang:
+            self._lang = lang if lang in PHRASES else "pidgin"
+
         if tone_tags is None:
             tone_tags = self.determine_tone()
 
@@ -435,56 +533,55 @@ class ConversationalFlow:
         emotion = context["emotion"]
         lines = []
 
-        # --- Opening line based on emotion ---
+        # Opening line based on emotion (in current language)
         if emotion == EmotionalState.ANXIOUS:
-            lines.append("No worry, I dey help you. Make we look into this together.\n")
+            lines.append(self._phrase("anxious_open"))
         elif emotion == EmotionalState.DISTRESSED:
-            lines.append("I understand say you dey suffer. Make I help you with this.\n")
+            lines.append(self._phrase("distressed_open"))
         elif emotion == EmotionalState.CONFUSED:
-            lines.append("No worry, I go explain am well well for you.\n")
+            lines.append(self._phrase("confused_open"))
         elif emotion == EmotionalState.URGENT:
-            lines.append("I hear you. Make we act quick.\n")
+            lines.append(self._phrase("urgent_open"))
         elif emotion == EmotionalState.SKEPTICAL:
-            lines.append("I understand your concern. Make I explain the evidence.\n")
+            lines.append(self._phrase("skeptical_open"))
         elif context["is_followup"]:
-            # Active topic awareness: mention what we already discussed
             topics = context["discussed_topics"]
             if topics:
                 topic_str = ", ".join(topics[:3])
-                lines.append(f"I don note say we talk about {topic_str} before.\n")
+                lines.append(self._phrase_format("followup_topics", topics=topic_str))
             else:
-                lines.append("Okay, I don note wetin you talk before.\n")
+                lines.append(self._phrase("followup_open"))
 
-        # --- Clinical answer (with adaptive length) ---
+        # Clinical answer with adaptive length
         resp_length = self._determine_response_length(tone_tags)
         trimmed = self._trim_response(clinical_answer, resp_length)
         lines.append(trimmed)
 
-        # --- Active topic context: suggest what else to check ---
+        # Active topic context
         if resp_length in ("medium", "detailed") and context["mentioned_symptoms"]:
             symptoms = context["mentioned_symptoms"]
             if len(symptoms) >= 2:
-                lines.append(f"\nNote: {', '.join(symptoms)} fit dey related.")
+                lines.append(self._phrase_format("topic_note", topics=", ".join(symptoms)))
 
-        # --- Closing based on tone ---
+        # Closing based on tone (in current language)
         if ToneTag.REASSURING in tone_tags:
             if context["is_elderly"]:
-                lines.append("\nYou go dey alright. Just follow wetin I talk.")
+                lines.append(self._phrase("reassuring_close_elderly"))
             elif context["is_child"]:
-                lines.append("\nYour pikin go dey alright. Just follow the medicine.")
+                lines.append(self._phrase("reassuring_close_child"))
             else:
-                lines.append("\nYou go dey alright. Just follow the treatment.")
+                lines.append(self._phrase("reassuring_close"))
 
         if ToneTag.ENCOURAGING in tone_tags:
-            lines.append("\nIf e no dey better in 2-3 days, come back make we check am again.")
+            lines.append(self._phrase("encouraging_close"))
 
         if ToneTag.URGENT in tone_tags:
-            lines.append("\nIf e dey worse, go hospital now now. No wait!")
+            lines.append(self._phrase("urgent_close"))
 
         if ToneTag.GENTLE in tone_tags:
-            lines.append("\nTake your time. If you get any question, ask me.")
+            lines.append(self._phrase("gentle_close"))
 
-        # Store the healthworker response
+        # Store healthworker response
         self.conversation.append(ClinicalMessage(
             role="healthworker",
             content=clinical_answer,
@@ -494,39 +591,33 @@ class ConversationalFlow:
         return "\n".join(lines)
 
     # ------------------------------------------------------------------
-    # Smart follow-ups based on topic tracking
+    # Smart follow-ups
     # ------------------------------------------------------------------
 
     def get_smart_followup_suggestions(self, current_symptoms: list[str] = None) -> list[str]:
-        """Suggest follow-up questions based on what hasn't been discussed yet.
-
-        Uses active topic tracking to avoid re-asking about things already covered.
-        Returns suggested questions the healthworker could ask.
-        """
+        """Suggest follow-up questions in the current language."""
         context = self.conversation.build_clinical_context()
         suggestions = []
 
-        # Don't suggest if patient is urgent/distressed
         if context["emotion"] in (EmotionalState.URGENT, EmotionalState.DISTRESSED):
             return suggestions
 
         mentioned = set(context["mentioned_symptoms"])
 
-        # Suggest related symptoms that haven't been mentioned
         if "fever" in mentioned and "cough" not in mentioned:
-            suggestions.append("E dey cough?")
+            suggestions.append(self._phrase("suggest_cough"))
         if "fever" in mentioned and "vomiting" not in mentioned:
-            suggestions.append("E dey vomit?")
+            suggestions.append(self._phrase("suggest_vomit"))
         if "cough" in mentioned and "breathing" not in mentioned:
-            suggestions.append("E dey find am hard to breathe?")
+            suggestions.append(self._phrase("suggest_breathing"))
         if "diarrhoea" in mentioned and "vomiting" not in mentioned:
-            suggestions.append("E dey vomit too?")
+            suggestions.append(self._phrase("suggest_vomit"))
         if "pain" in mentioned and "fever" not in mentioned:
-            suggestions.append("E get fever?")
+            suggestions.append(self._phrase("suggest_fever"))
         if "child_health" in mentioned and "diarrhoea" not in mentioned:
-            suggestions.append("Stomach dey run?")
+            suggestions.append(self._phrase("suggest_stomach"))
 
-        return suggestions[:3]  # Max 3 suggestions
+        return suggestions[:3]
 
     def get_conversation_summary(self) -> str:
         context = self.conversation.build_clinical_context()
@@ -535,6 +626,7 @@ class ConversationalFlow:
             f"Patient emotion: {context['emotion'].value}",
             f"Topics discussed: {', '.join(context['discussed_topics']) or 'none'}",
             f"Active topics: {', '.join(context['topic_stack']) or 'none'}",
+            f"Language: {self._lang}",
             f"Is follow-up: {context['is_followup']}",
             f"Is repeated concern: {context['is_repeated']}",
         ]
@@ -553,6 +645,48 @@ class ConversationalFlow:
         if context["is_repeated"]:
             return False
         return True
+
+    # ------------------------------------------------------------------
+    # Persistence
+    # ------------------------------------------------------------------
+
+    def save(self):
+        """Save conversation to disk for persistence across sessions."""
+        try:
+            data = self.conversation.to_dict()
+            data["_lang"] = self._lang
+            data["_saved_at"] = time.time()
+            os.makedirs(os.path.dirname(self._persistence_path), exist_ok=True)
+            with open(self._persistence_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass  # Don't crash if save fails
+
+    def load(self) -> bool:
+        """Restore conversation from disk. Returns True if loaded."""
+        try:
+            if not os.path.isfile(self._persistence_path):
+                return False
+            with open(self._persistence_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            # Don't restore conversations older than 24 hours
+            saved_at = data.get("_saved_at", 0)
+            if time.time() - saved_at > 86400:
+                os.remove(self._persistence_path)
+                return False
+            self.conversation = ClinicalConversation.from_dict(data)
+            self._lang = data.get("_lang", "pidgin")
+            return True
+        except Exception:
+            return False
+
+    def clear_persistence(self):
+        """Delete saved conversation."""
+        try:
+            if os.path.isfile(self._persistence_path):
+                os.remove(self._persistence_path)
+        except Exception:
+            pass
 
 
 # ---------------------------------------------------------------------------
@@ -577,75 +711,79 @@ if __name__ == "__main__":
     import sys
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+    print("Conversational Flow Engine v3 — CLI Test\n")
+    print("Features: language-aware + persistence + topic tracking + adaptive length\n")
+
+    # Test 1: Pidgin mode
+    print("=" * 60)
+    print("TEST 1: Pidgin mode — anxious mother")
+    print("=" * 60)
     flow = ConversationalFlow()
+    flow.set_language("pidgin")
     flow.start()
 
-    print("Conversational Flow Engine v2 — CLI Test\n")
-    print("Features: active topic tracking + adaptive response length\n")
-
-    # Test 1: Anxious mother
-    print("=" * 60)
-    print("TEST 1: Anxious mother with sick child")
-    print("=" * 60)
-    msgs = [
-        "my pikin get hot body i dey scared",
-        "e dey vomit too",
-        "is it serious? please help me",
-    ]
-    for text in msgs:
-        msg = flow.process_patient_input(text)
-        print(f"  Patient: {text}")
-        print(f"    Emotion: {msg.emotion.value} | Topics: {msg.detected_topics}")
+    for text in ["my pikin get hot body i dey scared", "e dey vomit too"]:
+        flow.process_patient_input(text)
 
     tone = flow.determine_tone()
-    print(f"\n  Tone: {[t.value for t in tone]}")
-    print(f"  Topics discussed: {flow.conversation.get_discussed_topics()}")
-    answer = flow.format_response("Paracetamol 10mg/kg. Keep hydrated. ORS if diarrhoea.", tone)
-    print(f"\n  Response:\n{answer}\n")
+    answer = flow.format_response("Paracetamol 10mg/kg. Keep hydrated.", tone)
+    print(f"  {answer}\n")
 
-    # Test 2: Smart follow-ups
+    # Test 2: English mode — same scenario
     print("=" * 60)
-    print("TEST 2: Smart follow-up suggestions")
-    print("=" * 60)
-    suggestions = flow.get_smart_followup_suggestions()
-    print(f"  Suggestions: {suggestions}\n")
-
-    # Test 3: Urgent (adaptive length)
-    print("=" * 60)
-    print("TEST 3: Urgent — short response")
+    print("TEST 2: English mode — same scenario")
     print("=" * 60)
     flow2 = ConversationalFlow()
+    flow2.set_language("en")
     flow2.start()
-    flow2.process_patient_input("emergency difficulty breathing now now")
-    tone2 = flow2.determine_tone()
-    print(f"  Tone: {[t.value for t in tone2]}")
-    long_answer = (
-        "Difficulty breathing is a serious symptom. You should:\n"
-        "1. Give the patient a sitting position\n"
-        "2. Check if there is wheezing\n"
-        "3. If the patient is a child, give salbutamol inhaler\n"
-        "4. Monitor oxygen levels if possible\n"
-        "5. If no improvement in 15 minutes, refer to hospital\n"
-        "6. Give paracetamol for any fever\n"
-        "7. Keep the patient calm\n"
-    )
-    answer2 = flow2.format_response(long_answer, tone2)
-    print(f"\n  Response (trimmed for urgency):\n{answer2}\n")
 
-    # Test 4: Topic tracking across conversation
+    for text in ["my child has fever and I'm worried", "also vomiting"]:
+        flow2.process_patient_input(text)
+
+    tone2 = flow2.determine_tone()
+    answer2 = flow2.format_response("Paracetamol 10mg/kg. Keep hydrated.", tone2)
+    print(f"  {answer2}\n")
+
+    # Test 3: Persistence
     print("=" * 60)
-    print("TEST 4: Topic tracking across turns")
+    print("TEST 3: Persistence save/load")
     print("=" * 60)
+    flow.save()
+    print(f"  Saved to: {flow._persistence_path}")
+
     flow3 = ConversationalFlow()
-    flow3.start()
-    turns = [
-        "i get headache and fever",
-        "e dey vomit too",
-        "i dey feel dizzy",
-    ]
-    for text in turns:
-        flow3.process_patient_input(text)
-    ctx = flow3.conversation.build_clinical_context()
-    print(f"  Topics discussed: {ctx['discussed_topics']}")
-    print(f"  Active topics: {ctx['topic_stack']}")
-    print(f"  Mentioned symptoms: {ctx['mentioned_symptoms']}")
+    loaded = flow3.load()
+    print(f"  Loaded: {loaded}")
+    print(f"  Messages restored: {len(flow3.conversation.messages)}")
+    print(f"  Topics restored: {flow3.conversation.get_discussed_topics()}")
+    print(f"  Language restored: {flow3._lang}")
+    flow3.clear_persistence()
+    print("  Cleaned up persistence file.\n")
+
+    # Test 4: Urgent — short response
+    print("=" * 60)
+    print("TEST 4: Urgent — adaptive short response")
+    print("=" * 60)
+    flow4 = ConversationalFlow()
+    flow4.set_language("en")
+    flow4.start()
+    flow4.process_patient_input("emergency difficulty breathing now now")
+    tone4 = flow4.determine_tone()
+    long_answer = (
+        "Difficulty breathing is serious. You should:\n"
+        "1. Give sitting position\n"
+        "2. Check for wheezing\n"
+        "3. Give salbutamol if available\n"
+        "4. Monitor for 15 minutes\n"
+        "5. Refer to hospital if no improvement\n"
+    )
+    answer4 = flow4.format_response(long_answer, tone4)
+    print(f"  {answer4}\n")
+
+    # Test 5: Smart follow-ups in both languages
+    print("=" * 60)
+    print("TEST 5: Smart follow-ups")
+    print("=" * 60)
+    print(f"  Pidgin: {flow.get_smart_followup_suggestions()}")
+    flow2.set_language("en")
+    print(f"  English: {flow2.get_smart_followup_suggestions()}")
