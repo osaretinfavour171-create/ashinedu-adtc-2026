@@ -293,28 +293,32 @@ class Orchestrator:
 
     # ------------------------------------------------------------------
     def _ensure_services(self) -> None:
-        """Check services and restart any that have crashed."""
+        """Check services — only auto-restart on first run, not on every query.
+
+        On subsequent queries, just note if a service is down.
+        Use the 'restart' command to manually restart services.
+        """
         if self.docreader and not self.docreader.is_ready():
-            print(f"\n  {random.choice(RECOVERING_TIPS)}")
-            log.info("DocReader is down, attempting restart...")
-            if _try_start_docreader():
-                log.info("DocReader restarted successfully.")
-                print("  \u2705 Data server is back!\n")
-            else:
-                log.warning("DocReader restart failed.")
-                print("  \u26a0\ufe0f  Data server could not restart. Drug lookups may not work.\n")
+            if not hasattr(self, '_docreader_warned'):
+                self._docreader_warned = True
+                log.info("DocReader is down, attempting restart...")
+                if _try_start_docreader():
+                    log.info("DocReader restarted successfully.")
+                else:
+                    log.warning("DocReader restart failed.")
+                    print("  \u26a0\ufe0f  Data server not available. Use 'restart' to try again.\n")
+            # If already warned, don't block — just skip
 
         if self.llm and not self.llm.is_ready():
-            print(f"\n  {random.choice(RECOVERING_TIPS)}")
-            log.info("Model server is down, attempting restart...")
-            print("  While I dey load, here are some health tips:\n")
-            _show_health_tips(20)
-            if _try_start_llm():
-                log.info("Model server restarted successfully.")
-                print("  \u2705 Clinical brain is back!\n")
-            else:
-                log.warning("Model server restart failed.")
-                print("  \u26a0\ufe0f  Clinical brain could not restart. Drug interactions still work.\n")
+            if not hasattr(self, '_llm_warned'):
+                self._llm_warned = True
+                log.info("Model server is down, attempting restart...")
+                if _try_start_llm():
+                    log.info("Model server restarted successfully.")
+                else:
+                    log.warning("Model server restart failed.")
+                    print("  \u26a0\ufe0f  Clinical brain not available. Graph engine still works. Use 'restart' to try again.\n")
+            # If already warned, don't block — just skip
 
     def answer(self, raw: str, patient_ctx: PatientContext = None) -> tuple[str, str]:
         """Full pipeline for one user input.
@@ -708,14 +712,39 @@ def main(argv=None):
             orch.cache.clear()
             print("Cache cleared. All queries will be re-processed.")
             continue
+        if low in ("restart", "restart services"):
+            print("\n  Restarting services...")
+            orch._docreader_warned = False
+            orch._llm_warned = False
+            orch._ensure_services()
+            print(orch.status())
+            continue
+        # Language switching — catch natural patterns
+        _lang_switched = False
         if low.startswith("lang ") or low.startswith("language "):
             new_lang = low.split(None, 1)[-1].strip()
+            _lang_switched = True
+        elif low in ("pidgin", "use pidgin", "switch to pidgin", "change to pidgin",
+                     "use pidgin english", "switch to pidgin english"):
+            new_lang = "pidgin"
+            _lang_switched = True
+        elif low in ("english", "use english", "switch to english", "change to english",
+                     "use en", "switch to en", "change to en"):
+            new_lang = "en"
+            _lang_switched = True
+        elif "pidgin" in low and any(w in low for w in ("switch", "change", "use", "set")):
+            new_lang = "pidgin"
+            _lang_switched = True
+        elif "english" in low and any(w in low for w in ("switch", "change", "use", "set")):
+            new_lang = "en"
+            _lang_switched = True
+        if _lang_switched:
             if new_lang in ("pidgin", "en"):
                 orch.lang = new_lang
                 lang_name = LANG_NAMES.get(new_lang, new_lang)
                 print(f"  Language changed to: {lang_name}. All responses will now use this language.")
             else:
-                print("  Available languages: pidgin, en, hausa, yoruba")
+                print("  Available languages: pidgin, en")
             continue
         if low in ("follow-up", "followup", "checkup", "check up"):
             result = orch.followup.run_followup(lang=orch.lang)
