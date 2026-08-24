@@ -1,6 +1,6 @@
-"""Simple web UI for PidginPharma.
+"""Simple web UI for Ashinedu.
 
-A lightweight Flask web interface that makes PidginPharma accessible
+A lightweight Flask web interface that makes Ashinedu accessible
 to community health workers who don't use the terminal.
 
 Features:
@@ -48,7 +48,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PidginPharma - Clinical Decision Support</title>
+<title>Ashinedu - Clinical Decision Support</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -108,7 +108,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
 <body>
 <div class="header">
   <div>
-    <h1>&#x1F3E5; PidginPharma</h1>
+    <h1>&#x1F3E5; Ashinedu</h1>
     <div class="subtitle">Offline Clinical Decision Support for Nigerian CHEWs</div>
   </div>
 </div>
@@ -123,7 +123,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
 </div>
 
 <div class="chat" id="chat">
-  <div class="msg system">Welcome to PidginPharma. Type your question in English or Pidgin.</div>
+  <div class="msg system">Welcome to Ashinedu. Type your question in English or Pidgin.</div>
 </div>
 
 <div class="input-area">
@@ -408,11 +408,11 @@ def intake_submit():
 
 @app.route("/api/health")
 def health():
-    return jsonify({"ok": True, "service": "PidginPharma Web UI"})
+    return jsonify({"ok": True, "service": "Ashinedu Web UI"})
 
 
 def main():
-    parser = argparse.ArgumentParser(description="PidginPharma Web UI")
+    parser = argparse.ArgumentParser(description="Ashinedu Web UI")
     parser.add_argument("--port", type=int, default=5000)
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--no-model", action="store_true")
@@ -425,7 +425,7 @@ def main():
         use_docreader=not args.no_docreader,
     )
 
-    print(f"\n  PidginPharma Web UI starting on http://{args.host}:{args.port}")
+    print(f"\n  Ashinedu Web UI starting on http://{args.host}:{args.port}")
     print(f"  Open in your browser to use the clinical assistant.\n")
     app.run(host=args.host, port=args.port, debug=False)
 

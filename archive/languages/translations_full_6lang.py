@@ -1,4 +1,4 @@
-"""Translations for PidginPharma.
+"""Translations for Ashinedu.
 
 Supports 6 languages:
   - pidgin: Nigerian Pidgin English (default)

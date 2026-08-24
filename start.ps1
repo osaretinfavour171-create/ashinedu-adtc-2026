@@ -1,4 +1,4 @@
-# PidginPharma - PowerShell startup script
+# Ashinedu - PowerShell startup script
 # Starts all services and opens the REPL.
 #
 # Usage: powershell -ExecutionPolicy Bypass -File start.ps1
@@ -40,13 +40,13 @@ function Test-Port {
 }
 
 Write-Host ""
-Write-Host "  PidginPharma Starting..." -ForegroundColor Cyan
+Write-Host "  Ashinedu Starting..." -ForegroundColor Cyan
 Write-Host ""
 
 # --- 1. DocReader ---
 if (-not (Test-Path $DOCREADER_BIN)) {
     Write-Host "  ERROR: docreader.exe not found at $DOCREADER_BIN" -ForegroundColor Red
-    Write-Host "  Please ask your ICT support person to reinstall PidginPharma." -ForegroundColor Yellow
+    Write-Host "  Please ask your ICT support person to reinstall Ashinedu." -ForegroundColor Yellow
     Write-Host "  If this is an emergency, please refer the patient to hospital." -ForegroundColor Red
     exit 1
 }

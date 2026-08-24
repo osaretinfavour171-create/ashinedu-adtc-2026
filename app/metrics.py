@@ -1,4 +1,4 @@
-"""Query metrics tracker for PidginPharma.
+"""Query metrics tracker for Ashinedu.
 
 Tracks response times, query counts, error rates, and popular queries.
 Data is saved to a local JSON file on exit and can be viewed via the
@@ -23,7 +23,7 @@ _METRICS_FILE = os.path.join(_TOOLS_DIR, "metrics.json")
 
 
 class Metrics:
-    """Track query metrics across a PidginPharma session."""
+    """Track query metrics across a Ashinedu session."""
 
     def __init__(self, persist_path: str = _METRICS_FILE):
         self._path = persist_path
@@ -105,7 +105,7 @@ class Metrics:
         slowest = max(rt) if rt else 0
 
         lines = [
-            "=== PidginPharma Session Stats ===",
+            "=== Ashinedu Session Stats ===",
             f"Total queries:  {total}",
             f"Errors:         {errors}",
             f"Avg response:   {avg_time:.1f}s",

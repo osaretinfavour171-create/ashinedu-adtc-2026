@@ -1,4 +1,4 @@
-"""Voice support for PidginPharma.
+"""Voice support for Ashinedu.
 
 Provides speech-to-text (STT) and text-to-speech (TTS) capabilities
 for community health workers who cannot type.
@@ -30,7 +30,7 @@ except ImportError:
 
 
 class VoiceEngine:
-    """Handles voice input/output for PidginPharma."""
+    """Handles voice input/output for Ashinedu."""
 
     def __init__(self):
         self._tts_engine = None

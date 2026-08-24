@@ -9,7 +9,7 @@ import json
 import logging
 import urllib.request
 
-log = logging.getLogger("pidginpharma.docreader")
+log = logging.getLogger("ashinedu.docreader")
 
 DEFAULT_DR_URL = "http://127.0.0.1:8765"
 

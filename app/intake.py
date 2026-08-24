@@ -1,4 +1,4 @@
-"""Clinical intake flow for PidginPharma.
+"""Clinical intake flow for Ashinedu.
 
 When a user describes symptoms (rather than asking a direct drug question),
 this module guides them through a structured patient intake to collect:

@@ -1,4 +1,4 @@
-"""Follow-up flow for PidginPharma.
+"""Follow-up flow for Ashinedu.
 
 After the initial consultation and treatment, this module tracks whether
 the patient improved. It can be triggered by the CHEW typing "follow up"

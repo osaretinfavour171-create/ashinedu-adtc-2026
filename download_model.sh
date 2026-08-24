@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PidginPharma - download models and toolchains (run once, needs internet).
+# Ashinedu - download models and toolchains (run once, needs internet).
 #
 # Downloads:
 #   models/medgemma-1.5-4b-it-Q8_0.gguf        (primary model, ~4.4 GB)

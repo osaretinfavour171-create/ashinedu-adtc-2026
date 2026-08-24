@@ -1,4 +1,4 @@
-"""Symptom detector for PidginPharma.
+"""Symptom detector for Ashinedu.
 
 Determines whether a user's query is:
   1. A SYMPTOM query (needs intake flow for accurate diagnosis)

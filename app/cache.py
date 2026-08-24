@@ -1,4 +1,4 @@
-"""LRU response cache for PidginPharma.
+"""LRU response cache for Ashinedu.
 
 Caches normalized query -> answer mappings so repeated queries return
 instantly without hitting the LLM. Key design decisions:

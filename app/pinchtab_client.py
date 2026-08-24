@@ -23,7 +23,7 @@ import shutil
 import subprocess
 import time
 
-log = logging.getLogger("pidginpharma.pinchtab")
+log = logging.getLogger("ashinedu.pinchtab")
 
 DEFAULT_HTML_BASE = "http://127.0.0.1:8766"
 STG_PAGE = "STG_conditions.html"

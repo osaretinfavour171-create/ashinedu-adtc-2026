@@ -1,4 +1,4 @@
-# PidginPharma
+# Ashinedu
 
 **Offline clinical decision support for Nigerian community health workers.**
 Built for the ADTC 2026 Hackathon.
@@ -10,7 +10,7 @@ Built for the ADTC 2026 Hackathon.
 | Osaretin Favour | [@osaretinfavour171-create](https://github.com/osaretinfavour171-create) | Lead Developer — Pidgin NLP, Orchestrator, LLM Integration |
 | Omotosho Rapheal Omolulu | [@romotosho10](https://github.com/romotosho10) | Co-Developer — DocReader, Security Audit, Testing
 
-PidginPharma helps Community Health Extension Workers (CHEWs) and
+Ashinedu helps Community Health Extension Workers (CHEWs) and
 pharmacists at primary healthcare centres across Nigeria answer clinical
 questions — in English, Nigerian Pidgin, or a mix — using **official
 Nigerian drug formulary data and standard treatment guidelines stored
@@ -123,5 +123,5 @@ tools/                     # docreader.exe, llama.cpp, Go
 tests/                     # unit + integration tests
 ```
 
-> **Clinical disclaimer:** PidginPharma is a decision-support aid. It does
+> **Clinical disclaimer:** Ashinedu is a decision-support aid. It does
 > not replace clinical judgment or referral to a higher-level facility.

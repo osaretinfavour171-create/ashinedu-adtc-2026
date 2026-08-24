@@ -1,4 +1,4 @@
-"""PidginPharma Pidgin language layer.
+"""Ashinedu Pidgin language layer.
 
 normalizer  : Pidgin/English mix -> clean English query
 reformulator: English answer     -> Pidgin-flavoured answer

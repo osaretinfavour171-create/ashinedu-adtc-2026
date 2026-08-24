@@ -1,4 +1,4 @@
-"""Dosage calculator for PidginPharma.
+"""Dosage calculator for Ashinedu.
 
 Uses patient age + weight to compute exact mg/kg doses from the
 Nigeria Essential Medicines List (EML 2020). This is the authoritative

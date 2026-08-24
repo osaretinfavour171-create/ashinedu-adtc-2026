@@ -1,4 +1,4 @@
-# PidginPharma Security Audit Report
+# Ashinedu Security Audit Report
 
 **Audit date:** August 18, 2026
 **Methodology:** Manual code review following Strix pentest methodology (scan, triage, fix, verify)
@@ -6,7 +6,7 @@
 
 ## Context
 
-PidginPharma is an offline clinical decision support system for Nigerian community
+Ashinedu is an offline clinical decision support system for Nigerian community
 health workers. All services bind to `127.0.0.1` (localhost only). The attack surface
 is limited to: (1) local processes on the same machine, and (2) the developer/tester
 interacting with the CLI. There is no public-facing HTTP server, no authentication
@@ -71,7 +71,7 @@ the `--bind 127.0.0.1` flag is critical. Server was already bound correctly.
 **File:** `app/llm.py:LLMClient.__init__()`
 **Impact:** External URL could send clinical queries to a remote server.
 **Fix:** Added startup warning when URL doesn't contain `127.0.0.1` or `localhost`.
-**Verification:** Warning logged via `pidginpharma.llm` logger.
+**Verification:** Warning logged via `ashinedu.llm` logger.
 
 ---
 

@@ -1,4 +1,4 @@
-"""LLM client for PidginPharma.
+"""LLM client for Ashinedu.
 
 Talks to a local llama.cpp server (llama-server) over HTTP on 127.0.0.1.
 Zero network dependency: only localhost.
@@ -13,13 +13,13 @@ import json
 import logging
 import urllib.request
 
-log = logging.getLogger("pidginpharma.llm")
+log = logging.getLogger("ashinedu.llm")
 
 DEFAULT_LLM_URL = "http://127.0.0.1:8080"
 
 # Strong clinical guardrails for the local model.
 SYSTEM_PROMPT = (
-    "You are PidginPharma, an offline clinical decision support assistant for "
+    "You are Ashinedu, an offline clinical decision support assistant for "
     "Nigerian community health workers (CHEWs) and pharmacists in primary "
     "healthcare centres. You follow the official Nigeria Essential Medicines "
     "List and Nigeria Standard Treatment Guidelines.\n\n"
