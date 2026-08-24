@@ -295,17 +295,23 @@ def render_help() -> str:
         lines.append(f"  {'':>8}  {C.DIM}{desc}{C.RESET}")
         lines.append("")
 
-    lines.append(f"  {C.BRIGHT_GREEN}{C.BOLD}COMMANDS{C.RESET}")
+    lines.append(f"  {C.BRIGHT_GREEN}{C.BOLD}COMMANDS{C.RESET}  {C.DIM}(use @ prefix){C.RESET}")
     cmds = [
-        ("help", "Show this help"),
-        ("status", "Check service status"),
-        ("stats", "Session statistics"),
-        ("lang", "Switch Pidgin / English"),
-        ("follow-up", "Track previous patient"),
-        ("exit", "Quit Ashinedu"),
+        ("@lang en", "Switch to English"),
+        ("@lang pidgin", "Switch to Pidgin"),
+        ("@status", "Check service status"),
+        ("@stats", "Session statistics"),
+        ("@clear", "Start new patient"),
+        ("@followup", "Track previous patient"),
+        ("@restart", "Restart services"),
+        ("@help", "Show this help"),
+        ("@exit", "Quit Ashinedu"),
     ]
     for cmd, desc in cmds:
-        lines.append(f"  {C.CYAN}{cmd:>12}{C.RESET}  {C.DIM}{desc}{C.RESET}")
+        lines.append(f"  {C.BRIGHT_CYAN}{cmd:>14}{C.RESET}  {C.DIM}{desc}{C.RESET}")
+    lines.append("")
+    lines.append(f"  {C.DIM}You can also type naturally:{C.RESET}")
+    lines.append(f"  {C.DIM}  'switch to english'  'i want pidgin'{C.RESET}")
 
     return "\n".join(lines)
 

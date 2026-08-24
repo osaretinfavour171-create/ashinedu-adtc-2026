@@ -705,6 +705,80 @@ def main(argv=None):
         if not raw:
             continue
         low = raw.lower()
+
+        # --------------------------------------------------------------
+        # @ commands — direct, fast, no confusion with medical queries
+        # --------------------------------------------------------------
+        if low.startswith("@"):
+            cmd = low[1:].strip()
+            parts = cmd.split(None, 1)
+            cmd_name = parts[0] if parts else ""
+            cmd_arg = parts[1] if len(parts) > 1 else ""
+
+            if cmd_name in ("exit", "quit", "q"):
+                print("Saving session data... Bye bye! Stay safe.")
+                orch.metrics.save()
+                return 0
+
+            if cmd_name in ("help", "h", "?"):
+                print(HELP_TEXT)
+                continue
+
+            if cmd_name == "status":
+                print(orch.status())
+                continue
+
+            if cmd_name == "stats":
+                print(orch.metrics.summary())
+                print()
+                print(orch.cache.stats())
+                continue
+
+            if cmd_name == "lang":
+                if cmd_arg in ("pidgin", "en", "english", "pidgin english"):
+                    new_lang = "pidgin" if cmd_arg.startswith("pidgin") else "en"
+                    orch.lang = new_lang
+                    orch.conversation_flow.set_language(new_lang)
+                    lang_name = LANG_NAMES.get(new_lang, new_lang)
+                    print(f"\n  Language changed to: {lang_name}")
+                    print(orch.status())
+                    print()
+                else:
+                    print("  Usage: @lang pidgin  or  @lang en")
+                continue
+
+            if cmd_name == "clear":
+                orch.conversation_flow.start()
+                orch.conversation_flow.clear_persistence()
+                print("  Conversation cleared. Starting fresh.")
+                continue
+
+            if cmd_name == "clear-cache":
+                orch.cache.clear()
+                print("Cache cleared. All queries will be re-processed.")
+                continue
+
+            if cmd_name == "restart":
+                print("\n  Restarting services...")
+                orch._docreader_warned = False
+                orch._llm_warned = False
+                orch._ensure_services()
+                print(orch.status())
+                continue
+
+            if cmd_name == "followup":
+                result = orch.followup.run_followup(lang=orch.lang)
+                if result:
+                    orch.metrics.record_query("followup", 0, "followup")
+                continue
+
+            # Unknown @ command
+            print(f"  Unknown command: @{cmd_name}. Type @help for available commands.")
+            continue
+
+        # --------------------------------------------------------------
+        # Legacy commands (backward compatible, no @ needed)
+        # --------------------------------------------------------------
         if low in ("exit", "quit", "q"):
             print("Saving session data... Bye bye! Stay safe.")
             orch.metrics.save()
@@ -736,17 +810,15 @@ def main(argv=None):
             orch._ensure_services()
             print(orch.status())
             continue
-        # Language switching — catch natural patterns
+        # Language switching — catch natural language patterns
         _lang_switched = False
         if low.startswith("lang ") or low.startswith("language "):
             new_lang = low.split(None, 1)[-1].strip()
             _lang_switched = True
-        elif low in ("pidgin", "use pidgin", "switch to pidgin", "change to pidgin",
-                     "use pidgin english", "switch to pidgin english"):
+        elif low in ("pidgin", "use pidgin", "switch to pidgin", "change to pidgin"):
             new_lang = "pidgin"
             _lang_switched = True
-        elif low in ("english", "use english", "switch to english", "change to english",
-                     "use en", "switch to en", "change to en"):
+        elif low in ("english", "use english", "switch to english", "change to english"):
             new_lang = "en"
             _lang_switched = True
         elif "pidgin" in low and any(w in low for w in ("switch", "change", "use", "set", "want", "need", "like")):
@@ -761,7 +833,6 @@ def main(argv=None):
                 orch.conversation_flow.set_language(new_lang)
                 lang_name = LANG_NAMES.get(new_lang, new_lang)
                 print(f"\n  Language changed to: {lang_name}")
-                # Show updated status so the language tick box updates
                 print(orch.status())
                 print()
             else:
