@@ -14,6 +14,9 @@ tools/
 __pycache__/
 *.pyc
 
+# Runtime data (session history, not for git)
+app/data/conversation_history.json
+
 # OS
 .DS_Store
 Thumbs.db

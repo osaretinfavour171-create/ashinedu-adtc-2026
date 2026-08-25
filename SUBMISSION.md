@@ -53,6 +53,11 @@ We stopped trying to fine-tune big models and built something different: a **gra
 - **Offline is non-negotiable** — if it doesn't work offline, it doesn't work in rural Nigeria
 - **Binary vectors beat string matching** — bitwise operations are 10,000x faster for symptom matching
 
+## Design Documents
+
+- **[ERD Diagram](docs/design/earlai.erd.json)** — 10 entities, 48 columns, 6 relationships (open in [erd-editor.io](https://erd-editor.io) or VS Code)
+- **[Architecture Diagram](docs/design/architecture.html)** — Full system architecture (open in browser, supports PNG/PDF export)
+
 ## What's next for EARL AI
 
 - Expand from 270 to **500+ conditions**
