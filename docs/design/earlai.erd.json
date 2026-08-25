@@ -1,0 +1,203 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dineug/erd-editor/main/json-schema/schema.json",
+  "version": "3.0.0",
+  "settings": {
+    "width": 3200,
+    "height": 2400,
+    "scrollTop": 0,
+    "scrollLeft": 0,
+    "zoomLevel": 0.7,
+    "show": 6,
+    "databaseName": "earlai_local_data",
+    "canvasType": "ERD",
+    "language": 0,
+    "tableNameCase": 4,
+    "columnNameCase": 4,
+    "bracketType": 1,
+    "relationshipDataTypeSync": true,
+    "relationshipOptimization": true,
+    "columnOrder": [1, 2, 3, 4, 5, 6, 7],
+    "maxWidthComment": 250
+  },
+  "doc": {
+    "tableIds": [
+      "t-condition", "t-clinical-feature", "t-investigation", "t-treatment",
+      "t-drug", "t-drug-interaction", "t-pidgin-term", "t-pidgin-phrase",
+      "t-symptom-bit", "t-session"
+    ],
+    "relationshipIds": ["r-1", "r-2", "r-3", "r-4", "r-5", "r-6"],
+    "indexIds": [],
+    "memoIds": ["m-1"]
+  },
+  "collections": {
+    "tableEntities": {
+      "t-condition": {
+        "id": "t-condition",
+        "name": "condition",
+        "comment": "stg_conditions/*.json — 270 conditions from NSTG 2022",
+        "columnIds": ["c-cond-slug", "c-cond-name", "c-cond-source", "c-cond-intro"],
+        "seqColumnIds": ["c-cond-slug", "c-cond-name", "c-cond-source", "c-cond-intro"],
+        "ui": { "x": 40, "y": 60, "zIndex": 0, "widthName": 140, "widthComment": 220, "color": "#22d3ee" },
+        "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 }
+      },
+      "t-clinical-feature": {
+        "id": "t-clinical-feature",
+        "name": "clinical_feature",
+        "comment": "clinical_features[] per condition",
+        "columnIds": ["c-cf-id", "c-cf-slug", "c-cf-type", "c-cf-features"],
+        "seqColumnIds": ["c-cf-id", "c-cf-slug", "c-cf-type", "c-cf-features"],
+        "ui": { "x": 440, "y": 40, "zIndex": 0, "widthName": 150, "widthComment": 200, "color": "#34d399" },
+        "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 }
+      },
+      "t-investigation": {
+        "id": "t-investigation",
+        "name": "investigation",
+        "comment": "investigations[] + other_investigations[]",
+        "columnIds": ["c-inv-id", "c-inv-slug", "c-inv-name", "c-inv-category"],
+        "seqColumnIds": ["c-inv-id", "c-inv-slug", "c-inv-name", "c-inv-category"],
+        "ui": { "x": 440, "y": 260, "zIndex": 0, "widthName": 130, "widthComment": 200, "color": "#34d399" },
+        "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 }
+      },
+      "t-treatment": {
+        "id": "t-treatment",
+        "name": "treatment",
+        "comment": "treatment.goals + definitive_treatment",
+        "columnIds": ["c-tr-id", "c-tr-slug", "c-tr-goals", "c-tr-definitive", "c-tr-drug-name"],
+        "seqColumnIds": ["c-tr-id", "c-tr-slug", "c-tr-goals", "c-tr-definitive", "c-tr-drug-name"],
+        "ui": { "x": 40, "y": 340, "zIndex": 0, "widthName": 120, "widthComment": 200, "color": "#34d399" },
+        "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 }
+      },
+      "t-drug": {
+        "id": "t-drug",
+        "name": "drug",
+        "comment": "Nigeria Essential Medicines List 2020 (890 drugs)",
+        "columnIds": ["c-drug-id", "c-drug-name", "c-drug-form", "c-drug-strength", "c-drug-adult-dose", "c-drug-child-dose", "c-drug-contra"],
+        "seqColumnIds": ["c-drug-id", "c-drug-name", "c-drug-form", "c-drug-strength", "c-drug-adult-dose", "c-drug-child-dose", "c-drug-contra"],
+        "ui": { "x": 440, "y": 500, "zIndex": 0, "widthName": 160, "widthComment": 240, "color": "#a78bfa" },
+        "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 }
+      },
+      "t-drug-interaction": {
+        "id": "t-drug-interaction",
+        "name": "drug_interaction",
+        "comment": "interactions.json — 164 curated pairs from DDInter v1.0",
+        "columnIds": ["c-di-id", "c-di-a", "c-di-b", "c-di-severity", "c-di-mechanism", "c-di-recommendation", "c-di-source"],
+        "seqColumnIds": ["c-di-id", "c-di-a", "c-di-b", "c-di-severity", "c-di-mechanism", "c-di-recommendation", "c-di-source"],
+        "ui": { "x": 880, "y": 300, "zIndex": 0, "widthName": 170, "widthComment": 240, "color": "#fb7185" },
+        "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 }
+      },
+      "t-pidgin-term": {
+        "id": "t-pidgin-term",
+        "name": "pidgin_term",
+        "comment": "pidgin_glossary.json — 264 medical terms",
+        "columnIds": ["c-pt-id", "c-pt-english", "c-pt-variants"],
+        "seqColumnIds": ["c-pt-id", "c-pt-english", "c-pt-variants"],
+        "ui": { "x": 880, "y": 700, "zIndex": 0, "widthName": 130, "widthComment": 220, "color": "#fbbf24" },
+        "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 }
+      },
+      "t-pidgin-phrase": {
+        "id": "t-pidgin-phrase",
+        "name": "pidgin_phrase",
+        "comment": "pidgin_phrases.json — 475 phrase mappings",
+        "columnIds": ["c-pp-id", "c-pp-phrase", "c-pp-mapping", "c-pp-category"],
+        "seqColumnIds": ["c-pp-id", "c-pp-phrase", "c-pp-mapping", "c-pp-category"],
+        "ui": { "x": 1240, "y": 700, "zIndex": 0, "widthName": 140, "widthComment": 220, "color": "#fbbf24" },
+        "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 }
+      },
+      "t-symptom-bit": {
+        "id": "t-symptom-bit",
+        "name": "symptom_bit",
+        "comment": "binary_matcher.py — 57 symptom bits, O(1) bitmask matching",
+        "columnIds": ["c-sb-position", "c-sb-name", "c-sb-phrases"],
+        "seqColumnIds": ["c-sb-position", "c-sb-name", "c-sb-phrases"],
+        "ui": { "x": 1240, "y": 480, "zIndex": 0, "widthName": 140, "widthComment": 240, "color": "#a78bfa" },
+        "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 }
+      },
+      "t-session": {
+        "id": "t-session",
+        "name": "session",
+        "comment": "conversation_history.json — patient intake + persistence",
+        "columnIds": ["c-se-id", "c-se-created", "c-se-language", "c-se-age", "c-se-weight", "c-se-sex", "c-se-topics"],
+        "seqColumnIds": ["c-se-id", "c-se-created", "c-se-language", "c-se-age", "c-se-weight", "c-se-sex", "c-se-topics"],
+        "ui": { "x": 40, "y": 720, "zIndex": 0, "widthName": 120, "widthComment": 240, "color": "#94a3b8" },
+        "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 }
+      }
+    },
+    "tableColumnEntities": {
+      "c-cond-slug": { "id": "c-cond-slug", "tableId": "t-condition", "name": "condition_slug", "comment": "PK, file key", "dataType": "TEXT", "default": "", "options": 10, "ui": { "keys": 1, "widthName": 120, "widthComment": 90, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-cond-name": { "id": "c-cond-name", "tableId": "t-condition", "name": "condition_name", "comment": "", "dataType": "TEXT", "default": "", "options": 8, "ui": { "keys": 0, "widthName": 120, "widthComment": 50, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-cond-source": { "id": "c-cond-source", "tableId": "t-condition", "name": "source", "comment": "'NSTG 2022'", "dataType": "TEXT", "default": "", "options": 8, "ui": { "keys": 0, "widthName": 80, "widthComment": 100, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-cond-intro": { "id": "c-cond-intro", "tableId": "t-condition", "name": "introduction", "comment": "clinical context", "dataType": "TEXT", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 110, "widthComment": 110, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+
+      "c-cf-id": { "id": "c-cf-id", "tableId": "t-clinical-feature", "name": "feature_id", "comment": "", "dataType": "INTEGER", "default": "", "options": 10, "ui": { "keys": 1, "widthName": 90, "widthComment": 50, "widthDataType": 80, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-cf-slug": { "id": "c-cf-slug", "tableId": "t-clinical-feature", "name": "condition_slug", "comment": "FK", "dataType": "TEXT", "default": "", "options": 8, "ui": { "keys": 2, "widthName": 120, "widthComment": 40, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-cf-type": { "id": "c-cf-type", "tableId": "t-clinical-feature", "name": "subtype", "comment": "e.g. Threatened Abortion", "dataType": "TEXT", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 90, "widthComment": 170, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-cf-features": { "id": "c-cf-features", "tableId": "t-clinical-feature", "name": "features", "comment": "JSON array of strings", "dataType": "JSON", "default": "", "options": 8, "ui": { "keys": 0, "widthName": 90, "widthComment": 150, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+
+      "c-inv-id": { "id": "c-inv-id", "tableId": "t-investigation", "name": "investigation_id", "comment": "", "dataType": "INTEGER", "default": "", "options": 10, "ui": { "keys": 1, "widthName": 110, "widthComment": 50, "widthDataType": 80, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-inv-slug": { "id": "c-inv-slug", "tableId": "t-investigation", "name": "condition_slug", "comment": "FK", "dataType": "TEXT", "default": "", "options": 8, "ui": { "keys": 2, "widthName": 120, "widthComment": 40, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-inv-name": { "id": "c-inv-name", "tableId": "t-investigation", "name": "name", "comment": "", "dataType": "TEXT", "default": "", "options": 8, "ui": { "keys": 0, "widthName": 70, "widthComment": 50, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-inv-category": { "id": "c-inv-category", "tableId": "t-investigation", "name": "category", "comment": "standard | other", "dataType": "TEXT", "default": "'standard'", "options": 0, "ui": { "keys": 0, "widthName": 90, "widthComment": 120, "widthDataType": 70, "widthDefault": 90 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+
+      "c-tr-id": { "id": "c-tr-id", "tableId": "t-treatment", "name": "treatment_id", "comment": "", "dataType": "INTEGER", "default": "", "options": 10, "ui": { "keys": 1, "widthName": 100, "widthComment": 50, "widthDataType": 80, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-tr-slug": { "id": "c-tr-slug", "tableId": "t-treatment", "name": "condition_slug", "comment": "FK", "dataType": "TEXT", "default": "", "options": 8, "ui": { "keys": 2, "widthName": 120, "widthComment": 40, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-tr-goals": { "id": "c-tr-goals", "tableId": "t-treatment", "name": "goals", "comment": "JSON array", "dataType": "JSON", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 70, "widthComment": 90, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-tr-definitive": { "id": "c-tr-definitive", "tableId": "t-treatment", "name": "definitive_treatment", "comment": "guideline text", "dataType": "TEXT", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 150, "widthComment": 110, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-tr-drug-name": { "id": "c-tr-drug-name", "tableId": "t-treatment", "name": "drug_name", "comment": "FK -> drug.drug_name", "dataType": "TEXT", "default": "", "options": 0, "ui": { "keys": 2, "widthName": 100, "widthComment": 150, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+
+      "c-drug-id": { "id": "c-drug-id", "tableId": "t-drug", "name": "drug_id", "comment": "", "dataType": "INTEGER", "default": "", "options": 10, "ui": { "keys": 1, "widthName": 80, "widthComment": 50, "widthDataType": 80, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-drug-name": { "id": "c-drug-name", "tableId": "t-drug", "name": "drug_name", "comment": "unique", "dataType": "TEXT", "default": "", "options": 12, "ui": { "keys": 0, "widthName": 100, "widthComment": 60, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-drug-form": { "id": "c-drug-form", "tableId": "t-drug", "name": "form", "comment": "tablet, syrup, injection...", "dataType": "TEXT", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 60, "widthComment": 190, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-drug-strength": { "id": "c-drug-strength", "tableId": "t-drug", "name": "strength", "comment": "e.g. 500 mg", "dataType": "TEXT", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 90, "widthComment": 100, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-drug-adult-dose": { "id": "c-drug-adult-dose", "tableId": "t-drug", "name": "adult_dose", "comment": "", "dataType": "TEXT", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 100, "widthComment": 50, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-drug-child-dose": { "id": "c-drug-child-dose", "tableId": "t-drug", "name": "paediatric_dose", "comment": "mg/kg basis", "dataType": "TEXT", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 130, "widthComment": 100, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-drug-contra": { "id": "c-drug-contra", "tableId": "t-drug", "name": "contraindications", "comment": "", "dataType": "TEXT", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 140, "widthComment": 50, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+
+      "c-di-id": { "id": "c-di-id", "tableId": "t-drug-interaction", "name": "interaction_id", "comment": "", "dataType": "INTEGER", "default": "", "options": 10, "ui": { "keys": 1, "widthName": 110, "widthComment": 50, "widthDataType": 80, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-di-a": { "id": "c-di-a", "tableId": "t-drug-interaction", "name": "drug_a", "comment": "FK", "dataType": "TEXT", "default": "", "options": 8, "ui": { "keys": 2, "widthName": 70, "widthComment": 40, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-di-b": { "id": "c-di-b", "tableId": "t-drug-interaction", "name": "drug_b", "comment": "FK", "dataType": "TEXT", "default": "", "options": 8, "ui": { "keys": 2, "widthName": 70, "widthComment": 40, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-di-severity": { "id": "c-di-severity", "tableId": "t-drug-interaction", "name": "severity", "comment": "low | moderate | high", "dataType": "TEXT", "default": "", "options": 8, "ui": { "keys": 0, "widthName": 90, "widthComment": 150, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-di-mechanism": { "id": "c-di-mechanism", "tableId": "t-drug-interaction", "name": "mechanism", "comment": "pharmacology", "dataType": "TEXT", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 110, "widthComment": 110, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-di-recommendation": { "id": "c-di-recommendation", "tableId": "t-drug-interaction", "name": "recommendation", "comment": "CHEW-facing action", "dataType": "TEXT", "default": "", "options": 8, "ui": { "keys": 0, "widthName": 130, "widthComment": 140, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-di-source": { "id": "c-di-source", "tableId": "t-drug-interaction", "name": "source", "comment": "'DDInter v1.0'", "dataType": "TEXT", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 80, "widthComment": 110, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+
+      "c-pt-id": { "id": "c-pt-id", "tableId": "t-pidgin-term", "name": "term_id", "comment": "", "dataType": "INTEGER", "default": "", "options": 10, "ui": { "keys": 1, "widthName": 80, "widthComment": 50, "widthDataType": 80, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-pt-english": { "id": "c-pt-english", "tableId": "t-pidgin-term", "name": "english_term", "comment": "unique", "dataType": "TEXT", "default": "", "options": 12, "ui": { "keys": 0, "widthName": 110, "widthComment": 60, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-pt-variants": { "id": "c-pt-variants", "tableId": "t-pidgin-term", "name": "pidgin_variants", "comment": "JSON array e.g. 'head dey pain'", "dataType": "JSON", "default": "", "options": 8, "ui": { "keys": 0, "widthName": 130, "widthComment": 210, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+
+      "c-pp-id": { "id": "c-pp-id", "tableId": "t-pidgin-phrase", "name": "phrase_id", "comment": "", "dataType": "INTEGER", "default": "", "options": 10, "ui": { "keys": 1, "widthName": 90, "widthComment": 50, "widthDataType": 80, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-pp-phrase": { "id": "c-pp-phrase", "tableId": "t-pidgin-phrase", "name": "pidgin_phrase", "comment": "longest-match-first", "dataType": "TEXT", "default": "", "options": 12, "ui": { "keys": 0, "widthName": 120, "widthComment": 150, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-pp-mapping": { "id": "c-pp-mapping", "tableId": "t-pidgin-phrase", "name": "english_mapping", "comment": "", "dataType": "TEXT", "default": "", "options": 8, "ui": { "keys": 0, "widthName": 130, "widthComment": 50, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-pp-category": { "id": "c-pp-category", "tableId": "t-pidgin-phrase", "name": "category", "comment": "symptom | body | negation...", "dataType": "TEXT", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 90, "widthComment": 200, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+
+      "c-sb-position": { "id": "c-sb-position", "tableId": "t-symptom-bit", "name": "bit_position", "comment": "PK, 0..56", "dataType": "INTEGER", "default": "", "options": 10, "ui": { "keys": 1, "widthName": 110, "widthComment": 90, "widthDataType": 80, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-sb-name": { "id": "c-sb-name", "tableId": "t-symptom-bit", "name": "symptom_name", "comment": "", "dataType": "TEXT", "default": "", "options": 8, "ui": { "keys": 0, "widthName": 120, "widthComment": 50, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-sb-phrases": { "id": "c-sb-phrases", "tableId": "t-symptom-bit", "name": "trigger_phrases", "comment": "Pidgin phrases that set this bit", "dataType": "JSON", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 130, "widthComment": 230, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+
+      "c-se-id": { "id": "c-se-id", "tableId": "t-session", "name": "session_id", "comment": "", "dataType": "TEXT", "default": "", "options": 10, "ui": { "keys": 1, "widthName": 100, "widthComment": 50, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-se-created": { "id": "c-se-created", "tableId": "t-session", "name": "created_at", "comment": "epoch ms", "dataType": "INTEGER", "default": "", "options": 8, "ui": { "keys": 0, "widthName": 100, "widthComment": 80, "widthDataType": 80, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-se-language": { "id": "c-se-language", "tableId": "t-session", "name": "language", "comment": "pidgin | english", "dataType": "TEXT", "default": "'pidgin'", "options": 8, "ui": { "keys": 0, "widthName": 90, "widthComment": 130, "widthDataType": 70, "widthDefault": 80 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-se-age": { "id": "c-se-age", "tableId": "t-session", "name": "patient_age_years", "comment": "", "dataType": "REAL", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 140, "widthComment": 50, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-se-weight": { "id": "c-se-weight", "tableId": "t-session", "name": "patient_weight_kg", "comment": "for mg/kg dosing", "dataType": "REAL", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 150, "widthComment": 140, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-se-sex": { "id": "c-se-sex", "tableId": "t-session", "name": "patient_sex", "comment": "male | female", "dataType": "TEXT", "default": "", "options": 0, "ui": { "keys": 0, "widthName": 110, "widthComment": 100, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "c-se-topics": { "id": "c-se-topics", "tableId": "t-session", "name": "topic_stack", "comment": "conversation topics", "dataType": "JSON", "default": "'[]'", "options": 0, "ui": { "keys": 0, "widthName": 110, "widthComment": 150, "widthDataType": 70, "widthDefault": 50 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } }
+    },
+    "relationshipEntities": {
+      "r-1": { "id": "r-1", "identification": true, "relationshipType": 16, "startRelationshipType": 1, "start": { "tableId": "t-condition", "columnIds": ["c-cond-slug"], "x": 180, "y": 60, "direction": 2 }, "end": { "tableId": "t-clinical-feature", "columnIds": ["c-cf-slug"], "x": 440, "y": 40, "direction": 1 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "r-2": { "id": "r-2", "identification": true, "relationshipType": 16, "startRelationshipType": 1, "start": { "tableId": "t-condition", "columnIds": ["c-cond-slug"], "x": 180, "y": 200, "direction": 2 }, "end": { "tableId": "t-investigation", "columnIds": ["c-inv-slug"], "x": 440, "y": 260, "direction": 1 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "r-3": { "id": "r-3", "identification": true, "relationshipType": 16, "startRelationshipType": 1, "start": { "tableId": "t-condition", "columnIds": ["c-cond-slug"], "x": 110, "y": 190, "direction": 8 }, "end": { "tableId": "t-treatment", "columnIds": ["c-tr-slug"], "x": 110, "y": 340, "direction": 4 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "r-4": { "id": "r-4", "identification": false, "relationshipType": 16, "startRelationshipType": 1, "start": { "tableId": "t-drug", "columnIds": ["c-drug-name"], "x": 600, "y": 550, "direction": 2 }, "end": { "tableId": "t-drug-interaction", "columnIds": ["c-di-a"], "x": 880, "y": 380, "direction": 1 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "r-5": { "id": "r-5", "identification": false, "relationshipType": 16, "startRelationshipType": 1, "start": { "tableId": "t-drug", "columnIds": ["c-drug-name"], "x": 600, "y": 620, "direction": 2 }, "end": { "tableId": "t-drug-interaction", "columnIds": ["c-di-b"], "x": 880, "y": 420, "direction": 1 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } },
+      "r-6": { "id": "r-6", "identification": false, "relationshipType": 16, "startRelationshipType": 1, "start": { "tableId": "t-drug", "columnIds": ["c-drug-name"], "x": 520, "y": 550, "direction": 4 }, "end": { "tableId": "t-treatment", "columnIds": ["c-tr-drug-name"], "x": 260, "y": 480, "direction": 8 }, "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 } }
+    },
+    "indexEntities": {},
+    "indexColumnEntities": {},
+    "memoEntities": {
+      "m-1": {
+        "id": "m-1",
+        "value": "EARL AI local data model.\nNo SQL database — these entities are pure JSON files loaded into memory at startup.\ncondition = one file in app/data/stg_conditions/\ndrug_interaction = app/data/interactions.json\npidgin_term / pidgin_phrase = app/pidgin/*.json\nsymptom_bit = binary_matcher.py SYMPTOM_BITS\nsession = app/data/conversation_history.json\nOpen with erd-editor.io or the VS Code extension to view/edit.",
+        "ui": { "x": 1240, "y": 40, "zIndex": 0, "width": 300, "height": 220, "color": "#fbbf24" },
+        "meta": { "updateAt": 1756080000000, "createAt": 1756080000000 }
+      }
+    }
+  }
+}
