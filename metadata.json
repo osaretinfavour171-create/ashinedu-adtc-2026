@@ -1,13 +1,13 @@
 {
-  "team_id": "your-team-id",
+  "team_id": "ADTC-2026-0001",
   "domain": "healthcare_medical",
   "language_scope": ["en", "pcm"],
   "african_alpha_claim": true,
   "budget_laptop_claim": true,
   "submitter": {
-    "name": "your-name",
-    "email": "your-email@domain.com",
-    "github_handle": "your-github"
+    "name": "Osaretin Favour & Omotosho Rapheal",
+    "email": "osaretinfavour171@gmail.com",
+    "github_handle": "osaretinfavour171-create"
   },
   "cross_disciplinary_pairing": {
     "discipline": "healthcare_medical",
