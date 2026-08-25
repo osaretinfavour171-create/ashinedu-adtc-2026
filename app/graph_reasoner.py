@@ -299,7 +299,7 @@ class GraphReasoner:
                     score += 1
                     matched.append(kw)
 
-            if score >= 2 or (score >= 1 and len(keywords) <= 4):
+            if score >= 1:  # Single keyword match is enough for clinical relevance
                 # Find the condition in the graph
                 slug = condition_key.replace("_", "-")
                 node = self.graph.get_condition(slug)

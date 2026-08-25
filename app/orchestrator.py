@@ -461,7 +461,7 @@ class Orchestrator:
                         gender=_info.get("gender"),
                         temperature=_info.get("temperature"),
                     )
-                graph_result = self.graph_reasoner.reason(raw, g_patient, self.lang)
+                graph_result = self.graph_reasoner.reason(query, g_patient, self.lang)
             except Exception as exc:
                 log.warning("Graph reasoner error: %s", exc)
 
