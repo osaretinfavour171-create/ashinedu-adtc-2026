@@ -715,9 +715,125 @@
       "metadata": {},
       "timestamp": 0.0,
       "detected_topics": []
+    },
+    {
+      "role": "patient",
+      "content": "what is the treatment for malaria",
+      "emotion": "calm",
+      "tone_tags": [],
+      "metadata": {
+        "age_years": null,
+        "weight_kg": null,
+        "gender": null,
+        "source": "graph"
+      },
+      "timestamp": 0.0,
+      "detected_topics": [
+        "malaria"
+      ]
+    },
+    {
+      "role": "healthworker",
+      "content": "Di system identify this as: Malaria\nConfidence: 85%\nSeverity: Manageable at this level\n\nTREATMENT:\n\nDRUGS:\n  + Prompt parasitological confirmation by microscopy or RDTs before treatment\n  + Artemisinin-based Combination Therapy (ACTs)\n  + Artemether-Lumefantrine (AL) is the medicine of choice\n  + Artesunate-Amodiaquine (AA), Dihydroartemisinin Piperaquine and Artesunate-Pyronaridine are alternatives\n  + Pre-make dem refer am go hospital treatment (Rectal Artesunate, Artesunate IM, Artemether IM or Quinine IM)\n\nSUPPORTIVE CARE:\n  + Paracetamol (oral/rectal) for symptomatic relief\n  + If temperature is >38.5°C, wipe with wet towel, and fan to lower the temperature\n  + Nurse in cardiac position for Pulmonary oedema\n\nWATCH OUT FOR:\n  ⚠  Mefloquine make you make you no use am if di patient had cerebral malaria because of the increased risk of seizure, encephalopathy and psychosis.\n\nTESTS Wey Fit Needed:\n  - Blood smear for malaria parasites\n  - Packed cell volume; haemoglobin concentration\n  - White cell count with differentials\n\nHOW TO PREVENT AM:\n  + Reduce the frequency of mosquito bites by make you no useing exposure to mosquitoes at their peak feeding times.\n  + Use insect repellants.\n  + Put on suitable clothing.\n\nAbeg take note well: dis advice na from di official Nigeria treatment guideline. If di patient dey worse, make you send am go hospital quick quick.",
+      "emotion": null,
+      "tone_tags": [
+        "professional",
+        "gentle"
+      ],
+      "metadata": {},
+      "timestamp": 0.0,
+      "detected_topics": []
+    },
+    {
+      "role": "patient",
+      "content": "metronidazole plus warfarin e dey safe?",
+      "emotion": "calm",
+      "tone_tags": [],
+      "metadata": {
+        "age_years": null,
+        "weight_kg": null,
+        "gender": null,
+        "source": "docreader"
+      },
+      "timestamp": 0.0,
+      "detected_topics": []
+    },
+    {
+      "role": "healthworker",
+      "content": "Drug interaction check for Metronidazole:\n- With Warfarin (HIGH): Metronidazole inhibits warfarin metabolism, markedly increasing INR and bleeding risk. dey check INR closely; reduce warfarin dose. Warn di patient about bleeding signs.\n- With Phenytoin (MODERATE): Metronidazole increases phenytoin plasma levels, increasing the risk of phenytoin toxicity. dey check for phenytoin toxicity and reduce dose if needed.\n- With Carbamazepine (MODERATE): Metronidazole increases carbamazepine levels, increasing the risk of toxicity (dizziness, drowsiness, unsteadiness). dey check for carbamazepine toxicity.\n- With Isoniazid (MODERATE): Combined use increases the risk of hepatotoxicity. dey check liver function and advise di patient to report jaundice or dark urine.\n\nCONDITIONS (from Nigeria Standard Treatment Guidelines 2022):\n- Drug Safety and Pharmacovigilance: The use of medicines for treatment, diagnosis, or prevention of disease is inextricably linked to unintended effects. These unintended effects may be adverse to di patients, and therefore, the safe use of medicine should be an e dey very important consideration of any clinician.\n  Goals: Improve patient care and safety in relation to the use of medicines and all medical and paramedical interventions; Improve public health and safety in relation to the use of medicines; Contribute to the assessment of benefit, harm, effectiveness and risk of medicines, encouraging their safe, rational and more effective (including cost-effective) use\n- Safety of Drugs and Pharmacovigilance: The use of medicines for treatment, diagnosis, or prevention of disease is inextricably linked to unintended effects. These unintended effects may be adverse to di patients, and therefore, the safe use of medicine should be an e dey very important consideration of any clinician.\n  Goals: Improve patient care and safety in relation to the use of medicines and all medical and paramedical interventions; Improve public health and safety in relation to the use of medicines; Contribute to the assessment of benefit, harm, effectiveness and risk of medicines, encouraging their safe, rational and more effective (including cost-effective) use\n- Typhoid Fever (Enteric Fever): A multisystemic illness caused primarily by Salmonella enterica serotype typhi and, to a lesser extent, S. enterica serotypes paratyphi A, B, and C. It is usually spread through contaminated food or water. Once Salmonella typhi bacteria are eaten or drunk, they multiply and spread into the bloodstre\n  Treatment (NSTG): Antibiotics at least 2 - 4 minutes; 2 - 4 g daily in severe infection; may also be given by intravenous infusion; Neonate, 20 - 50 mg/kg daily by intravenous injection over 60 minutes; Infant and child under 50 kg: 20 - 50 mg/kg daily; up to 80 mg/kg in severe infection;\n  Goals: Eliminate S. typhi and S. paratyphi; Prevent Complications.; Prevent chronic carrier status.\n\nINTERACTIONS for Metronidazole (from local interaction database):\n- Metronidazole + Warfarin [HIGH]: Metronidazole inhibits warfarin metabolism, markedly increasing INR and bleeding risk. Recommendation: dey check INR closely; reduce warfarin dose. Warn di patient about bleeding signs.\n- Metronidazole + Phenytoin [MODERATE]: Metronidazole increases phenytoin plasma levels, increasing the risk of phenytoin toxicity. Recommendation: dey check for phenytoin toxicity and reduce dose if needed.\n- Metronidazole + Carbamazepine [MODERATE]: Metronidazole increases carbamazepine levels, increasing the risk of toxicity (dizziness, drowsiness, unsteadiness). Recommendation: dey check for carbamazepine toxicity.\n- Metronidazole + Isoniazid [MODERATE]: Combined use increases the risk of hepatotoxicity. Recommendation: dey check liver function and advise di patient to report jaundice or dark urine.\n\nAbeg take note well: dis advice na from di official Nigeria treatment guideline. If di patient dey worse, make you send am go hospital quick quick.",
+      "emotion": null,
+      "tone_tags": [
+        "professional",
+        "gentle"
+      ],
+      "metadata": {},
+      "timestamp": 0.0,
+      "detected_topics": []
+    },
+    {
+      "role": "patient",
+      "content": "my pikin get hot body and dey vomit",
+      "emotion": "calm",
+      "tone_tags": [],
+      "metadata": {
+        "age_years": null,
+        "weight_kg": null,
+        "gender": null,
+        "source": "graph"
+      },
+      "timestamp": 0.0,
+      "detected_topics": [
+        "fever",
+        "vomiting",
+        "child_health"
+      ]
+    },
+    {
+      "role": "healthworker",
+      "content": "Di system identify this as: Malaria\nConfidence: 100%\nSeverity: Manageable at this level\n\nTREATMENT:\n\nDRUGS:\n  + Prompt parasitological confirmation by microscopy or RDTs before treatment\n  + Artemisinin-based Combination Therapy (ACTs)\n  + Artemether-Lumefantrine (AL) is the medicine of choice\n  + Artesunate-Amodiaquine (AA), Dihydroartemisinin Piperaquine and Artesunate-Pyronaridine are alternatives\n  + Pre-make dem refer am go hospital treatment (Rectal Artesunate, Artesunate IM, Artemether IM or Quinine IM)\n\nSUPPORTIVE CARE:\n  + Paracetamol (oral/rectal) for symptomatic relief\n  + If temperature is >38.5°C, wipe with wet towel, and fan to lower the temperature\n  + Nurse in cardiac position for Pulmonary oedema\n\nWATCH OUT FOR:\n  ⚠  Mefloquine make you make you no use am if di patient had cerebral malaria because of the increased risk of seizure, encephalopathy and psychosis.\n\nTESTS Wey Fit Needed:\n  - Blood smear for malaria parasites\n  - Packed cell volume; haemoglobin concentration\n  - White cell count with differentials\n\nHOW TO PREVENT AM:\n  + Reduce the frequency of mosquito bites by make you no useing exposure to mosquitoes at their peak feeding times.\n  + Use insect repellants.\n  + Put on suitable clothing.\n\nAbeg take note well: dis advice na from di official Nigeria treatment guideline. If di patient dey worse, make you send am go hospital quick quick.",
+      "emotion": null,
+      "tone_tags": [
+        "professional",
+        "gentle"
+      ],
+      "metadata": {},
+      "timestamp": 0.0,
+      "detected_topics": []
+    },
+    {
+      "role": "patient",
+      "content": "diarrhoea treatment",
+      "emotion": "calm",
+      "tone_tags": [],
+      "metadata": {
+        "age_years": null,
+        "weight_kg": null,
+        "gender": null,
+        "source": "graph"
+      },
+      "timestamp": 0.0,
+      "detected_topics": [
+        "diarrhoea"
+      ]
+    },
+    {
+      "role": "healthworker",
+      "content": "Di system identify this as: Acute Diarrhoea\nConfidence: 85%\nSeverity: Consider make dem refer am go hospital to hospital\n\nTREATMENT:\n\nDRUGS:\n  + Oral Rehydration Therapy (ORT): (low osmolarity) for mild to moderate dehydration 500 mL orally over 2 - 3 hours, 3 - 4 times daily\n  + Intravenous sodium chloride 0.9% - 1 litre, 2 - 6 hourly for moderate to severe dehydration\n  + Alternate with Darrow's solution depending on serum potassium\n  + Children: Use of zinc supplementation - 6 months and above: 20 mg every day for 10 - 14 days - Under 6 months old: 10 mg every day\n  + Specific anti-infective agents for infectious diarrhoeas e.g. metronidazole for amoebiasis, giardiasis\n\nSUPPORTIVE CARE:\n  + dey check fluid intake/output\n\nTESTS Wey Fit Needed:\n  - Stool microscopy, culture and sensitivity\n  - Full Blood Count\n  - Urea, Electrolytes and Creatinine\n\nHOW TO PREVENT AM:\n  + Communal and Personal hygiene\n  + Potable water\n  + Sanitary disposal of human waste\n\nAbeg take note well: dis advice na from di official Nigeria treatment guideline. If di patient dey worse, make you send am go hospital quick quick.",
+      "emotion": null,
+      "tone_tags": [
+        "professional",
+        "gentle"
+      ],
+      "metadata": {},
+      "timestamp": 0.0,
+      "detected_topics": []
     }
   ],
   "emotion_history": [
+    "calm",
+    "calm",
+    "calm",
+    "calm",
     "calm",
     "calm",
     "calm",
@@ -753,19 +869,19 @@
     "diarrhoea"
   ],
   "discussed_topics": [
-    "fever",
-    "malaria",
     "child_health",
+    "fever",
     "diarrhoea",
-    "vomiting"
+    "vomiting",
+    "malaria"
   ],
   "mentioned_symptoms": [
-    "fever",
-    "malaria",
     "child_health",
+    "fever",
     "diarrhoea",
-    "vomiting"
+    "vomiting",
+    "malaria"
   ],
   "_lang": "pidgin",
-  "_saved_at": 1787618941.7223291
+  "_saved_at": 1787619578.205526
 }

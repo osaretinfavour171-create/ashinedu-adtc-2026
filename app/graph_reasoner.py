@@ -73,87 +73,420 @@ class ReasoningResult:
 # Maps patient-described symptoms to likely conditions
 # This supplements the automatic index for better accuracy
 CONDITION_HINTS = {
-    # Malaria — most common in Nigeria
-    "malaria": ["malaria", "fever", "chills", "body pain", "headache",
-                "vomiting", "sweating", "weakness", "tired"],
-    # Respiratory
-    "acute-rhinitis-common-cold-coryza": ["cold", "catarrh", "runny nose", "sneezing",
-                    "sore throat", "cough", "blocked nose",
-                    "i get cold", "nose dey run", "nose dey block"],
-    "pneumonia": ["cough", "fever", "breathing difficulty", "chest pain",
-                  "fast breathing", "productive cough"],
-    "acute-bronchitis": ["cough", "chest tightness", "wheezing"],
-    "bronchial-asthma": ["wheezing", "breathing difficulty", "chest tightness",
-               "cannot breathe", "asthma"],
-    # Gastrointestinal
-    "acute-diarrhoea": ["diarrhoea", "diarrhea", "loose stool", "running stomach",
-                  "watery stool", "pooing", "pikin pooing", "child diarrhoea"],
-    "typhoid-fever-enteric-fever": ["fever", "abdominal pain", "headache",
-                "constipation", "rash", "typhoid"],
-    "gastritis": ["stomach pain", "vomiting", "nausea", "bloating",
-                  "heartburn", "acid reflux", "stomach dey pain"],
-    # Musculoskeletal
-    "osteoarthritis": ["joint pain", "knee pain", "hip pain",
-                       "joint dey pain", "old age", "elderly",
-                       "years old", "60 years", "70 years"],
-    "gout": ["joint pain", "big toe", "sudden pain", "red hot joint",
-             "swelling"],
-    # Skin
-    "furunculosis-boils": ["boil", "boils", "skin infection", "pus"],
-    "atopic-dermatitis-atopic-eczema": ["itchy skin", "rash", "dry skin",
-                                         "eczema", "dermatitis"],
-    # Eye
-    "the-red-eye": ["red eye", "eye pain", "discharge", "itchy eye",
-                       "watery eye", "eye dey red"],
-    # Ear
-    "foreign-bodies-in-the-ear": ["ear pain", "earache", "ear dey pain",
-                                    "object in ear"],
-    # Throat
-    "pharyngitis-sore-throat": ["sore throat", "throat pain",
-                                  "throat dey pain", "difficulty swallowing"],
-    # Dental
-    "dental-caries": ["toothache", "tooth pain", "dental pain", "jaw pain"],
-    "gingival-abscess": ["gum swelling", "gum pain", "swollen gum", "toothache"],
-    # Anaemia
-    "anaemias": ["tired", "weak", "pale", "dizzy", "breathlessness",
-                "fatigue", "no energy", "weakness"],
-    # Hypertension
-    "hypertension": ["headache", "dizziness", "blurred vision",
-                     "nosebleed", "high blood pressure"],
-    # Diabetes
-    "diabetes-mellitus": ["frequent urination", "thirst", "weight loss",
-                 "fatigue", "blurred vision", "slow healing", "diabetes"],
-    # Typhoid
-    "typhoid-fever-enteric-fever": ["fever", "abdominal pain", "headache",
-                "constipation", "rash", "typhoid"],
+    # ===================================================================
+    # MALARIA — most common in Nigeria
+    # ===================================================================
+    "malaria": [
+        "malaria", "fever", "chills", "body pain", "headache",
+        "vomiting", "sweating", "weakness", "tired",
+        # Pidgin
+        "hot body", "body dey hot", "dey shiver", "shivering",
+        "body dey pain", "head dey pain", "dey vomit",
+        "dey sweat", "no strength", "weak well well",
+        "temperature", "high temperature",
+    ],
+    # ===================================================================
+    # RESPIRATORY
+    # ===================================================================
+    "acute-rhinitis-common-cold-coryza": [
+        "cold", "catarrh", "runny nose", "sneezing",
+        "sore throat", "cough", "blocked nose",
+        # Pidgin
+        "nose dey run", "nose dey block", "i get cold",
+        "nose dey flow", "sneezing plenty", "nose dey block",
+        "catarrh", "i get catarrh",
+    ],
+    "pneumonia": [
+        "cough", "fever", "breathing difficulty", "chest pain",
+        "fast breathing", "productive cough",
+        # Pidgin
+        "dey cough", "cough dey hot", "chest dey pain",
+        "e no fit breathe", "breathing dey hard",
+        "cough with phlegm", "cough dey bad",
+    ],
+    "acute-bronchitis": [
+        "cough", "chest tightness", "wheezing",
+        # Pidgin
+        "chest dey tight", "dey cough", "chest dey choke",
+    ],
+    "bronchial_asthma": [
+        "wheezing", "breathing difficulty", "chest tightness",
+        "cannot breathe", "asthma",
+        # Pidgin
+        "e no fit breathe", "chest dey tight", "e dey gasp",
+        "breathing dey hard", "e dey wheeze",
+    ],
+    # ===================================================================
+    # GASTROINTESTINAL
+    # ===================================================================
+    "acute-diarrhoea": [
+        "diarrhoea", "diarrhea", "loose stool", "running stomach",
+        "watery stool", "pooing",
+        # Pidgin
+        "run stomach", "e dey run stomach", "e dey poo",
+        "pikin dey poo", "stomach dey run", "watery poo",
+        "belly dey run", "e dey purge",
+    ],
+    "typhoid-fever-enteric-fever": [
+        "fever", "abdominal pain", "headache",
+        "constipation", "rash", "typhoid",
+        # Pidgin
+        "belly dey pain", "stomach dey pain", "typhoid",
+        "e get temperature", "rash for body",
+    ],
+    "gastritis": [
+        "stomach pain", "vomiting", "nausea", "bloating",
+        "heartburn", "acid reflux",
+        # Pidgin
+        "stomach dey pain", "belly dey pain", "dey vomit",
+        "e dey vomit", "nausea", "e dey feel like vomiting",
+        "heart dey burn", "acid dey come up",
+    ],
+    "amoebic-dysentery": [
+        "dysentery", "bloody stool", "blood in stool",
+        "abdominal pain", "diarrhoea",
+        # Pidgin
+        "blood for stool", "e dey see blood",
+        "stool with blood", "belly dey pain",
+    ],
+    # ===================================================================
+    # MUSCULOSKELETAL
+    # ===================================================================
+    "osteoarthritis": [
+        "joint pain", "knee pain", "hip pain",
+        "old age", "elderly",
+        # Pidgin
+        "joint dey pain", "knee dey pain", "hip dey pain",
+        "e get arthritis", "e get joint pain",
+        "old man", "old woman", "grandma", "grandpa",
+        "60 years", "70 years", "80 years",
+    ],
+    "gout": [
+        "joint pain", "big toe", "sudden pain", "red hot joint",
+        "swelling",
+        # Pidgin
+        "big toe dey pain", "toe dey swell",
+        "joint dey red", "joint dey hot",
+    ],    "back-pain": ["back pain", "lower back", "backache",
+        # Pidgin
+        "back dey pain", "waist dey pain",
+        "back dey hurt", "e get back pain",
+    ],
+    # ===================================================================
+    # SKIN
+    # ===================================================================
+    "furunculosis-boils": [
+        "boil", "boils", "skin infection", "pus",
+        # Pidgin
+        "e get boil", "boil for body", "e get wound",
+        "skin dey swell", "e dey pain",
+    ],
+    "atopic-dermatitis-atopic-eczema": [
+        "itchy skin", "rash", "dry skin",
+        "eczema", "dermatitis",
+        # Pidgin
+        "e dey itch", "body dey itch", "skin dey itch",
+        "rash for body", "e get rash",
+    ],
+    "scabies": [
+        "scabies", "itchy skin", "rash", "mites",
+        # Pidgin
+        "e get scabies", "body dey itch well well",
+        "e dey scratch", "small spots for body",
+    ],
+    # ===================================================================
+    # EYE
+    # ===================================================================
+    "the-red-eye": [
+        "red eye", "eye pain", "discharge", "itchy eye",
+        "watery eye",
+        # Pidgin
+        "eye dey red", "eye dey pain", "eye dey itch",
+        "eye dey run", "eye dey swell",
+    ],
+    "conjunctivitis": [
+        "conjunctivitis", "pink eye", "red eye",
+        "eye discharge", "eye infection",
+        # Pidgin
+        "eye dey red", "eye dey itch", "eye dey flow",
+    ],
+    # ===================================================================
+    # EAR
+    # ===================================================================
+    "foreign-bodies-in-the-ear": [
+        "ear pain", "earache", "object in ear",
+        # Pidgin
+        "ear dey pain", "ear dey hurt", "earache",
+        "something for ear",
+    ],
+    "chronic-otitis-media": [
+        "ear infection", "ear pain", "ear discharge",
+        "fever", "hearing loss",
+        # Pidgin
+        "ear dey pain", "ear dey flow", "ear dey block",
+    ],
+    # ===================================================================
+    # THROAT
+    # ===================================================================
+    "pharyngitis-sore-throat": [
+        "sore throat", "throat pain", "difficulty swallowing",
+        # Pidgin
+        "throat dey pain", "throat dey scratch",
+        "e no fit swallow", "swallowing dey hard",
+    ],
+    # ===================================================================
+    # DENTAL
+    # ===================================================================
+    "dental-caries": [
+        "toothache", "tooth pain", "dental pain", "jaw pain",
+        # Pidgin
+        "tooth dey pain", "teeth dey pain", "jaw dey pain",
+    ],
+    "gingival-abscess": [
+        "gum swelling", "gum pain", "swollen gum", "toothache",
+        # Pidgin
+        "gum dey swell", "gum dey pain", "gum dey bleed",
+    ],
+    # ===================================================================
+    # ANAEMIA
+    # ===================================================================
+    "anaemias": [
+        "tired", "weak", "pale", "dizzy", "breathlessness",
+        "fatigue", "no energy", "weakness",
+        # Pidgin
+        "no strength", "e dey tire", "e dey weak",
+        "e dey pale", "e dey dizzy", "no energy",
+        "body dey weak", "e dey faint",
+    ],
+    # ===================================================================
+    # HYPERTENSION
+    # ===================================================================
+    "hypertension": [
+        "headache", "dizziness", "blurred vision",
+        "nosebleed", "high blood pressure", "hypertension",
+        # Pidgin
+        "head dey pain", "e dey dizzy", "eye dey blur",
+        "nose dey bleed", "bp dey high",
+    ],
+    # ===================================================================
+    # DIABETES
+    # ===================================================================
+    "diabetes-mellitus": [
+        "frequent urination", "thirst", "weight loss",
+        "fatigue", "blurred vision", "slow healing", "diabetes",
+        # Pidgin
+        "e dey pee plenty", "e dey drink plenty",
+        "e dey lose weight", "e dey tire",
+        "wound no dey heal", "diabetes",
+    ],
+    # ===================================================================
     # TB
-    "pulmonary-tuberculosis": ["cough", "weight loss", "night sweats",
-                                 "blood in sputum", "tb", "tuberculosis"],
-    # Meningitis
-    "meningitis": ["headache", "stiff neck", "fever", "vomiting",
-                    "sensitivity to light", "confusion"],
-    # Anxiety
-    "anxiety-disorder": ["anxiety", "nervous", "worry", "panic",
-                          "restlessness", "cannot sleep"],
-    # Depression
-    "depression": ["depression", "sad", "hopeless", "no interest",
-                   "cannot sleep", "no appetite"],
-    # Insomnia
-    "insomnia": ["insomnia", "cannot sleep", "sleeplessness",
-                 "trouble sleeping"],
-    # Nasal allergy
-    "nasal-allergy": ["allergy", "allergic", "sneezing", "runny nose",
-                       "itchy nose", "hay fever"],
-    # Headache
-    "headaches": ["headache", "head pain", "head dey pain", "migraine"],
-    "migraines": ["migraine", "severe headache", "throbbing headache",
-                  "light sensitivity"],
-    # Sickle cell
-    "sickle-cell-disease": ["sickle cell", "joint pain", "abdominal pain",
-                              "anaemia", "painful crisis"],
-    # Hepatitis
-    "hepatitis": ["jaundice", "yellow skin", "abdominal pain",
-                  "nausea", "hepatitis"],
+    # ===================================================================
+    "pulmonary-tuberculosis": [
+        "cough", "weight loss", "night sweats",
+        "blood in sputum", "tb", "tuberculosis",
+        # Pidgin
+        "dey cough", "cough dey long", "e dey cough blood",
+        "e dey sweat at night", "e dey lose weight",
+        "tb", "brown cough",
+    ],
+    # ===================================================================
+    # MENINGITIS
+    # ===================================================================
+    "meningitis": [
+        "headache", "stiff neck", "fever", "vomiting",
+        "sensitivity to light", "confusion",
+        # Pidgin
+        "head dey pain", "neck dey stiff", "hot body",
+        "e dey vomit", "light dey hurt eye", "e dey confuse",
+    ],
+    # ===================================================================
+    # HEPATITIS
+    # ===================================================================
+    "hepatitis": [
+        "jaundice", "yellow skin", "abdominal pain",
+        "nausea", "hepatitis",
+        # Pidgin
+        "yellow skin", "eye dey yellow", "belly dey pain",
+        "e dey feel like vomiting", "hepatitis",
+    ],
+    # ===================================================================
+    # URINARY
+    # ===================================================================
+    "urinary-tract-calculi": [
+        "urinary tract infection", "uti", "burning urination",
+        "frequent urination", " cloudy urine",
+        # Pidgin
+        "e dey pee plenty", "peeing dey burn",
+        "e dey pee small small", "water dey burn",
+    ],
+    # ===================================================================
+    # SICKLE CELL
+    # ===================================================================
+    "sickle-cell-disease": [
+        "sickle cell", "joint pain", "abdominal pain",
+        "anaemia", "painful crisis",
+        # Pidgin
+        "sickle cell", "e get sickle cell",
+        "joint dey pain", "belly dey pain",
+        "e dey pain well well",
+    ],
+    # ===================================================================
+    # MENTAL HEALTH
+    # ===================================================================
+    "anxiety-disorder": [
+        "anxiety", "nervous", "worry", "panic",
+        "restlessness", "cannot sleep",
+        # Pidgin
+        "e dey worry too much", "e no fit sleep",
+        "e dey fear", "e dey nervous",
+    ],
+    "depression": [
+        "depression", "sad", "hopeless", "no interest",
+        "cannot sleep", "no appetite",
+        # Pidgin
+        "e dey sad", "e no get joy", "e no wan eat",
+        "e no fit sleep", "e dey cry plenty",
+    ],
+    "insomnia": [
+        "insomnia", "cannot sleep", "sleeplessness",
+        "trouble sleeping",
+        # Pidgin
+        "e no fit sleep", "e no dey sleep",
+        "sleep no dey come", "e dey wake at night",
+    ],
+    # ===================================================================
+    # NASAL ALLERGY
+    # ===================================================================
+    "nasal-allergy": [
+        "allergy", "allergic", "sneezing", "runny nose",
+        "itchy nose", "hay fever",
+        # Pidgin
+        "nose dey run", "e dey sneeze", "nose dey itch",
+    ],
+    # ===================================================================
+    # HEADACHE / MIGRAINE
+    # ===================================================================
+    "headaches": [
+        "headache", "head pain", "migraine",
+        # Pidgin
+        "head dey pain", "head dey heavy",
+        "head dey pound", "e get headache",
+    ],
+    "migraines": [
+        "migraine", "severe headache", "throbbing headache",
+        "light sensitivity",
+        # Pidgin
+        "head dey pain well well", "head dey pound",
+        "light dey hurt eye", "e dey vomit with headache",
+    ],
+    # ===================================================================
+    # FEVER (general — catches anything with fever)
+    # ===================================================================
+    "fevers": [
+        "fever", "hot body", "chills",
+        # Pidgin
+        "body dey hot", "hot body", "e get temperature",
+        "e dey shiver", "fever",
+    ],
+    # ===================================================================
+    # WOUND / INFECTION
+    # ===================================================================
+    "cellulitis": [
+        "wound", "cut", "injury", "infection",
+        # Pidgin
+        "e get wound", "e get cut", "e dey wound",
+        "wound dey swell", "wound dey pain",
+    ],
+    # ===================================================================
+    # SKIN INFECTIONS
+    # ===================================================================
+    "impetigo-contagiosa": [
+        "impetigo", "skin infection", "blisters", "crusting",
+        # Pidgin
+        "e get sore for face", "skin dey peel",
+        "e get blisters",
+    ],
+    # ===================================================================
+    # DEHYDRATION
+    # ===================================================================
+    "acute-diarrhoea": [
+        "diarrhoea", "diarrhea", "loose stool", "running stomach",
+        "watery stool", "pooing",
+        # Pidgin
+        "run stomach", "e dey run stomach", "e dey poo",
+        "pikin dey poo", "stomach dey run", "watery poo",
+        "belly dey run", "e dey purge",
+        # Dehydration (related)
+        "dehydration", "dry mouth", "thirst",
+        "e dey thirsty", "e mouth dey dry",
+    ],
+    # ===================================================================
+    # PREGNANCY
+    # ===================================================================
+    "antenatal-care-anc": [
+        "pregnant", "pregnancy", "antenatal",
+        # Pidgin
+        "e get belle", "e dey carry pikin",
+        "e dey pregnant", "stomach dey big",
+    ],
+    # ===================================================================
+    # NUTRITION
+    # ===================================================================
+    "kwashiorkor-and-marasmus": [
+        "malnutrition", "kwashiorkor", "marasmus",
+        "weight loss", "stunted growth",
+        # Pidgin
+        "pikin body dey swell", "pikin belly dey big",
+        "pikin no dey grow", "pikin body dey thin",
+    ],
+    # ===================================================================
+    # HIV
+    # ===================================================================
+    "human-immunodeficiency-virus-hiv-infection": [
+        "hiv", "aids", "immunodeficiency",
+        "weight loss", "night sweats", "chronic cough",
+        # Pidgin
+        "hiv", "e get hiv", "e dey lose weight",
+        "e dey sweat at night",
+    ],
+    # ===================================================================
+    # DIARRHEA WITH BLOOD (Dysentery)
+    # ===================================================================
+    "bacillary-dysentery": [
+        "bloody diarrhoea", "blood in stool", "dysentery",
+        # Pidgin
+        "blood for stool", "e dey see blood",
+        "stool with blood",
+    ],
+    # ===================================================================
+    # EPILEPSY / CONVULSIONS
+    # ===================================================================
+    "seizures-epilepsies": [
+        "epilepsy", "convulsion", "seizure", "fits",
+        # Pidgin
+        "e get convulsion", "e dey shake",
+        "e dey fall", "e get fits",
+    ],
+    # ===================================================================
+    # BURNS
+    # ===================================================================
+    "scorpion-sting": [
+        "burn", "burns", "scald",
+        # Pidgin
+        "e get burn", "hot water pour am",
+        "e burn am",
+    ],
+    # ===================================================================
+    # SEXUALLY TRANSMITTED INFECTIONS
+    # ===================================================================
+    "gonorrhea": [
+        "sti", "std", "gonorrhoea", "syphilis",
+        "genital sores", "vaginal discharge",
+        # Pidgin
+        "e get running", "e get discharge",
+        "e dey itch down there",
+    ],
 }
 
 
@@ -171,9 +504,13 @@ class GraphReasoner:
         self.graph = graph or get_graph()
 
     def reason(self, query: str, patient: PatientContext = None,
-               lang: str = "pidgin") -> ReasoningResult:
+               lang: str = "pidgin", raw_query: str = None) -> ReasoningResult:
         """Main entry point: reason about a clinical query.
 
+        Args:
+            query: Normalized English query.
+            raw_query: Original Pidgin input (for hint matching).
+        
         Steps:
         1. Check for red flags (emergency referral)
         2. Match symptoms to conditions via graph
@@ -184,8 +521,10 @@ class GraphReasoner:
         # Store query for red flag display in formatted answers
         self._last_query = query
 
-        # 1. Red flag check — highest priority
+        # 1. Red flag check — highest priority (check both raw and normalized)
         red_flags = self.graph.check_red_flags(query)
+        if not red_flags and raw_query:
+            red_flags = self.graph.check_red_flags(raw_query)
         if red_flags:
             return self._emergency_result(query, red_flags, lang)
 
@@ -199,8 +538,10 @@ class GraphReasoner:
             gender=patient.gender if patient else None,
         )
 
-        # 4. Also check condition hints for better matching
+        # 4. Also check condition hints — try both raw (Pidgin) and normalized
         hint_matches = self._check_condition_hints(query, patient)
+        if not hint_matches and raw_query:
+            hint_matches = self._check_condition_hints(raw_query, patient)
         if hint_matches:
             # Hint matches always come first (hand-tuned for Nigerian context)
             # Boost their confidence slightly
@@ -300,11 +641,14 @@ class GraphReasoner:
                     matched.append(kw)
 
             if score >= 1:  # Single keyword match is enough for clinical relevance
-                # Find the condition in the graph
+                # Find the condition in the graph (try both slug formats)
                 slug = condition_key.replace("_", "-")
                 node = self.graph.get_condition(slug)
+                if not node:
+                    alt_slug = condition_key.replace("-", "_")
+                    node = self.graph.get_condition(alt_slug)
                 if node:
-                    confidence = min(1.0, score / len(keywords))
+                    confidence = min(1.0, 0.3 + (score * 0.35))
                     severity = self.graph._assess_severity(
                         node,
                         age=patient.age_years if patient else None,
