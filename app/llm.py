@@ -46,8 +46,16 @@ USER_BEGIN = "<|start_header_id|>user<|end_header_id|>\n\n"
 ASSISTANT_BEGIN = "<|start_header_id|>assistant<|end_header_id|>\n\n"
 
 
-def build_prompt(query: str, context: str = "", patient_block: str = "") -> str:
-    """Build the full prompt (system + user with context)."""
+def build_prompt(query: str, context: str = "", patient_block: str = "",
+                 binary_context: str = "") -> str:
+    """Build the full prompt (system + user with context).
+    
+    Args:
+        query: The clinical query.
+        context: Official guideline data from DocReader.
+        patient_block: Structured patient info (age, weight, etc.).
+        binary_context: Pre-computed symptom analysis from binary matcher.
+    """
     ctx_block = ""
     if context:
         ctx_block = (
@@ -56,9 +64,24 @@ def build_prompt(query: str, context: str = "", patient_block: str = "") -> str:
             f"{context}\n"
             "------------------------------------"
         )
+    
+    # Binary matcher context: tells the LLM what symptoms were detected
+    # and which conditions are most likely — saves the model from figuring
+    # this out from scratch (faster, more accurate responses)
+    binary_block = ""
+    if binary_context:
+        binary_block = (
+            "\n\nPRE-ANALYSIS (symptom detection engine):\n"
+            "----------------------------------------\n"
+            f"{binary_context}\n"
+            "----------------------------------------\n"
+            "Use this pre-analysis to guide your answer. "
+            "The symptom engine detected these symptoms and possible conditions."
+        )
+    
     user_msg = (
         "Patient question / query from a community health worker: "
-        f'"{query}"{ctx_block}\n\n'
+        f'"{query}"{ctx_block}{binary_block}\n\n'
         "Give a concise, safe, practical clinical answer."
     )
     return (
@@ -126,8 +149,16 @@ class LLMClient:
     # Maximum context length (chars) to avoid overwhelming the local model.
     MAX_CONTEXT_LEN = 6000
 
-    def ask(self, query: str, context: str = "", patient_block: str = "") -> str:
-        """Full round trip: build prompt, complete, strip tokens."""
+    def ask(self, query: str, context: str = "", patient_block: str = "",
+             binary_context: str = "") -> str:
+        """Full round trip: build prompt, complete, strip tokens.
+        
+        Args:
+            query: The clinical query.
+            context: Official guideline data from DocReader.
+            patient_block: Structured patient info.
+            binary_context: Pre-computed symptom analysis from binary matcher.
+        """
         if not self.is_ready():
             raise ConnectionError(
                 "Local model server not reachable. Start it with start.sh "
@@ -136,5 +167,6 @@ class LLMClient:
         # Truncate context if too large for the model context window.
         if len(context) > self.MAX_CONTEXT_LEN:
             context = context[:self.MAX_CONTEXT_LEN] + "\n[...truncated...]"
-        prompt = build_prompt(query, context, patient_block=patient_block)
+        prompt = build_prompt(query, context, patient_block=patient_block,
+                              binary_context=binary_context)
         return self.complete(prompt)
