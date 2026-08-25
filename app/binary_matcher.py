@@ -147,6 +147,7 @@ CONDITIONS = [
              (1 << SYMPTOM_BITS["night_sweats"]) |
              (1 << SYMPTOM_BITS["nausea"]),
     ),
+
     BinaryCondition(
         name="Common Cold",
         slug="acute-rhinitis-common-cold-coryza",
