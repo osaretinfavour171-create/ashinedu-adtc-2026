@@ -528,10 +528,40 @@ class GraphReasoner:
         if red_flags:
             return self._emergency_result(query, red_flags, lang)
 
-        # 2. Symptom extraction
+        # 2. Fast binary match (bitwise, <30 microseconds)
+        #    Uses bitmask vectors for instant Pidgin symptom matching
+        try:
+            from binary_matcher import match_single, query_to_mask
+            bm = match_single(raw_query or query)
+            if bm and bm.confidence >= 0.05:
+                # Binary match is confident enough — use it directly
+                # Find the matching condition in the graph for treatment info
+                node = self.graph.get_condition(bm.condition.slug)
+                if node:
+                    severity = self.graph._assess_severity(
+                        node,
+                        age=patient.age_years if patient else None,
+                        gender=patient.gender if patient else None,
+                        query=query.lower(),
+                    )
+                    treatment_path = "drugs" if severity in ("mild", "moderate", "severe") else "conservative"
+                    answer = self._format_treatment_from_node(node, treatment_path, patient, lang)
+                    return ReasoningResult(
+                        answer=answer,
+                        source="graph",
+                        condition_name=node.name,
+                        confidence=bm.confidence,
+                        severity=severity,
+                        needs_referral=severity == "emergency",
+                        treatment_path=treatment_path,
+                    )
+        except ImportError:
+            pass  # binary_matcher not available, fall through to graph
+
+        # 3. Symptom extraction
         extracted_symptoms = self._extract_symptoms(query)
 
-        # 3. Graph traversal — find matching conditions
+        # 4. Graph traversal — find matching conditions
         matches = self.graph.find_conditions_by_symptoms(
             query,
             age=patient.age_years if patient else None,
@@ -818,6 +848,20 @@ class GraphReasoner:
     # ------------------------------------------------------------------
     # Answer formatting
     # ------------------------------------------------------------------
+
+    def _format_treatment_from_node(self, node, treatment_path: str,
+                                      patient: PatientContext = None,
+                                      lang: str = "pidgin") -> str:
+        """Format treatment from a bare ConditionNode (used by binary matcher)."""
+        temp_match = GraphMatch(
+            condition=node,
+            confidence=0.5,
+            matched_symptoms=[],
+            severity="mild",
+            needs_drugs=True,
+            needs_referral=False,
+        )
+        return self._format_treatment(temp_match, treatment_path, patient, lang)
 
     def _format_treatment(self, match: GraphMatch, treatment_path: str,
                            patient: PatientContext = None,

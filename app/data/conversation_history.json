@@ -827,9 +827,125 @@
       "metadata": {},
       "timestamp": 0.0,
       "detected_topics": []
+    },
+    {
+      "role": "patient",
+      "content": "what is the treatment for malaria",
+      "emotion": "calm",
+      "tone_tags": [],
+      "metadata": {
+        "age_years": null,
+        "weight_kg": null,
+        "gender": null,
+        "source": "fallback"
+      },
+      "timestamp": 0.0,
+      "detected_topics": [
+        "malaria"
+      ]
+    },
+    {
+      "role": "healthworker",
+      "content": "I no fit use di clinical brain now, but from di official Nigeria guidelines wey I get:\n\nCONDITIONS (from Nigeria Standard Treatment Guidelines 2022):\n- Malaria: An infectious protozoan disease transmitted by the female Anopheles mosquito. A major public and private health problem and indeed a cause and consequence of national underdevelopment. Five species of the parasite cause the disease in humans: Plasmodium falciparum, P. malariae, P. vivax, P. ovale an\n  Treatment (NSTG): Prompt parasitological confirmation by microscopy or RDTs before treatment; Artemisinin-based Combination Therapy (ACTs); Artemether-Lumefantrine (AL) is the medicine of choice\n  Goals: Eradicate parasitaemia; Prevent progression to severe malaria.; Attend to the immediate threats of life.\n- Malaria in the Newborn: Malaria in the newborn period masquerades as sepsis in most instances as the Clinical Features are very similar.\n  Treatment (NSTG): Oral quinine 20 mg/kg stat, followed with 10 mg/kg 8 hourly for 5 to 7 days is recommended.; Oral amodiaquine as 25 mg/kg total dose administered as 10 mg/kg/day on the first two days and 5 mg/kg on the third day may be used when quinine no go use am together.; Treat infants weighing <5 kg with uncomplicated P. falciparum malaria with ACT at the same mg/kg body weight target dose as for children weighing 5 kg with close dey check of response\n- Malaria in the Newborn: Malaria in the newborn period masquerades as sepsis in most instances as the clinical features are very similar.\n  Treatment (NSTG): Oral quinine 20 mg/kg stat, followed with 10 mg/kg 8 hourly for 5 to 7 days; Oral amodiaquine as 25 mg/kg total dose administered as 10 mg/kg/day on the first two days and 5 mg/kg on the third day may be used when quinine no go use am together; Treat infants weighing <5 kg with uncomplicated P. falciparum malaria with ACT at the same mg/kg body weight target dose as for children weighing 5 kg with close dey check of response\n\nIf di patient dey worse, send am go hospital quick quick.\n\nAbeg take note well: dis advice na from di official Nigeria treatment guideline. If di patient dey worse, make you send am go hospital quick quick.",
+      "emotion": null,
+      "tone_tags": [
+        "professional",
+        "gentle"
+      ],
+      "metadata": {},
+      "timestamp": 0.0,
+      "detected_topics": []
+    },
+    {
+      "role": "patient",
+      "content": "metronidazole plus warfarin e dey safe?",
+      "emotion": "calm",
+      "tone_tags": [],
+      "metadata": {
+        "age_years": null,
+        "weight_kg": null,
+        "gender": null,
+        "source": "docreader"
+      },
+      "timestamp": 0.0,
+      "detected_topics": []
+    },
+    {
+      "role": "healthworker",
+      "content": "Drug interaction check for Metronidazole:\n- With Warfarin (HIGH): Metronidazole inhibits warfarin metabolism, markedly increasing INR and bleeding risk. dey check INR closely; reduce warfarin dose. Warn di patient about bleeding signs.\n- With Phenytoin (MODERATE): Metronidazole increases phenytoin plasma levels, increasing the risk of phenytoin toxicity. dey check for phenytoin toxicity and reduce dose if needed.\n- With Carbamazepine (MODERATE): Metronidazole increases carbamazepine levels, increasing the risk of toxicity (dizziness, drowsiness, unsteadiness). dey check for carbamazepine toxicity.\n- With Isoniazid (MODERATE): Combined use increases the risk of hepatotoxicity. dey check liver function and advise di patient to report jaundice or dark urine.\n\nCONDITIONS (from Nigeria Standard Treatment Guidelines 2022):\n- Drug Safety and Pharmacovigilance: The use of medicines for treatment, diagnosis, or prevention of disease is inextricably linked to unintended effects. These unintended effects may be adverse to di patients, and therefore, the safe use of medicine should be an e dey very important consideration of any clinician.\n  Goals: Improve patient care and safety in relation to the use of medicines and all medical and paramedical interventions; Improve public health and safety in relation to the use of medicines; Contribute to the assessment of benefit, harm, effectiveness and risk of medicines, encouraging their safe, rational and more effective (including cost-effective) use\n- Safety of Drugs and Pharmacovigilance: The use of medicines for treatment, diagnosis, or prevention of disease is inextricably linked to unintended effects. These unintended effects may be adverse to di patients, and therefore, the safe use of medicine should be an e dey very important consideration of any clinician.\n  Goals: Improve patient care and safety in relation to the use of medicines and all medical and paramedical interventions; Improve public health and safety in relation to the use of medicines; Contribute to the assessment of benefit, harm, effectiveness and risk of medicines, encouraging their safe, rational and more effective (including cost-effective) use\n- Typhoid Fever (Enteric Fever): A multisystemic illness caused primarily by Salmonella enterica serotype typhi and, to a lesser extent, S. enterica serotypes paratyphi A, B, and C. It is usually spread through contaminated food or water. Once Salmonella typhi bacteria are eaten or drunk, they multiply and spread into the bloodstre\n  Treatment (NSTG): Antibiotics at least 2 - 4 minutes; 2 - 4 g daily in severe infection; may also be given by intravenous infusion; Neonate, 20 - 50 mg/kg daily by intravenous injection over 60 minutes; Infant and child under 50 kg: 20 - 50 mg/kg daily; up to 80 mg/kg in severe infection;\n  Goals: Eliminate S. typhi and S. paratyphi; Prevent Complications.; Prevent chronic carrier status.\n\nINTERACTIONS for Metronidazole (from local interaction database):\n- Metronidazole + Warfarin [HIGH]: Metronidazole inhibits warfarin metabolism, markedly increasing INR and bleeding risk. Recommendation: dey check INR closely; reduce warfarin dose. Warn di patient about bleeding signs.\n- Metronidazole + Phenytoin [MODERATE]: Metronidazole increases phenytoin plasma levels, increasing the risk of phenytoin toxicity. Recommendation: dey check for phenytoin toxicity and reduce dose if needed.\n- Metronidazole + Carbamazepine [MODERATE]: Metronidazole increases carbamazepine levels, increasing the risk of toxicity (dizziness, drowsiness, unsteadiness). Recommendation: dey check for carbamazepine toxicity.\n- Metronidazole + Isoniazid [MODERATE]: Combined use increases the risk of hepatotoxicity. Recommendation: dey check liver function and advise di patient to report jaundice or dark urine.\n\nAbeg take note well: dis advice na from di official Nigeria treatment guideline. If di patient dey worse, make you send am go hospital quick quick.",
+      "emotion": null,
+      "tone_tags": [
+        "professional",
+        "gentle"
+      ],
+      "metadata": {},
+      "timestamp": 0.0,
+      "detected_topics": []
+    },
+    {
+      "role": "patient",
+      "content": "my pikin get hot body and dey vomit",
+      "emotion": "calm",
+      "tone_tags": [],
+      "metadata": {
+        "age_years": null,
+        "weight_kg": null,
+        "gender": null,
+        "source": "fallback"
+      },
+      "timestamp": 0.0,
+      "detected_topics": [
+        "fever",
+        "vomiting",
+        "child_health"
+      ]
+    },
+    {
+      "role": "healthworker",
+      "content": "I no fit use di clinical brain now, but from di official Nigeria guidelines wey I get:\n\nCONDITIONS (from Nigeria Standard Treatment Guidelines 2022):\n- Rheumatic Fever: A result of abnormal reaction of antibodies developed against antigens of group A β- haemolytic streptococcus. Infection is usually of the throat; occasionally the skin in a sensitized individual. Antigen-antibody complex damages the heart (endocardium, myocardium and pericardium). Commonest strepto\n  Treatment (NSTG): Antibiotics: Penicillin V, Adult: 500 mg orally every 6 hours, increased up to 1g 6 hourly in severe infections, Child: 1 month - 1 year: 62.5 mg orally every 6 hours increased in severe infection to ensure at least 12.5 mg/kg/dose, 1 - 6 years: 125 mg every 6 hours increased in severe infection to ensure at least 12.5 mg/kg/dose, 6 - 12 years: 250 mg every 6 hours, increased in severe infection to ensure at least 12.5 mg/kg/dose, 12 - 18 years: 500 mg every 6 hours, increased in severe infection up to 1 g/dose; Antibiotics: Erythromycin, Adult and child over 8 years: 250 - 500 mg orally every 6 hours or 500 mg - 1 g every 12 hours; up to 4 g daily in severe infections, Child: Up to 2 years: 125 orally mg every 6 hours, 2 - 8 years: 250 mg every 6 hours; doses doubled for severe infections; Salicylates: Aspirin (acetylsalicylic acid), Adult: 300 mg - 1 g orally every 4 hours after food; maximum dose in acute conditions 8 g daily\n  Goals: Relieve symptoms; Treat the bacterial throat infection; Reduce or abolish inflammatory process\n- Typhoid Fever (Enteric Fever): A multisystemic illness caused primarily by Salmonella enterica serotype typhi and, to a lesser extent, S. enterica serotypes paratyphi A, B, and C. It is usually spread through contaminated food or water. Once Salmonella typhi bacteria are eaten or drunk, they multiply and spread into the bloodstre\n  Treatment (NSTG): Antibiotics at least 2 - 4 minutes; 2 - 4 g daily in severe infection; may also be given by intravenous infusion; Neonate, 20 - 50 mg/kg daily by intravenous injection over 60 minutes; Infant and child under 50 kg: 20 - 50 mg/kg daily; up to 80 mg/kg in severe infection;\n  Goals: Eliminate S. typhi and S. paratyphi; Prevent Complications.; Prevent chronic carrier status.\n- Fevers: 'Fever' is elevation of body temperature that exceeds the normal daily variation and occurs in conjunction with an increase in hypothalamic set point. Fever occurs in response to infection, inflammation, and trauma.\n  Treatment (NSTG): Paracetamol: Adult: 500 mg - 1 g orally every 4 - 6 hours; maximum 4 g daily; Paracetamol: Child: 3 months - 1 year: 60 - 125 mg; Paracetamol: Child: 1 - 5 years: 120 - 250 mg\n  Goals: Reduce the body temperature; Treat underlying causes\n\nIf di patient dey worse, send am go hospital quick quick.\n\nAbeg take note well: dis advice na from di official Nigeria treatment guideline. If di patient dey worse, make you send am go hospital quick quick.",
+      "emotion": null,
+      "tone_tags": [
+        "professional",
+        "gentle"
+      ],
+      "metadata": {},
+      "timestamp": 0.0,
+      "detected_topics": []
+    },
+    {
+      "role": "patient",
+      "content": "diarrhoea treatment",
+      "emotion": "calm",
+      "tone_tags": [],
+      "metadata": {
+        "age_years": null,
+        "weight_kg": null,
+        "gender": null,
+        "source": "fallback"
+      },
+      "timestamp": 0.0,
+      "detected_topics": [
+        "diarrhoea"
+      ]
+    },
+    {
+      "role": "healthworker",
+      "content": "I no fit use di clinical brain now, but from di official Nigeria guidelines wey I get:\n\nCONDITIONS (from Nigeria Standard Treatment Guidelines 2022):\n- Acute Diarrhoea: A very common clinical problem the world over. Defined as increase in daily frequency, fluidity or volume of stools. May be acute, chronic or intermittent. Aetiology may be infectious or non-infectiious.\n  Treatment (NSTG): Oral Rehydration Therapy (ORT): (low osmolarity) for mild to moderate dehydration 500 mL orally over 2 - 3 hours, 3 - 4 times daily; Intravenous sodium chloride 0.9% - 1 litre, 2 - 6 hourly for moderate to severe dehydration; Alternate with Darrow's solution depending on serum potassium\n  Goals: Rehydration.; Correction of electrolyte anomalies; Treat underlying cause (where possible)\n- Bacillary Dysentery: An e dey very important cause of diarrhoea, caused by pathogenic species of Shigella A-D (dysenteri, flexneri, boydii and sonnei).\n  Treatment (NSTG): Ciprofloxacin 500 mg - 1 g orally 12 hourly for 5 days; Azithromycin 500 mg daily for 3 days for resistant strains; Cotrimoxazole for children: 6 weeks – 6 months: 120 mg every 12 hours, 6 months – 6 years: 240 mg every 12 hours, 6 years – 12 years: 480 mg every 12 hours, 12 years - 18 years: 960 mg every 12 hours\n  Goals: Eradicate bacterial pathogens; Supportive care\n- Blood Transfusion: Blood transfusion is the administration of blood for therapy. It is potentially hazardous: blood should be given only if the dangers of not transfusing outweigh those of transfusion. Indication(s) must be clearly established. Transfusion of whole blood or red cell concentrates is e dey very important in the tr\n  Treatment (NSTG): Furosemide 40 mg on administration of one unit of blood; In children, IV furosemide 1-2mg/kg; In the event of transfusion reactions, stop the transfusion right away and administer the following: Promethazine 25 mg with injection for musclely or through drip, Epinephrine 0.5 mL of 1:1000 solutions to be administered subcutaneously, Hydrocortisone sodium succinate 100 mg injection through drip\n  Goals: To raise haemoglobin concentration and other blood parameters to normal levels; To prevent blood transfusion complications\n\nIf di patient dey worse, send am go hospital quick quick.\n\nAbeg take note well: dis advice na from di official Nigeria treatment guideline. If di patient dey worse, make you send am go hospital quick quick.",
+      "emotion": null,
+      "tone_tags": [
+        "professional",
+        "gentle"
+      ],
+      "metadata": {},
+      "timestamp": 0.0,
+      "detected_topics": []
     }
   ],
   "emotion_history": [
+    "calm",
+    "calm",
+    "calm",
+    "calm",
     "calm",
     "calm",
     "calm",
@@ -870,18 +986,18 @@
   ],
   "discussed_topics": [
     "child_health",
-    "fever",
-    "diarrhoea",
     "vomiting",
-    "malaria"
+    "malaria",
+    "diarrhoea",
+    "fever"
   ],
   "mentioned_symptoms": [
     "child_health",
-    "fever",
-    "diarrhoea",
     "vomiting",
-    "malaria"
+    "malaria",
+    "diarrhoea",
+    "fever"
   ],
   "_lang": "pidgin",
-  "_saved_at": 1787619578.205526
+  "_saved_at": 1787620279.5186799
 }
