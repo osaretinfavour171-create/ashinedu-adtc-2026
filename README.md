@@ -206,8 +206,31 @@ Inspired by Fish Audio's multi-turn conversation pattern:
 
 | Name | GitHub | Role |
 |------|--------|------|
-| **Osaretin Favour** | [@osaretinfavour171-create](https://github.com/osaretinfavour171-create) | Lead — Pidgin NLP, Orchestrator, LLM Integration, Knowledge Graph |
-| **Omotosho Rapheal Omolulu** | [@romotosho10](https://github.com/romotosho10) | Co-Developer — DocReader, Security Audit, Testing |
+| **Osaretin Favour** | [@osaretinfavour171-create](https://github.com/osaretinfavour171-create) | Lead — Knowledge Graph Engine, Binary Symptom Matcher, LLM Integration, Pidgin NLP, Orchestrator |
+| **Omotosho Rapheal Omolulu** | [@romotosho10](https://github.com/romotosho10) | Co-Developer — Terminal UI, Triage Engine, Patient Intake, Language System, Cross-Platform, Security, Docs |
+
+### Contribution Breakdown
+
+**Osaretin Favour** — Core Intelligence:
+- Clinical Knowledge Graph — 270 conditions, 890 drugs, 1ms response time
+- Binary Symptom Vector Engine — bitwise matching inspired by Google TLU architecture
+- Pidgin NLP Layer — 264 medical terms, 475 phrase mappings, reformulator
+- LLM Integration — MedGemma 4B + Qwen 1.5B with binary pre-analysis context
+- Conversational Engine — Fish Audio-inspired multi-turn dialogue patterns
+- Orchestrator — pipeline routing, service caching, health checks
+- Non-medical input detection — rejects nonsense queries gracefully
+
+**Omotosho Rapheal** — User Experience & Platform:
+- Terminal UI — box-drawing interface, ANSI colors, visual hierarchy
+- Smart Triage Engine — targeted follow-up questions with decision graph
+- Conservative Care Engine — detects self-limiting conditions (cold, stress → rest not drugs)
+- Patient Intake Flow — structured assessment (age, weight, gender, vitals, allergies, history)
+- Dosage Calculator — weight-based drug dosing for children and adults
+- Language System — Pidgin/English switching, @lang commands, response consistency
+- Cross-Platform — Linux/Ubuntu support, PowerShell ANSI colors, Windows path fixes
+- Installation — global launcher scripts, --lite mode, start.ps1
+- Security Hardening — 8 findings fixed (input limits, Content-Type validation)
+- Documentation — README, REPORT, INSTALL, ADTC 2026 compliance checklist |
 
 ---
 
